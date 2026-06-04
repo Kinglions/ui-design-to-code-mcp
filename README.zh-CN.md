@@ -110,6 +110,12 @@ claude mcp add-json ui-design-to-code '{"type":"stdio","command":"npx","args":["
 
 ## 发布
 
+先运行发布门禁：
+
+```bash
+npm run release:check
+```
+
 发布到公共 npm：
 
 ```bash
@@ -158,3 +164,6 @@ GitHub:
 ```text
 https://github.com/Kinglions/ui-design-to-code-mcp.git
 ```
+
+完整安全发布、灰度和回滚策略见 [RELEASE.md](./RELEASE.md) 与
+[SECURITY.md](./SECURITY.md)。

@@ -108,6 +108,12 @@ claude mcp add-json ui-design-to-code '{"type":"stdio","command":"npx","args":["
 
 ## Publish
 
+Run the release gate first:
+
+```bash
+npm run release:check
+```
+
 Public npm:
 
 ```bash
@@ -134,3 +140,6 @@ npx -y ui-design-to-code-mcp@latest install --clients cursor,claude-code,codex
 
 Use `--package-spec ui-design-to-code-mcp@<version>` for pinned stable rollout,
 or `@latest` for dynamic update on next MCP server restart.
+
+For the full secure release and rollback policy, see [RELEASE.md](./RELEASE.md)
+and [SECURITY.md](./SECURITY.md).

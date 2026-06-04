@@ -7,31 +7,46 @@ on:
         description: "npm dist-tag"
         required: true
         default: "latest"
+        type: choice
+        options:
+          - latest
+          - beta
+          - next
+      publish_mcp_registry:
+        description: "Publish server.json metadata to the MCP Registry"
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: npm-publish
     permissions:
       contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
-      - run: npm run check
-      - run: npm publish --access public --tag "${{ github.event.inputs.npm_tag }}"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm run release:check
+      - run: npm publish --access public --tag "${{ github.event.inputs.npm_tag }}" --provenance
 
   mcp-registry:
     needs: publish
     runs-on: ubuntu-latest
-    if: ${{ secrets.MCP_REGISTRY_TOKEN != '' }}
+    environment: npm-publish
+    if: ${{ github.event.inputs.publish_mcp_registry == 'true' }}
+    permissions:
+      contents: read
+    env:
+      MCP_PUBLISHER_VERSION: v1.0.0
+      MCP_REGISTRY_TOKEN: ${{ secrets.MCP_REGISTRY_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - run: |
-          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          test -n "${MCP_REGISTRY_TOKEN}" || (echo "MCP_REGISTRY_TOKEN is required when publish_mcp_registry=true" && exit 1)
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
           ./mcp-publisher publish --token "${MCP_REGISTRY_TOKEN}"
-        env:
-          MCP_REGISTRY_TOKEN: ${{ secrets.MCP_REGISTRY_TOKEN }}
