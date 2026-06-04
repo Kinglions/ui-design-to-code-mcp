@@ -6,6 +6,7 @@ const { spawnSync, spawn } = require("child_process");
 const root = path.resolve(__dirname, "..");
 const serverPath = path.join(root, "scripts", "ui_design_to_code_mcp_server.js");
 const installerPath = path.join(root, "scripts", "install_mcp_client.js");
+const registryTokenPath = path.join(root, "scripts", "configure_mcp_registry_token.js");
 
 function usage() {
   console.log(`ui-design-to-code-mcp
@@ -15,6 +16,7 @@ Usage:
   ui-design-to-code-mcp install [--clients cursor,claude-code,codex] [--scope project|user] [--project-dir <dir>] [--package-spec <pkg>] [--dry-run]
   ui-design-to-code-mcp update [--clients cursor,claude-code,codex] [--channel latest|beta|next|stable]
   ui-design-to-code-mcp config [--client cursor|claude-code|codex] [--package-spec <pkg>]
+  ui-design-to-code-mcp configure-registry-token [--token <token>|--stdin] [--repo owner/name]
   ui-design-to-code-mcp doctor
   ui-design-to-code-mcp version
 `);
@@ -73,6 +75,10 @@ function main() {
   }
   if (command === "install" || command === "update" || command === "config") {
     const result = spawnSync(process.execPath, [installerPath, command, ...rest], { stdio: "inherit" });
+    process.exit(result.status || 0);
+  }
+  if (command === "configure-registry-token") {
+    const result = spawnSync(process.execPath, [registryTokenPath, ...rest], { stdio: "inherit" });
     process.exit(result.status || 0);
   }
   if (command === "doctor") {

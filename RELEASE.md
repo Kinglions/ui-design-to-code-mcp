@@ -14,6 +14,48 @@
    CI.
 5. Protect `main`: require CI, reviews, and no direct force-push.
 
+## Configure MCP Registry Token
+
+Get the token from `mcp-publisher` after GitHub login:
+
+```bash
+mcp-publisher login github
+```
+
+Then configure the GitHub Actions secret with one command:
+
+```bash
+ui-design-to-code-mcp configure-registry-token --token "<token>"
+```
+
+Or avoid shell history by reading from stdin:
+
+```bash
+printf "%s" "<token>" | ui-design-to-code-mcp configure-registry-token --stdin
+```
+
+The command uses GitHub CLI:
+
+```bash
+gh secret set MCP_REGISTRY_TOKEN --repo Kinglions/ui-design-to-code-mcp --body "<token>"
+```
+
+`MCP_REGISTRY_TOKEN` is only required when running the Release workflow with
+`publish_mcp_registry = true`.
+
+## Branch Flow
+
+Develop on `develop`, then open a pull request into `main`:
+
+```bash
+git checkout develop
+npm run release:check
+git push origin develop
+```
+
+Merge `develop` into `main` only after CI and review pass. Release only from
+`main`.
+
 ## Stable Release
 
 ```bash

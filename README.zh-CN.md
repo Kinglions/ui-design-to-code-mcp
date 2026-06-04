@@ -57,6 +57,12 @@ npx -y ui-design-to-code-mcp@latest serve
 npx -y ui-design-to-code-mcp@latest doctor
 ```
 
+自动配置 GitHub Actions 的 MCP Registry Token：
+
+```bash
+printf "%s" "<token>" | npx -y ui-design-to-code-mcp@latest configure-registry-token --stdin
+```
+
 ## 客户端配置
 
 Cursor 或 Claude Code 项目级配置：

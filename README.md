@@ -63,6 +63,12 @@ Health check:
 npx -y ui-design-to-code-mcp@latest doctor
 ```
 
+Configure MCP Registry token for GitHub Actions:
+
+```bash
+printf "%s" "<token>" | npx -y ui-design-to-code-mcp@latest configure-registry-token --stdin
+```
+
 ## Client Config
 
 Cursor or Claude Code project config:
