@@ -116,12 +116,25 @@ claude mcp add-json ui-design-to-code '{"type":"stdio","command":"npx","args":["
 npm run release:check
 ```
 
-发布到公共 npm：
+推荐的公共 npm 发布路径：
 
-```bash
-npm version patch
-npm publish --access public
-```
+1. 为这个包配置 npm Trusted Publishing：
+
+   ```bash
+   node bin/ui-design-to-code-mcp.js configure-npm-trusted-publishing --dry-run
+   ```
+
+   确认参数无误后去掉 `--dry-run` 执行，或者在
+   `npmjs.com -> Package -> Settings -> Trusted publishing` 中手动配置。
+
+2. 从 `main` 分支手动触发 GitHub Actions 的 `Release` workflow。
+
+Release workflow 使用 GitHub Actions OIDC（`id-token: write`）执行 `npm
+publish`，因此不需要 `NPM_TOKEN`，也不会在 CI 发布时要求本地 OTP。使用
+Trusted Publishing 时，npm 会自动发布 provenance 证明。
+
+不要为了发布关闭 npm 账号的 2FA/OTP。交互式本地 `npm publish` 只作为首次建包
+或紧急兜底流程，npm 可能会要求一次性 OTP，这是正常的安全保护。
 
 发布到官方 MCP Registry：
 

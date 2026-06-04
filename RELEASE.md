@@ -2,17 +2,33 @@
 
 ## One-time Setup
 
-1. In npm, create the `ui-design-to-code-mcp` package by publishing the first
-   version or configure Trusted Publishing for the package after creation.
-2. Configure npm Trusted Publishing for:
+1. Keep npm account 2FA enabled. Do not disable OTP to work around local
+   publish prompts.
+2. Create the `ui-design-to-code-mcp` package on npm. `npm trust` requires the
+   package to already exist. If npm does not allow configuring a trusted
+   publisher before package creation, publish only the first version
+   interactively with a one-time OTP, then use GitHub Actions for all future
+   releases.
+3. Use Node 22.14+ and npm 11.10+ when configuring or publishing through
+   Trusted Publishing.
+4. Configure npm Trusted Publishing for:
    - repository: `Kinglions/ui-design-to-code-mcp`
-   - workflow: `.github/workflows/release.yml`
+   - workflow file: `release.yml`
    - environment: `npm-publish`
-3. In GitHub, create an Environment named `npm-publish` and require manual
+   - allowed action: `npm publish`
+
+   CLI helper:
+
+   ```bash
+   node bin/ui-design-to-code-mcp.js configure-npm-trusted-publishing --dry-run
+   node bin/ui-design-to-code-mcp.js configure-npm-trusted-publishing
+   ```
+
+5. In GitHub, create an Environment named `npm-publish` and require manual
    approval.
-4. MCP Registry publishing uses GitHub Actions OIDC through
+6. MCP Registry publishing uses GitHub Actions OIDC through
    `mcp-publisher login github-oidc`; no long-lived registry token is required.
-5. Protect `main`: require CI, reviews, and no direct force-push.
+7. Protect `main`: require CI, reviews, and no direct force-push.
 
 ## MCP Registry Authentication
 
@@ -33,6 +49,29 @@ This avoids storing a long-lived `MCP_REGISTRY_TOKEN` in GitHub Secrets.
 
 Manual token publishing remains available only as a fallback for local
 operations, not for the default GitHub Actions release path.
+
+## npm Authentication
+
+The default npm publishing path is GitHub Actions Trusted Publishing:
+
+```text
+permissions:
+  id-token: write
+environment: npm-publish
+```
+
+```bash
+npm publish --access public --tag latest
+```
+
+Do not add `NPM_TOKEN` or `NODE_AUTH_TOKEN` to the publish job. The npm CLI
+detects the GitHub Actions OIDC environment and uses a short-lived credential.
+Trusted Publishing also generates provenance automatically, so the workflow
+does not need `--provenance`.
+
+After Trusted Publishing is verified, set npm package publishing access to
+require 2FA and disallow traditional tokens. This keeps trusted publishers
+working while preventing long-lived token releases.
 
 ## Branch Flow
 

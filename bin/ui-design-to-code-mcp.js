@@ -7,6 +7,7 @@ const root = path.resolve(__dirname, "..");
 const serverPath = path.join(root, "scripts", "ui_design_to_code_mcp_server.js");
 const installerPath = path.join(root, "scripts", "install_mcp_client.js");
 const registryTokenPath = path.join(root, "scripts", "configure_mcp_registry_token.js");
+const npmTrustedPublishingPath = path.join(root, "scripts", "configure_npm_trusted_publishing.js");
 
 function usage() {
   console.log(`ui-design-to-code-mcp
@@ -16,6 +17,7 @@ Usage:
   ui-design-to-code-mcp install [--clients cursor,claude-code,codex] [--scope project|user] [--project-dir <dir>] [--package-spec <pkg>] [--dry-run]
   ui-design-to-code-mcp update [--clients cursor,claude-code,codex] [--channel latest|beta|next|stable]
   ui-design-to-code-mcp config [--client cursor|claude-code|codex] [--package-spec <pkg>]
+  ui-design-to-code-mcp configure-npm-trusted-publishing [--repo owner/name] [--workflow release.yml] [--environment npm-publish] [--dry-run] [--yes]
   ui-design-to-code-mcp configure-registry-token [--token <token>|--stdin] [--repo owner/name]  # fallback only; GitHub Actions uses OIDC
   ui-design-to-code-mcp doctor
   ui-design-to-code-mcp version
@@ -79,6 +81,10 @@ function main() {
   }
   if (command === "configure-registry-token") {
     const result = spawnSync(process.execPath, [registryTokenPath, ...rest], { stdio: "inherit" });
+    process.exit(result.status || 0);
+  }
+  if (command === "configure-npm-trusted-publishing") {
+    const result = spawnSync(process.execPath, [npmTrustedPublishingPath, ...rest], { stdio: "inherit" });
     process.exit(result.status || 0);
   }
   if (command === "doctor") {

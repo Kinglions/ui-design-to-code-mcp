@@ -80,12 +80,43 @@ function checkLifecycleScripts() {
   }
 }
 
+function checkTrustedPublishingWorkflow() {
+  const workflowPath = ".github/workflows/release.yml";
+  assertFile(workflowPath);
+  const workflow = read(workflowPath);
+  if (!workflow.includes("id-token: write")) {
+    fail("release workflow must grant id-token: write for OIDC publishing");
+  }
+  if (!workflow.includes("environment: npm-publish")) {
+    fail("release workflow must use the npm-publish GitHub Environment");
+  }
+  if (!workflow.includes("node-version: 22.14.0")) {
+    fail("release workflow must use Node 22.14.0 or newer for npm Trusted Publishing");
+  }
+  if (!workflow.includes("npm install -g npm@^11.10.0")) {
+    fail("release workflow must install npm 11.10.0 or newer for Trusted Publishing");
+  }
+  if (workflow.includes("NPM_TOKEN") || workflow.includes("NODE_AUTH_TOKEN")) {
+    fail("release workflow must not use long-lived npm token secrets for publishing");
+  }
+  if (workflow.includes("MCP_REGISTRY_TOKEN")) {
+    fail("release workflow must not use long-lived MCP Registry token secrets");
+  }
+  if (!workflow.includes("npm publish --access public")) {
+    fail("release workflow must publish the public npm package");
+  }
+  if (!workflow.includes("mcp-publisher login github-oidc")) {
+    fail("release workflow must authenticate MCP Registry publishing with github-oidc");
+  }
+}
+
 function main() {
   process.chdir(path.resolve(__dirname, ".."));
   checkSkillDescription();
   checkPackageMetadata();
   checkPackageFiles();
   checkLifecycleScripts();
+  checkTrustedPublishingWorkflow();
   console.log("release readiness passed");
 }
 

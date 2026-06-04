@@ -114,12 +114,26 @@ Run the release gate first:
 npm run release:check
 ```
 
-Public npm:
+Recommended public npm release path:
 
-```bash
-npm version patch
-npm publish --access public
-```
+1. Configure npm Trusted Publishing for this package:
+
+   ```bash
+   node bin/ui-design-to-code-mcp.js configure-npm-trusted-publishing --dry-run
+   ```
+
+   Then run the same command without `--dry-run`, or configure it in
+   `npmjs.com -> Package -> Settings -> Trusted publishing`.
+
+2. Run the GitHub Actions `Release` workflow from `main`.
+
+The release workflow uses GitHub Actions OIDC (`id-token: write`) and `npm
+publish`, so it does not need `NPM_TOKEN` and does not prompt for a local OTP.
+npm automatically publishes provenance for Trusted Publishing releases.
+
+Keep npm account 2FA enabled. Do not disable OTP to make local publish easier.
+Interactive local `npm publish` remains a first-package or emergency fallback
+only, and npm may require a one-time OTP for that fallback.
 
 Official MCP Registry:
 

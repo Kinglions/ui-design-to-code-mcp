@@ -28,6 +28,10 @@ execution, path traversal, unsafe deletion, or supply-chain compromise.
 
 - Prefer npm Trusted Publishing with GitHub Actions OIDC over long-lived
   `NPM_TOKEN` secrets.
+- Keep npm account 2FA enabled. Do not disable OTP to bypass local publish
+  prompts.
+- After Trusted Publishing is verified, configure npm package publishing access
+  to require 2FA and disallow traditional tokens.
 - Protect the `main` branch and require CI before release.
 - Use a protected GitHub Environment named `npm-publish` for release approval.
 - Publish beta builds with `--tag beta`; reserve `latest` for validated stable
