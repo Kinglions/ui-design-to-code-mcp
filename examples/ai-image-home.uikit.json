@@ -1,0 +1,206 @@
+{
+  "viewController": "AIImageHomeViewController",
+  "rootView": "AIImageHomeView",
+  "stateModel": {
+    "name": "AIImageHomeViewState",
+    "states": ["loading", "empty", "error", "content"]
+  },
+  "layout": {
+    "root": "UIView",
+    "regions": [
+      {
+        "id": "scroll",
+        "type": "UIScrollView",
+        "edges": "safeArea",
+        "contentInsetBottom": "primaryButtonHeight + bottomSpacing * 2"
+      },
+      {
+        "id": "contentStack",
+        "type": "UIStackView",
+        "parent": "scroll",
+        "axis": "vertical",
+        "spacingToken": "sectionSpacing",
+        "horizontalInsetToken": "pageX"
+      },
+      {
+        "id": "fixedBottom",
+        "type": "UIView",
+        "position": "fixed_bottom",
+        "bottom": "safeArea + bottomSpacing",
+        "horizontalInsetToken": "pageX"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "hero",
+      "semanticType": "hero_header",
+      "iosClass": "HeroHeaderView",
+      "parent": "contentStack",
+      "mappingReason": "header semantics match project-style reusable title/subtitle view",
+      "layoutSpec": {
+        "height": { "mode": "intrinsic" },
+        "contentInsets": {
+          "top": "cardPadding",
+          "bottom": "cardPadding",
+          "leading": "cardPadding",
+          "trailing": "cardPadding"
+        },
+        "interItemSpacing": {
+          "vertical": 8,
+          "slotGap": 12
+        },
+        "slotLayout": {
+          "title": { "height": { "mode": "intrinsic" }, "spacingAfter": 8, "swiftConstant": "Metrics.titleLineHeight" },
+          "subtitle": { "height": { "mode": "intrinsic" }, "swiftConstant": "Metrics.subtitleLineHeight" }
+        }
+      },
+      "visualSpec": {
+        "cornerRadius": { "token": "card" },
+        "typography": {
+          "primaryTextStyle": "AppFont.title1",
+          "secondaryTextStyle": "AppFont.body"
+        },
+        "backgroundStyle": "AppColor.card"
+      }
+    },
+    {
+      "id": "prompt",
+      "semanticType": "prompt_input",
+      "iosClass": "PromptInputCardView",
+      "parent": "contentStack",
+      "mappingReason": "input node requires placeholder, validation, error presentation, and keyboard handling",
+      "layoutSpec": {
+        "height": { "mode": "fixed", "token": "promptInputHeight" },
+        "contentInsets": {
+          "top": "cardPadding",
+          "bottom": "cardPadding",
+          "leading": "cardPadding",
+          "trailing": "cardPadding"
+        },
+        "interItemSpacing": {
+          "vertical": 12
+        },
+        "slotLayout": {
+          "placeholder": { "height": { "mode": "fill" }, "spacingAfter": 10, "swiftConstant": "Metrics.textAreaHeight" },
+          "supporting": { "height": { "mode": "intrinsic" }, "swiftConstant": "Metrics.supportingTextHeight" }
+        }
+      },
+      "visualSpec": {
+        "cornerRadius": { "token": "card" },
+        "typography": {
+          "primaryTextStyle": "AppFont.body",
+          "secondaryTextStyle": "AppFont.body"
+        },
+        "backgroundStyle": "AppColor.card",
+        "borderStyle": "AppBorder.subtle"
+      },
+      "validation": {
+        "required": true,
+        "maxLength": 1000,
+        "emptyMessage": "Enter a prompt to continue."
+      },
+      "keyboardHandling": true
+    },
+    {
+      "id": "style_selector",
+      "semanticType": "horizontal_option_list",
+      "iosClass": "UICollectionView",
+      "parent": "contentStack",
+      "mappingReason": "horizontal dynamic options require selection state and reusable cells",
+      "layoutSpec": {
+        "height": { "mode": "fixed", "token": "chipHeight" },
+        "contentInsets": {
+          "top": 0,
+          "bottom": 0,
+          "leading": 0,
+          "trailing": 0
+        },
+        "interItemSpacing": {
+          "horizontal": 12,
+          "slotGap": 8
+        },
+        "slotLayout": {
+          "chip_label": { "height": { "mode": "intrinsic" }, "swiftConstant": "StyleOptionCell.Metrics.labelHeight" }
+        }
+      },
+      "visualSpec": {
+        "cornerRadius": { "token": "chip" },
+        "typography": {
+          "primaryTextStyle": "AppFont.button"
+        }
+      },
+      "cellTemplate": "StyleOptionCell",
+      "dataModel": "StyleOption"
+    },
+    {
+      "id": "recent_projects",
+      "semanticType": "vertical_list",
+      "iosClass": "UICollectionView",
+      "parent": "contentStack",
+      "mappingReason": "repeated dynamic project cards require a collection cell template",
+      "layoutSpec": {
+        "height": { "mode": "intrinsic" },
+        "contentInsets": {
+          "top": 0,
+          "bottom": 0,
+          "leading": 0,
+          "trailing": 0
+        },
+        "interItemSpacing": {
+          "vertical": 16,
+          "horizontal": 16,
+          "slotGap": 12
+        },
+        "slotLayout": {
+          "thumbnail": { "height": { "mode": "aspectRatio", "aspectRatio": "16:9" }, "spacingAfter": 10, "swiftConstant": "RecentProjectCell.Metrics.thumbnailAspectRatio" },
+          "title": { "height": { "mode": "intrinsic" }, "spacingAfter": 6, "swiftConstant": "RecentProjectCell.Metrics.titleLineHeight" },
+          "status": { "height": { "mode": "intrinsic" }, "swiftConstant": "RecentProjectCell.Metrics.statusLineHeight" }
+        }
+      },
+      "visualSpec": {
+        "cornerRadius": { "token": "card" },
+        "typography": {
+          "primaryTextStyle": "AppFont.body",
+          "secondaryTextStyle": "AppFont.caption"
+        },
+        "backgroundStyle": "AppColor.card",
+        "shadowStyle": "AppShadow.card"
+      },
+      "cellTemplate": "RecentProjectCell",
+      "dataModel": "RecentProjectItem"
+    },
+    {
+      "id": "generate_cta",
+      "semanticType": "primary_cta",
+      "iosClass": "ProjectPrimaryButton",
+      "parent": "fixedBottom",
+      "mappingReason": "primary fixed CTA maps to project button and must remain outside scroll content",
+      "layoutSpec": {
+        "height": { "mode": "fixed", "token": "primaryButtonHeight" },
+        "contentInsets": {
+          "top": 0,
+          "bottom": 0,
+          "leading": 20,
+          "trailing": 20
+        },
+        "interItemSpacing": {
+          "horizontal": 10
+        },
+        "slotLayout": {
+          "title": { "height": { "mode": "intrinsic" }, "swiftConstant": "ProjectPrimaryButton.Metrics.titleLineHeight" },
+          "trailing_icon": { "height": { "mode": "fixed", "value": 18 }, "swiftConstant": "ProjectPrimaryButton.Metrics.trailingIconSize" }
+        }
+      },
+      "visualSpec": {
+        "cornerRadius": { "token": "button" },
+        "typography": {
+          "primaryTextStyle": "AppFont.button"
+        },
+        "backgroundStyle": "AppColor.primary"
+      },
+      "events": ["tap"],
+      "states": ["normal", "highlighted", "disabled", "loading"]
+    }
+  ]
+}

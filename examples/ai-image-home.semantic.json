@@ -1,0 +1,282 @@
+{
+  "screen": {
+    "name": "AIImageHome",
+    "platform": "ios",
+    "deviceClass": "iphone",
+    "safeAreaAware": true,
+    "states": ["loading", "empty", "error", "content"],
+    "tokens": {
+      "spacing": {
+        "pageX": 20,
+        "sectionSpacing": 24,
+        "bottomSpacing": 16,
+        "cardPadding": 16
+      },
+      "radius": {
+        "card": 24,
+        "button": 18,
+        "chip": 14
+      },
+      "size": {
+        "primaryButtonHeight": 56,
+        "promptInputHeight": 160,
+        "chipHeight": 38
+      },
+      "color": {
+        "background": "AppColor.background",
+        "primary": "AppColor.primary",
+        "card": "AppColor.card"
+      },
+      "typography": {
+        "title": "AppFont.title1",
+        "body": "AppFont.body",
+        "button": "AppFont.button"
+      }
+    },
+    "nodes": [
+      {
+        "id": "hero",
+        "semanticType": "hero_header",
+        "role": "page_intro",
+        "text": "Create AI Art",
+        "confidence": 0.91,
+        "alternatives": [],
+        "evidence": ["top aligned title and subtitle", "non-interactive header area"],
+        "layoutIntent": {
+          "position": "scroll_content",
+          "container": "contentStack"
+        },
+        "visualMetrics": {
+          "outerCornerRadius": { "token": "card" },
+          "height": { "mode": "intrinsic" },
+          "padding": {
+            "top": "cardPadding",
+            "bottom": "cardPadding",
+            "leading": "cardPadding",
+            "trailing": "cardPadding"
+          },
+          "spacing": {
+            "vertical": 8,
+            "slotGap": 12
+          },
+          "typography": {
+            "primaryTextStyle": "AppFont.title1",
+            "secondaryTextStyle": "AppFont.body"
+          }
+        },
+        "contentStructure": {
+          "layoutPattern": "stack",
+          "slots": [
+            { "name": "title", "role": "headline", "required": true, "maxLines": 2, "alignment": "leading" },
+            { "name": "subtitle", "role": "supporting_text", "required": true, "maxLines": 2, "alignment": "leading" }
+          ]
+        },
+        "slotMetrics": {
+          "title": { "height": { "mode": "intrinsic" }, "lineHeight": 32, "maxLines": 2, "spacingAfter": 8, "alignment": "leading" },
+          "subtitle": { "height": { "mode": "intrinsic" }, "lineHeight": 20, "maxLines": 2, "alignment": "leading" }
+        },
+        "states": ["content"],
+        "events": []
+      },
+      {
+        "id": "prompt",
+        "semanticType": "prompt_input",
+        "role": "primary_prompt_input",
+        "confidence": 0.88,
+        "alternatives": ["content_card"],
+        "evidence": ["large rounded input area", "placeholder text", "keyboard-triggering affordance"],
+        "layoutIntent": {
+          "position": "scroll_content",
+          "container": "contentStack",
+          "heightToken": "promptInputHeight"
+        },
+        "visualMetrics": {
+          "outerCornerRadius": { "token": "card" },
+          "height": { "mode": "fixed", "token": "promptInputHeight" },
+          "padding": {
+            "top": "cardPadding",
+            "bottom": "cardPadding",
+            "leading": "cardPadding",
+            "trailing": "cardPadding"
+          },
+          "spacing": {
+            "vertical": 12
+          },
+          "typography": {
+            "primaryTextStyle": "AppFont.body",
+            "secondaryTextStyle": "AppFont.body"
+          }
+        },
+        "contentStructure": {
+          "layoutPattern": "input",
+          "slots": [
+            { "name": "placeholder", "role": "placeholder_text", "required": true, "maxLines": 3, "alignment": "leading" },
+            { "name": "supporting", "role": "validation_message", "required": false, "maxLines": 2, "alignment": "leading" }
+          ]
+        },
+        "slotMetrics": {
+          "placeholder": { "height": { "mode": "fill" }, "lineHeight": 20, "maxLines": 3, "spacingAfter": 10, "alignment": "leading" },
+          "supporting": { "height": { "mode": "intrinsic" }, "lineHeight": 17, "maxLines": 2, "alignment": "leading" }
+        },
+        "states": ["empty", "focused", "error", "content", "disabled"],
+        "events": ["textChanged", "focusChanged"],
+        "data": {
+          "placeholder": "Describe your idea...",
+          "validation": {
+            "required": true,
+            "maxLength": 1000,
+            "emptyMessage": "Enter a prompt to continue."
+          }
+        }
+      },
+      {
+        "id": "style_selector",
+        "semanticType": "horizontal_option_list",
+        "role": "style_selection",
+        "confidence": 0.86,
+        "alternatives": ["segmented_control"],
+        "evidence": ["horizontal chips", "selected visual state", "repeated item geometry"],
+        "layoutIntent": {
+          "position": "scroll_content",
+          "container": "contentStack",
+          "scrollAxis": "horizontal"
+        },
+        "visualMetrics": {
+          "height": { "mode": "fixed", "token": "chipHeight" },
+          "padding": {
+            "top": 0,
+            "bottom": 0,
+            "leading": 0,
+            "trailing": 0
+          },
+          "spacing": {
+            "horizontal": 12,
+            "slotGap": 8
+          },
+          "typography": {
+            "primaryTextStyle": "AppFont.button"
+          }
+        },
+        "contentStructure": {
+          "layoutPattern": "list",
+          "slots": [
+            { "name": "chip_label", "role": "option_title", "required": true, "maxLines": 1, "alignment": "center" }
+          ]
+        },
+        "slotMetrics": {
+          "chip_label": { "height": { "mode": "intrinsic" }, "lineHeight": 18, "maxLines": 1, "alignment": "center" }
+        },
+        "states": ["normal", "selected", "disabled"],
+        "events": ["selectionChanged"],
+        "data": {
+          "itemModel": "StyleOption",
+          "template": true,
+          "itemSize": { "width": 112, "height": 38 },
+          "sampleItems": [
+            { "id": "cinematic", "title": "Cinematic", "isSelected": true },
+            { "id": "anime", "title": "Anime", "isSelected": false },
+            { "id": "photo", "title": "Photo", "isSelected": false }
+          ]
+        }
+      },
+      {
+        "id": "recent_projects",
+        "semanticType": "vertical_list",
+        "role": "recent_project_history",
+        "confidence": 0.84,
+        "alternatives": ["grid"],
+        "evidence": ["repeated cards", "thumbnail plus title metadata pattern", "dynamic content area"],
+        "layoutIntent": {
+          "position": "scroll_content",
+          "container": "contentStack",
+          "cellTemplate": "RecentProjectCell"
+        },
+        "visualMetrics": {
+          "height": { "mode": "intrinsic" },
+          "padding": {
+            "top": 0,
+            "bottom": 0,
+            "leading": 0,
+            "trailing": 0
+          },
+          "spacing": {
+            "vertical": 16,
+            "horizontal": 16,
+            "slotGap": 12
+          },
+          "typography": {
+            "primaryTextStyle": "AppFont.body",
+            "secondaryTextStyle": "AppFont.caption"
+          }
+        },
+        "contentStructure": {
+          "layoutPattern": "list",
+          "slots": [
+            { "name": "thumbnail", "role": "media", "required": true, "alignment": "fill" },
+            { "name": "title", "role": "item_title", "required": true, "maxLines": 2, "alignment": "leading" },
+            { "name": "status", "role": "metadata", "required": true, "maxLines": 1, "alignment": "leading" }
+          ]
+        },
+        "slotMetrics": {
+          "thumbnail": { "height": { "mode": "aspectRatio", "aspectRatio": "16:9" }, "spacingAfter": 10, "alignment": "fill" },
+          "title": { "height": { "mode": "intrinsic" }, "lineHeight": 20, "maxLines": 2, "spacingAfter": 6, "alignment": "leading" },
+          "status": { "height": { "mode": "intrinsic" }, "lineHeight": 16, "maxLines": 1, "alignment": "leading" }
+        },
+        "states": ["loading", "empty", "error", "content"],
+        "events": ["itemSelected"],
+        "data": {
+          "itemModel": "RecentProjectItem",
+          "template": true,
+          "itemSize": { "width": 160, "height": 210 },
+          "sampleItems": [
+            { "id": "1", "title": "Neon city concept", "status": "completed" },
+            { "id": "2", "title": "Product hero shot", "status": "completed" }
+          ]
+        }
+      },
+      {
+        "id": "generate_cta",
+        "semanticType": "primary_cta",
+        "role": "submit_generation",
+        "text": "Generate",
+        "confidence": 0.94,
+        "alternatives": [],
+        "evidence": ["large bottom button", "primary color", "CTA label"],
+        "layoutIntent": {
+          "position": "fixed_bottom",
+          "heightToken": "primaryButtonHeight",
+          "horizontalInsetToken": "pageX"
+        },
+        "visualMetrics": {
+          "outerCornerRadius": { "token": "button" },
+          "height": { "mode": "fixed", "token": "primaryButtonHeight" },
+          "padding": {
+            "top": 0,
+            "bottom": 0,
+            "leading": 20,
+            "trailing": 20
+          },
+          "spacing": {
+            "iconToText": 10
+          },
+          "typography": {
+            "primaryTextStyle": "AppFont.button"
+          }
+        },
+        "contentStructure": {
+          "layoutPattern": "button",
+          "slots": [
+            { "name": "title", "role": "button_label", "required": true, "maxLines": 1, "alignment": "center" },
+            { "name": "trailing_icon", "role": "affordance", "required": false, "alignment": "trailing" }
+          ]
+        },
+        "slotMetrics": {
+          "title": { "height": { "mode": "intrinsic" }, "lineHeight": 20, "maxLines": 1, "alignment": "center" },
+          "trailing_icon": { "height": { "mode": "fixed", "value": 18 }, "alignment": "trailing" }
+        },
+        "states": ["normal", "highlighted", "disabled", "loading"],
+        "events": ["tap"]
+      }
+    ]
+  }
+}

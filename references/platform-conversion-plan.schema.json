@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/platform-conversion-plan.schema.json",
+  "title": "Platform Conversion Plan",
+  "type": "object",
+  "required": ["artifactType", "sourceId", "crossPlatformNodeDataId", "targets"],
+  "properties": {
+    "artifactType": { "type": "string", "const": "platform_conversion_plan" },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "crossPlatformNodeDataId": { "type": "string", "minLength": 1 },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "language", "uiRuntime", "adapterContract", "stateStrategy", "componentMapping", "layoutMapping", "assetPlan", "unsupportedPatterns", "reviewPlan"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": ["ios-uikit", "ios-swiftui", "web-react", "web-next", "android-compose", "android-view", "custom"]
+          },
+          "language": { "type": "string", "minLength": 1 },
+          "uiRuntime": { "type": "string", "minLength": 1 },
+          "adapterContract": { "type": "string", "minLength": 1 },
+          "stateStrategy": { "type": "string", "minLength": 1 },
+          "componentMapping": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/nodeMapping" }
+          },
+          "layoutMapping": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/nodeMapping" }
+          },
+          "assetPlan": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["sourceNodeId", "strategy"],
+              "properties": {
+                "sourceNodeId": { "type": "string", "minLength": 1 },
+                "strategy": { "type": "string", "enum": ["reuse_asset", "crop_from_source", "generate_placeholder", "system_icon", "none"] },
+                "notes": { "type": "array", "items": { "type": "string" } }
+              },
+              "additionalProperties": true
+            }
+          },
+          "unsupportedPatterns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["nodeId", "reason"],
+              "properties": {
+                "nodeId": { "type": "string", "minLength": 1 },
+                "reason": { "type": "string", "minLength": 1 },
+                "suggestedFallback": { "type": "string" }
+              },
+              "additionalProperties": true
+            }
+          },
+          "reviewPlan": {
+            "type": "object",
+            "required": ["checks"],
+            "properties": {
+              "commands": { "type": "array", "items": { "type": "string" } },
+              "checks": { "type": "array", "items": { "type": "string" } }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "$defs": {
+    "nodeMapping": {
+      "type": "object",
+      "required": ["nodeId", "target", "mappingReason"],
+      "properties": {
+        "nodeId": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 },
+        "mappingReason": { "type": "string", "minLength": 1 },
+        "fallbacks": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

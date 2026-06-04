@@ -1,0 +1,142 @@
+{
+  "version": "1.0.0",
+  "defaults": {
+    "framework": "UIKit",
+    "layout": "SnapKit",
+    "storyboard": false,
+    "mappingPriority": [
+      "projectComponent",
+      "uikitNative",
+      "generatedReusableComponent",
+      "pagePrivateView",
+      "bitmapFallback"
+    ],
+    "requiredScreenStates": ["loading", "empty", "error", "content"],
+    "requiredNodeDetailFields": ["visualMetrics", "contentStructure", "slotMetrics"],
+    "reviewConfidenceThreshold": 0.8
+  },
+  "mappings": [
+    {
+      "semanticType": "hero_header",
+      "preferred": "HeroHeaderView",
+      "fallbacks": ["UIStackView", "GeneratedHeroHeaderView"],
+      "requiredStates": ["content"],
+      "requiredEvents": [],
+      "requiredDetailFields": ["visualMetrics", "contentStructure", "slotMetrics"],
+      "layoutRules": {
+        "container": "contentStack",
+        "defaultSpacingToken": "sectionSpacing",
+        "horizontalInsetToken": "pageX",
+        "requiredMeasurements": ["outerCornerRadius", "padding", "spacing", "typography", "slotMetrics"]
+      },
+      "rejectWhen": ["usedAsNavigationBar"]
+    },
+    {
+      "semanticType": "primary_cta",
+      "preferred": "ProjectPrimaryButton",
+      "fallbacks": ["UIButton.Configuration.filled", "GeneratedPrimaryButtonView"],
+      "requiredStates": ["normal", "highlighted", "disabled", "loading"],
+      "requiredEvents": ["tap"],
+      "requiredDetailFields": ["visualMetrics", "contentStructure", "slotMetrics"],
+      "layoutRules": {
+        "defaultHeightToken": "primaryButtonHeight",
+        "defaultHorizontalInsetToken": "pageX",
+        "safeAreaAware": true,
+        "requiredMeasurements": ["height", "outerCornerRadius", "padding", "spacing", "typography", "slotMetrics"]
+      },
+      "rejectWhen": ["usedAsStaticLabel", "missingTapIntent"]
+    },
+    {
+      "semanticType": "prompt_input",
+      "preferred": "PromptInputCardView",
+      "fallbacks": ["UITextView", "GeneratedPromptInputView"],
+      "requiredStates": ["empty", "focused", "error", "content", "disabled"],
+      "requiredEvents": ["textChanged", "focusChanged"],
+      "requiredDetailFields": ["visualMetrics", "contentStructure", "slotMetrics"],
+      "layoutRules": {
+        "container": "contentStack",
+        "defaultHeightToken": "promptInputHeight",
+        "keyboardAvoidance": true,
+        "requiresValidation": true,
+        "requiredMeasurements": ["height", "outerCornerRadius", "padding", "spacing", "typography", "slotMetrics"]
+      },
+      "rejectWhen": ["missingPlaceholder", "missingValidation", "missingErrorPresentation"]
+    },
+    {
+      "semanticType": "horizontal_option_list",
+      "preferred": "UICollectionView",
+      "fallbacks": ["UIStackView", "GeneratedOptionSelectorView"],
+      "requiredStates": ["normal", "selected", "disabled"],
+      "requiredEvents": ["selectionChanged"],
+      "requiredDetailFields": ["visualMetrics", "contentStructure", "slotMetrics"],
+      "layoutRules": {
+        "container": "contentStack",
+        "useCollectionViewWhen": ["itemsCountDynamic", "horizontalScroll", "selectionState", "cellReuseNeeded"],
+        "useStackViewWhen": ["itemsStatic", "itemsCountLessThanOrEqualTo4", "noHorizontalScroll"],
+        "cellTemplateRequired": true,
+        "requiredMeasurements": ["height", "padding", "spacing", "typography", "itemSize", "slotMetrics"]
+      },
+      "rejectWhen": ["dynamicItemsHardcoded"]
+    },
+    {
+      "semanticType": "vertical_list",
+      "preferred": "UICollectionView",
+      "fallbacks": ["UITableView", "GeneratedListView"],
+      "requiredStates": ["loading", "empty", "error", "content"],
+      "requiredEvents": ["itemSelected"],
+      "requiredDetailFields": ["visualMetrics", "contentStructure", "slotMetrics"],
+      "layoutRules": {
+        "container": "contentStack",
+        "cellTemplateRequired": true,
+        "dataModelRequired": true,
+        "requiredMeasurements": ["padding", "spacing", "typography", "itemSize", "slotMetrics"]
+      },
+      "rejectWhen": ["itemsHardcodedAsIndividualViews"]
+    },
+    {
+      "semanticType": "content_card",
+      "preferred": "ContentCardView",
+      "fallbacks": ["GeneratedCardView", "UIView"],
+      "requiredStates": ["normal", "selected"],
+      "requiredEvents": [],
+      "requiredDetailFields": ["visualMetrics", "contentStructure", "slotMetrics"],
+      "layoutRules": {
+        "container": "contentStack",
+        "radiusToken": "card",
+        "paddingToken": "cardPadding",
+        "shadowToken": "card",
+        "requiredMeasurements": ["height", "outerCornerRadius", "padding", "spacing", "typography", "mediaAspectRatio", "slotMetrics"]
+      },
+      "rejectWhen": ["decorativeOnly"]
+    },
+    {
+      "semanticType": "tab_bar",
+      "preferred": "ProjectTabBarController",
+      "fallbacks": ["UITabBarController", "GeneratedTabBarView"],
+      "requiredStates": ["normal", "selected", "disabled"],
+      "requiredEvents": ["tabSelected"],
+      "requiredDetailFields": ["visualMetrics", "contentStructure", "slotMetrics"],
+      "layoutRules": {
+        "position": "fixed_bottom",
+        "safeAreaAware": true,
+        "evenDistribution": true,
+        "requiredMeasurements": ["height", "padding", "spacing", "typography", "slotMetrics"]
+      },
+      "rejectWhen": ["mappedAsPlainButtonGroup"]
+    },
+    {
+      "semanticType": "decorative_media",
+      "preferred": "UIImageView",
+      "fallbacks": ["GeneratedDecorativeMediaView"],
+      "requiredStates": ["content"],
+      "requiredEvents": [],
+      "requiredDetailFields": ["visualMetrics", "contentStructure", "slotMetrics"],
+      "layoutRules": {
+        "bitmapFallbackAllowed": true,
+        "accessibilityHiddenByDefault": true,
+        "requiredMeasurements": ["outerCornerRadius", "mediaAspectRatio", "slotMetrics"]
+      },
+      "rejectWhen": ["usedForText", "usedForInteractiveControl"]
+    }
+  ]
+}

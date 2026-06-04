@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/visual-review-plan.schema.json",
+  "title": "Visual Review Plan",
+  "type": "object",
+  "required": ["artifactType", "sourceId", "target", "sourceImage", "runtime", "captures", "thresholds", "checks"],
+  "properties": {
+    "artifactType": { "type": "string", "const": "visual_review_plan" },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "target": { "type": "string", "minLength": 1 },
+    "sourceImage": {
+      "type": "object",
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "crop": { "$ref": "#/$defs/rect" },
+        "coordinateSpace": { "type": "string", "enum": ["source_pixel", "logical"] }
+      },
+      "additionalProperties": true
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["web", "ios-simulator", "android-emulator", "manual"] },
+        "url": { "type": "string" },
+        "launchCommand": { "type": "string" },
+        "captureCommand": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "captures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "viewport", "state", "outputPath"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "viewport": {
+            "type": "object",
+            "required": ["width", "height"],
+            "properties": {
+              "width": { "type": "number", "exclusiveMinimum": 0 },
+              "height": { "type": "number", "exclusiveMinimum": 0 },
+              "deviceScaleFactor": { "type": "number", "exclusiveMinimum": 0 },
+              "isMobile": { "type": "boolean" }
+            },
+            "additionalProperties": true
+          },
+          "state": { "type": "string" },
+          "selector": { "type": "string" },
+          "waitForSelector": { "type": "string" },
+          "outputPath": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": true
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "required": ["maxPixelDiffRatio", "maxMeanChannelDelta"],
+      "properties": {
+        "maxPixelDiffRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "minSimilarity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "maxMeanChannelDelta": { "type": "number", "minimum": 0, "maximum": 255 },
+        "pixelDeltaThreshold": { "type": "number", "minimum": 0, "maximum": 255 },
+        "requireSameDimensions": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "materialExclusions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "reason", "rect"],
+        "properties": {
+          "id": { "type": "string" },
+          "reason": { "type": "string", "enum": ["photo", "generated_media", "video_thumbnail", "illustration", "device_frame", "external_asset"] },
+          "rect": { "$ref": "#/$defs/rect" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["screenshot_diff", "dimension_match", "text_overflow", "state_variants", "responsive", "accessibility_smoke", "asset_rendering"]
+      }
+    }
+  },
+  "$defs": {
+    "rect": {
+      "type": "object",
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

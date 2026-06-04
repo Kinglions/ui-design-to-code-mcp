@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/image-source-manifest.schema.json",
+  "title": "Source Image Manifest",
+  "type": "object",
+  "required": ["source", "coordinateSpaces", "knownViewport", "uncertainties"],
+  "properties": {
+    "source": {
+      "type": "object",
+      "required": ["id", "path", "widthPx", "heightPx"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 },
+        "widthPx": { "type": "number", "exclusiveMinimum": 0 },
+        "heightPx": { "type": "number", "exclusiveMinimum": 0 },
+        "colorSpace": { "type": "string" },
+        "pixelDensity": {
+          "type": "object",
+          "properties": {
+            "scale": { "type": "number", "exclusiveMinimum": 0 },
+            "unit": { "type": "string", "enum": ["px", "pt", "dp", "cssPx", "unknown"] },
+            "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "coordinateSpaces": {
+      "type": "object",
+      "required": ["sourcePixel", "normalized", "logical"],
+      "properties": {
+        "sourcePixel": {
+          "type": "object",
+          "required": ["origin", "unit", "bounds"],
+          "properties": {
+            "origin": { "type": "string", "enum": ["top_left"] },
+            "unit": { "type": "string", "const": "px" },
+            "bounds": { "$ref": "#/$defs/bbox" }
+          },
+          "additionalProperties": true
+        },
+        "normalized": {
+          "type": "object",
+          "required": ["origin", "range"],
+          "properties": {
+            "origin": { "type": "string", "enum": ["top_left"] },
+            "range": { "type": "string", "enum": ["0_to_1"] }
+          },
+          "additionalProperties": true
+        },
+        "logical": {
+          "type": "object",
+          "required": ["unit", "scaleFromSourcePx", "confidence"],
+          "properties": {
+            "unit": { "type": "string", "enum": ["pt", "dp", "cssPx", "unknown"] },
+            "scaleFromSourcePx": { "type": "number", "minimum": 0 },
+            "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+            "evidence": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "knownViewport": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 },
+        "unit": { "type": "string", "enum": ["px", "pt", "dp", "cssPx", "unknown"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": true
+    },
+    "uncertainties": { "$ref": "#/$defs/stringArray" }
+  },
+  "$defs": {
+    "bbox": {
+      "type": "object",
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number", "minimum": 0 },
+        "height": { "type": "number", "minimum": 0 },
+        "rotation": { "type": "number" }
+      },
+      "additionalProperties": true
+    },
+    "stringArray": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}

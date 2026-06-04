@@ -1,0 +1,158 @@
+{
+  "adapter": {
+    "id": "android-compose",
+    "name": "Android Jetpack Compose Adapter",
+    "platform": "android",
+    "language": "Kotlin",
+    "uiRuntime": "Jetpack Compose",
+    "version": "1.0.0",
+    "defaultLayout": "Compose layout primitives"
+  },
+  "mappingPriority": [
+    "project_composable",
+    "material3_composable",
+    "foundation_composable",
+    "generated_composable",
+    "bitmap_asset"
+  ],
+  "semanticMappings": [
+    {
+      "semanticType": "primary_cta",
+      "preferred": "Button",
+      "fallbacks": [
+        "FilledTonalButton",
+        "GeneratedCTA"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "visual",
+        "interaction",
+        "accessibility"
+      ]
+    },
+    {
+      "semanticType": "input_field",
+      "preferred": "TextField or OutlinedTextField",
+      "fallbacks": [
+        "BasicTextField"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "data.validation",
+        "interaction"
+      ]
+    },
+    {
+      "semanticType": "content_card",
+      "preferred": "Card",
+      "fallbacks": [
+        "Surface",
+        "GeneratedCard"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout.slotLayout",
+        "visual"
+      ]
+    },
+    {
+      "semanticType": "vertical_list",
+      "preferred": "LazyColumn",
+      "fallbacks": [
+        "Column for static content"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "data.template"
+      ]
+    },
+    {
+      "semanticType": "bottom_navigation",
+      "preferred": "NavigationBar",
+      "fallbacks": [
+        "GeneratedBottomNavigation"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "interaction"
+      ]
+    }
+  ],
+  "layoutCapabilities": {
+    "scroll": "LazyColumn, LazyRow, verticalScroll",
+    "fixed": "Scaffold bottomBar/topBar",
+    "overlay": "Box layers, Dialog, Popup",
+    "grid": "LazyVerticalGrid",
+    "safeArea": "WindowInsets and padding modifiers",
+    "keyboard": "imePadding and bringIntoView"
+  },
+  "stateMappings": {
+    "loading": "UiState.Loading",
+    "empty": "UiState.Empty",
+    "error": "UiState.Error",
+    "content": "UiState.Content",
+    "disabled": "enabled = false",
+    "focused": "FocusRequester or interaction source",
+    "selected": "selected parameter"
+  },
+  "eventMappings": {
+    "tap": "onClick",
+    "textChanged": "onValueChange",
+    "selectionChanged": "onSelectedChange",
+    "itemSelected": "onItemClick"
+  },
+  "accessibilityMappings": {
+    "role": "semantics role",
+    "label": "contentDescription",
+    "value": "stateDescription",
+    "hint": "semantics custom description"
+  },
+  "assetHandling": {
+    "systemIcons": "Material Icons when available",
+    "bitmap": "painterResource or async image",
+    "mediaCrop": "ContentScale.Crop"
+  },
+  "reviewPlan": {
+    "commands": [
+      "./gradlew assembleDebug"
+    ],
+    "runtimeChecks": [
+      "Compose preview or emulator screenshot",
+      "font scale",
+      "dark mode",
+      "state variants"
+    ],
+    "visualReview": {
+      "capture": "scripts/run_android_emulator_review.js or Compose preview snapshot workflow",
+      "compare": "scripts/compare_screenshots.js",
+      "defaultViewports": [
+        {
+          "width": 393,
+          "height": 852,
+          "deviceScaleFactor": 1,
+          "isMobile": true
+        }
+      ],
+      "thresholds": {
+        "maxPixelDiffRatio": 0.08,
+        "maxMeanChannelDelta": 12,
+        "pixelDeltaThreshold": 16,
+        "minSimilarity": 0.9
+      },
+      "requiredStateCaptures": [
+        "content"
+      ],
+      "blockedWhen": [
+        "emulator unavailable",
+        "screenshot command unavailable"
+      ]
+    }
+  },
+  "rejectWhen": [
+    "clickable node lacks semantics",
+    "lazy list item lacks stable key when data is dynamic",
+    "input node lacks validation and error text"
+  ]
+}

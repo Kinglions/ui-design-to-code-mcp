@@ -1,0 +1,56 @@
+{
+  "artifactType": "platform_neutral_semantic_ui_ir",
+  "sourceId": "minimal-source",
+  "coordinateSpace": "source_pixel",
+  "screen": {
+    "name": "MinimalButton",
+    "bounds": { "x": 0, "y": 0, "width": 390, "height": 844 },
+    "states": ["loading", "empty", "error", "content"],
+    "safeAreaHints": { "top": 0, "bottom": 0, "leading": 0, "trailing": 0, "confidence": 0.2 }
+  },
+  "tokens": {
+    "spacing": { "pageX": 24 },
+    "radius": { "button": 16 },
+    "size": { "buttonHeight": 56 },
+    "color": { "buttonBackground": "#111111", "buttonText": "#FFFFFF" },
+    "typography": { "button": { "fontSize": 16, "lineHeight": 20, "fontWeight": "600" } }
+  },
+  "nodeTree": [
+    {
+      "id": "node-primary-cta",
+      "semanticType": "primary_cta",
+      "role": "continue_action",
+      "sourceGroupIds": ["group-primary-cta"],
+      "bbox": { "x": 24, "y": 720, "width": 342, "height": 56 },
+      "layoutIntent": { "position": "fixed_bottom", "flow": "horizontal" },
+      "visualMetrics": {
+        "height": { "mode": "fixed", "value": 56 },
+        "padding": { "top": 0, "bottom": 0, "leading": 20, "trailing": 20 },
+        "spacing": { "iconToText": 0 },
+        "typography": { "primaryTextStyle": "button" },
+        "radius": { "token": "button", "value": 16 }
+      },
+      "contentStructure": {
+        "layoutPattern": "button",
+        "slots": [
+          { "name": "title", "role": "button_label", "required": true, "maxLines": 1, "alignment": "center" }
+        ]
+      },
+      "slotMetrics": {
+        "title": { "height": { "mode": "intrinsic" }, "lineHeight": 20, "maxLines": 1, "alignment": "center" }
+      },
+      "states": ["normal", "disabled", "loading"],
+      "events": ["tap"],
+      "dataHints": { "label": "Continue" },
+      "accessibilityHints": { "role": "button", "label": "Continue" },
+      "confidence": 0.95,
+      "alternatives": [],
+      "uncertainties": []
+    }
+  ],
+  "traceability": {
+    "nodeToGroups": {
+      "node-primary-cta": ["group-primary-cta"]
+    }
+  }
+}

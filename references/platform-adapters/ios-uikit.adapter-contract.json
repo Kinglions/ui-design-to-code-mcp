@@ -1,0 +1,165 @@
+{
+  "adapter": {
+    "id": "ios-uikit",
+    "name": "iOS UIKit Adapter",
+    "platform": "ios",
+    "language": "Swift",
+    "uiRuntime": "UIKit",
+    "version": "1.0.0",
+    "defaultLayout": "Auto Layout with SnapKit"
+  },
+  "mappingPriority": [
+    "project_component",
+    "native_control",
+    "generated_reusable_view",
+    "page_private_view",
+    "bitmap_asset"
+  ],
+  "semanticMappings": [
+    {
+      "semanticType": "primary_cta",
+      "preferred": "UIButton",
+      "fallbacks": [
+        "UIControl subclass",
+        "GeneratedCTAView"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "visual",
+        "interaction",
+        "accessibility"
+      ]
+    },
+    {
+      "semanticType": "input_field",
+      "preferred": "UITextField or UITextView",
+      "fallbacks": [
+        "GeneratedInputView"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "visual",
+        "data.validation",
+        "interaction"
+      ]
+    },
+    {
+      "semanticType": "content_card",
+      "preferred": "UIView subclass",
+      "fallbacks": [
+        "UICollectionViewCell",
+        "PagePrivateCardView"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout.slotLayout",
+        "visual",
+        "data"
+      ]
+    },
+    {
+      "semanticType": "vertical_list",
+      "preferred": "UICollectionView",
+      "fallbacks": [
+        "UITableView",
+        "UIStackView for static lists"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "data.template"
+      ]
+    },
+    {
+      "semanticType": "bottom_navigation",
+      "preferred": "UITabBarController or custom UIView",
+      "fallbacks": [
+        "GeneratedBottomNavigationView"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "interaction",
+        "accessibility"
+      ]
+    }
+  ],
+  "layoutCapabilities": {
+    "scroll": "UIScrollView or UICollectionView",
+    "fixed": "safeAreaLayoutGuide constraints",
+    "overlay": "z-ordered subviews",
+    "grid": "UICollectionViewCompositionalLayout",
+    "safeArea": "safeAreaLayoutGuide",
+    "keyboard": "keyboard notifications or inputAccessoryView"
+  },
+  "stateMappings": {
+    "loading": "ViewState.loading",
+    "empty": "ViewState.empty",
+    "error": "ViewState.error",
+    "content": "ViewState.content",
+    "disabled": "isEnabled = false",
+    "focused": "firstResponder",
+    "selected": "isSelected"
+  },
+  "eventMappings": {
+    "tap": "UIControl.Event.touchUpInside",
+    "textChanged": "editingChanged or UITextViewDelegate",
+    "selectionChanged": "selection handler",
+    "itemSelected": "collection/table delegate selection"
+  },
+  "accessibilityMappings": {
+    "role": "accessibilityTraits",
+    "label": "accessibilityLabel",
+    "value": "accessibilityValue",
+    "hint": "accessibilityHint"
+  },
+  "assetHandling": {
+    "systemIcons": "SF Symbols when available",
+    "bitmap": "asset catalog or source crop",
+    "mediaCrop": "UIImageView contentMode"
+  },
+  "reviewPlan": {
+    "commands": [
+      "xcodebuild build"
+    ],
+    "runtimeChecks": [
+      "simulator screenshot",
+      "dynamic type",
+      "dark mode",
+      "loading empty error content states"
+    ],
+    "visualReview": {
+      "capture": "scripts/run_ios_simulator_review.js",
+      "compare": "scripts/compare_screenshots.js",
+      "defaultViewports": [
+        {
+          "width": 393,
+          "height": 852,
+          "deviceScaleFactor": 3,
+          "isMobile": true
+        }
+      ],
+      "thresholds": {
+        "maxPixelDiffRatio": 0.08,
+        "maxMeanChannelDelta": 12,
+        "pixelDeltaThreshold": 16,
+        "minSimilarity": 0.9
+      },
+      "requiredStateCaptures": [
+        "content"
+      ],
+      "blockedWhen": [
+        "simulator unavailable",
+        "app cannot be launched"
+      ]
+    }
+  },
+  "rejectWhen": [
+    "multi-slot node lacks layout.slotLayout",
+    "fixed bottom node is mapped inside scroll content",
+    "input node lacks validation",
+    "repeated list lacks template data"
+  ]
+}

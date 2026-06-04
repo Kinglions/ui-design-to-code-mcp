@@ -1,0 +1,8 @@
+generated/
+node_modules/
+.DS_Store
+*.log
+*.tgz
+coverage/
+.env
+.env.*

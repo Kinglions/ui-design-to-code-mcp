@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/vision-ir.schema.json",
+  "title": "Vision IR",
+  "type": "object",
+  "required": ["artifactType", "sourceId", "coordinateSpace", "primitives"],
+  "properties": {
+    "artifactType": { "type": "string", "const": "vision_ir" },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "coordinateSpace": { "type": "string", "enum": ["source_pixel"] },
+    "primitives": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/primitive" }
+    }
+  },
+  "$defs": {
+    "primitive": {
+      "type": "object",
+      "required": ["id", "type", "bbox", "confidence", "uncertainties"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": [
+            "text_run",
+            "icon_candidate",
+            "shape",
+            "image_region",
+            "effect",
+            "color_sample",
+            "spacing_sample"
+          ]
+        },
+        "bbox": { "$ref": "#/$defs/bbox" },
+        "normalizedBBox": { "$ref": "#/$defs/normalizedBBox" },
+        "content": {
+          "type": "object",
+          "properties": {
+            "text": { "type": "string" },
+            "ocrLanguage": { "type": "string" },
+            "symbolGuess": { "type": "string" },
+            "assetKind": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "style": {
+          "type": "object",
+          "properties": {
+            "fill": { "type": "string" },
+            "stroke": { "type": "string" },
+            "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+            "cornerRadius": { "type": "number", "minimum": 0 },
+            "shadow": { "type": "string" },
+            "blur": { "type": "string" },
+            "fontSize": { "type": "number", "minimum": 0 },
+            "fontWeight": { "type": "string" },
+            "lineHeight": { "type": "number", "minimum": 0 },
+            "textAlign": { "type": "string", "enum": ["leading", "center", "trailing", "justified", "unknown"] }
+          },
+          "additionalProperties": true
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "targetId"],
+            "properties": {
+              "type": { "type": "string" },
+              "targetId": { "type": "string" },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+            },
+            "additionalProperties": true
+          }
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "uncertainties": { "$ref": "#/$defs/stringArray" }
+      },
+      "additionalProperties": true
+    },
+    "bbox": {
+      "type": "object",
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number", "minimum": 0 },
+        "height": { "type": "number", "minimum": 0 },
+        "rotation": { "type": "number" }
+      },
+      "additionalProperties": true
+    },
+    "normalizedBBox": {
+      "type": "object",
+      "required": ["nx", "ny", "nw", "nh"],
+      "properties": {
+        "nx": { "type": "number", "minimum": 0, "maximum": 1 },
+        "ny": { "type": "number", "minimum": 0, "maximum": 1 },
+        "nw": { "type": "number", "minimum": 0, "maximum": 1 },
+        "nh": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": true
+    },
+    "stringArray": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/asset-policy.schema.json",
+  "title": "Asset Policy",
+  "type": "object",
+  "required": ["artifactType", "naming", "dedupe", "retention", "iconPriority"],
+  "properties": {
+    "artifactType": { "type": "string", "const": "asset_policy" },
+    "naming": {
+      "type": "object",
+      "required": ["pattern"],
+      "properties": { "pattern": { "type": "string" } },
+      "additionalProperties": true
+    },
+    "dedupe": {
+      "type": "object",
+      "required": ["hashAlgorithm"],
+      "properties": { "hashAlgorithm": { "type": "string" } },
+      "additionalProperties": true
+    },
+    "retention": { "type": "object", "additionalProperties": true },
+    "iconPriority": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["system_icon", "project_icon", "vector_rebuild", "bitmap_crop"] }
+    }
+  },
+  "additionalProperties": true
+}

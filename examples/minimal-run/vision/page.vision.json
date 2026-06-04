@@ -1,0 +1,24 @@
+{
+  "artifactType": "vision_ir",
+  "sourceId": "minimal-source",
+  "coordinateSpace": "source_pixel",
+  "primitives": [
+    {
+      "id": "shape-button-bg",
+      "type": "shape",
+      "bbox": { "x": 24, "y": 720, "width": 342, "height": 56 },
+      "style": { "fill": "#111111", "cornerRadius": 16 },
+      "confidence": 0.96,
+      "uncertainties": []
+    },
+    {
+      "id": "text-button-label",
+      "type": "text_run",
+      "bbox": { "x": 164, "y": 738, "width": 62, "height": 20 },
+      "content": { "text": "Continue", "ocrLanguage": "en" },
+      "style": { "fill": "#FFFFFF", "fontSize": 16, "fontWeight": "600", "lineHeight": 20, "textAlign": "center" },
+      "confidence": 0.94,
+      "uncertainties": []
+    }
+  ]
+}

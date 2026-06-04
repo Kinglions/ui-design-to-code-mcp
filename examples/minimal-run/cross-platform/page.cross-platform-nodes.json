@@ -1,0 +1,50 @@
+{
+  "artifactType": "cross_platform_node_data",
+  "sourceId": "minimal-source",
+  "semanticTreeId": "semantic",
+  "coordinateSpace": "source_pixel",
+  "nodes": [
+    {
+      "id": "xnode-primary-cta",
+      "core": {
+        "semanticType": "primary_cta",
+        "role": "continue_action",
+        "states": ["normal", "disabled", "loading"],
+        "events": ["tap"]
+      },
+      "source": {
+        "bbox": { "x": 24, "y": 720, "width": 342, "height": 56 },
+        "sourceGroupIds": ["group-primary-cta"],
+        "sourcePrimitiveIds": ["shape-button-bg", "text-button-label"],
+        "confidence": 0.95,
+        "uncertainties": []
+      },
+      "layout": {
+        "position": "fixed_bottom",
+        "flow": "horizontal",
+        "slotLayout": {
+          "title": { "height": { "mode": "intrinsic" }, "lineHeight": 20, "maxLines": 1, "alignment": "center" }
+        },
+        "responsive": { "widthBehavior": "fill", "heightBehavior": "fixed", "breakpointHints": ["mobile"] },
+        "safeAreaBehavior": "respect",
+        "keyboardBehavior": "none"
+      },
+      "visual": {
+        "padding": { "top": 0, "bottom": 0, "leading": 20, "trailing": 20 },
+        "spacing": { "iconToText": 0 },
+        "typography": { "primaryTextStyle": "button" },
+        "radius": { "value": 16 },
+        "color": { "background": "#111111", "text": "#FFFFFF" }
+      },
+      "interaction": { "primaryAction": "continue", "gestureHints": ["tap"] },
+      "data": { "modelName": "ContinueAction", "sampleData": [{ "label": "Continue" }] },
+      "accessibility": { "role": "button", "label": "Continue", "dynamicText": "support" },
+      "traceability": {
+        "semanticNodeId": "node-primary-cta",
+        "sourceGroupIds": ["group-primary-cta"],
+        "sourcePrimitiveIds": ["shape-button-bg", "text-button-label"],
+        "uncertainties": []
+      }
+    }
+  ]
+}

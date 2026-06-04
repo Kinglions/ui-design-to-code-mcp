@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/adapter-capability-matrix.schema.json",
+  "title": "Adapter Capability Matrix",
+  "type": "object",
+  "required": ["artifactType", "adapters", "semanticTypes", "matrix"],
+  "properties": {
+    "artifactType": { "type": "string", "const": "adapter_capability_matrix" },
+    "adapters": { "type": "array", "items": { "type": "string" } },
+    "semanticTypes": { "type": "array", "items": { "type": "string" } },
+    "matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["semanticType", "adapter", "support"],
+        "properties": {
+          "semanticType": { "type": "string" },
+          "adapter": { "type": "string" },
+          "support": { "type": "string", "enum": ["native", "generated", "fallback", "unsupported"] },
+          "notes": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

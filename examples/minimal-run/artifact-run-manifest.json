@@ -1,0 +1,84 @@
+{
+  "artifactType": "artifact_run_manifest",
+  "run": {
+    "id": "minimal-run",
+    "skill": "ui-design-to-code",
+    "createdAt": "2026-06-04T00:00:00Z",
+    "root": ".",
+    "sourceSummary": "Minimal button screenshot fixture",
+    "targets": ["web-react"]
+  },
+  "retention": {
+    "defaultIntermediateTtlHours": 168,
+    "defaultDebugTtlHours": 24,
+    "cleanupPolicy": "dry_run_required"
+  },
+  "artifacts": [
+    {
+      "id": "source-manifest",
+      "path": "source/page.source-manifest.json",
+      "category": "source",
+      "artifactType": "source_image_manifest",
+      "cleanupStatus": "keep"
+    },
+    {
+      "id": "vision",
+      "path": "vision/page.vision.json",
+      "category": "intermediate",
+      "artifactType": "vision_ir",
+      "cleanupStatus": "cleanup_eligible"
+    },
+    {
+      "id": "compression",
+      "path": "compression/page.compression.json",
+      "category": "intermediate",
+      "artifactType": "node_compression_ir",
+      "cleanupStatus": "cleanup_eligible"
+    },
+    {
+      "id": "semantic",
+      "path": "semantic/page.semantic-tree.json",
+      "category": "intermediate",
+      "artifactType": "platform_neutral_semantic_ui_ir",
+      "cleanupStatus": "keep"
+    },
+    {
+      "id": "cross-platform",
+      "path": "cross-platform/page.cross-platform-nodes.json",
+      "category": "intermediate",
+      "artifactType": "cross_platform_node_data",
+      "cleanupStatus": "keep"
+    },
+    {
+      "id": "conversion-plan",
+      "path": "targets/platform-conversion-plan.json",
+      "category": "intermediate",
+      "artifactType": "platform_conversion_plan",
+      "cleanupStatus": "keep"
+    },
+    {
+      "id": "web-react-layout",
+      "path": "targets/web-react/page.target-layout.json",
+      "category": "final",
+      "artifactType": "target_layout_ir",
+      "target": "web-react",
+      "cleanupStatus": "final"
+    },
+    {
+      "id": "visual-review-plan",
+      "path": "review/web-react/visual-review-plan.json",
+      "category": "review",
+      "artifactType": "visual_review_plan",
+      "target": "web-react",
+      "cleanupStatus": "keep"
+    },
+    {
+      "id": "visual-review-result",
+      "path": "review/web-react/visual-review-result.json",
+      "category": "review",
+      "artifactType": "visual_review_result",
+      "target": "web-react",
+      "cleanupStatus": "keep"
+    }
+  ]
+}

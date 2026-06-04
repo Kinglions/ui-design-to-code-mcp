@@ -1,0 +1,7 @@
+interface:
+  display_name: "UI Design to Code"
+  short_description: "Convert UI previews into UIKit pages"
+  default_prompt: "Use $ui-design-to-code to convert this UI preview into design-decoding artifacts, platform-neutral node data, a target conversion plan, maintainable platform code when requested, and a cleaned artifact run."
+
+policy:
+  allow_implicit_invocation: true

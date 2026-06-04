@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/target-layout-ios-swiftui.schema.json",
+  "title": "iOS SwiftUI Target Layout IR",
+  "type": "object",
+  "required": ["artifactType", "target", "sourceId", "rootView", "views"],
+  "properties": {
+    "artifactType": { "type": "string", "const": "target_layout_ir" },
+    "target": { "type": "string", "const": "ios-swiftui" },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "rootView": { "type": "string", "minLength": 1 },
+    "stateModel": { "type": "object", "required": ["states"], "additionalProperties": true },
+    "views": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "sourceNodeId", "view", "layout", "modifiers", "accessibility"],
+        "properties": {
+          "id": { "type": "string" },
+          "sourceNodeId": { "type": "string" },
+          "view": { "type": "string" },
+          "viewName": { "type": "string" },
+          "layout": { "type": "object", "additionalProperties": true },
+          "modifiers": { "type": "array", "items": { "type": "string" } },
+          "bindings": { "type": "object", "additionalProperties": true },
+          "actions": { "type": "object", "additionalProperties": true },
+          "accessibility": { "type": "object", "additionalProperties": true },
+          "children": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": true
+      }
+    },
+    "assets": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+    "reviewChecks": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

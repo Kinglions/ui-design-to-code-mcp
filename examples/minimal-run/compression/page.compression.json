@@ -1,0 +1,38 @@
+{
+  "artifactType": "node_compression_ir",
+  "sourceId": "minimal-source",
+  "coordinateSpace": "source_pixel",
+  "spatialRelations": [
+    {
+      "id": "rel-button-contains-label",
+      "type": "contains",
+      "sourceId": "shape-button-bg",
+      "targetId": "text-button-label",
+      "measurements": { "overlapRatio": 1 },
+      "confidence": 0.96
+    }
+  ],
+  "groups": [
+    {
+      "id": "group-primary-cta",
+      "candidateType": "button",
+      "primitiveIds": ["shape-button-bg", "text-button-label"],
+      "bbox": { "x": 24, "y": 720, "width": 342, "height": 56 },
+      "groupingEvidence": ["label centered inside rounded rectangle"],
+      "slotCandidates": [
+        {
+          "name": "title",
+          "role": "button_label",
+          "primitiveIds": ["text-button-label"],
+          "bbox": { "x": 164, "y": 738, "width": 62, "height": 20 },
+          "confidence": 0.94
+        }
+      ],
+      "confidence": 0.95,
+      "alternatives": [],
+      "uncertainties": []
+    }
+  ],
+  "templates": [],
+  "unassignedPrimitives": []
+}

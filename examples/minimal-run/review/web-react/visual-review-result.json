@@ -1,0 +1,14 @@
+{
+  "artifactType": "visual_review_result",
+  "sourceId": "minimal-source",
+  "target": "web-react",
+  "status": "blocked",
+  "captures": [],
+  "comparisons": [],
+  "findings": [
+    {
+      "severity": "warning",
+      "message": "Fixture has no actual source image or running web target; visual comparison is documented but blocked."
+    }
+  ]
+}

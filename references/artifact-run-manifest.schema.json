@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/artifact-run-manifest.schema.json",
+  "title": "Artifact Run Manifest",
+  "type": "object",
+  "required": ["artifactType", "run", "retention", "artifacts"],
+  "properties": {
+    "artifactType": { "type": "string", "const": "artifact_run_manifest" },
+    "run": {
+      "type": "object",
+      "required": ["id", "skill", "createdAt", "root"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "skill": { "type": "string", "const": "ui-design-to-code" },
+        "createdAt": { "type": "string", "minLength": 1 },
+        "updatedAt": { "type": "string" },
+        "root": { "type": "string", "minLength": 1 },
+        "sourceSummary": { "type": "string" },
+        "mode": {
+          "type": "string",
+          "enum": ["decode-only", "plan-only", "target-ir", "codegen", "codegen-with-auto-review", "runtime-review"]
+        },
+        "targets": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "retention": {
+      "type": "object",
+      "required": ["defaultIntermediateTtlHours", "defaultDebugTtlHours", "cleanupPolicy"],
+      "properties": {
+        "defaultIntermediateTtlHours": { "type": "number", "minimum": 0 },
+        "defaultDebugTtlHours": { "type": "number", "minimum": 0 },
+        "cleanupPolicy": {
+          "type": "string",
+          "enum": ["dry_run_required", "auto_tmp_only", "manual_only"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "category", "cleanupStatus"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "path": { "type": "string", "minLength": 1 },
+          "category": {
+            "type": "string",
+            "enum": ["source", "intermediate", "review", "debug", "final"]
+          },
+          "artifactType": { "type": "string" },
+          "target": { "type": "string" },
+          "sizeBytes": { "type": "number", "minimum": 0 },
+          "createdAt": { "type": "string" },
+          "ttlHours": { "type": "number", "minimum": 0 },
+          "revision": { "type": "integer", "minimum": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["active", "superseded", "final", "failed"]
+          },
+          "supersedes": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ]
+          },
+          "cleanupStatus": {
+            "type": "string",
+            "enum": ["keep", "final", "cleanup_eligible", "deleted", "external"]
+          },
+          "reason": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "cleanup": {
+      "type": "object",
+      "properties": {
+        "lastDryRunAt": { "type": "string" },
+        "lastApplyAt": { "type": "string" },
+        "deletedArtifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "sizeSummary": {
+      "type": "object",
+      "properties": {
+        "totalBytes": { "type": "number", "minimum": 0 },
+        "categoryBytes": {
+          "type": "object",
+          "additionalProperties": { "type": "number", "minimum": 0 }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

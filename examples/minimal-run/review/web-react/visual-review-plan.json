@@ -1,0 +1,29 @@
+{
+  "artifactType": "visual_review_plan",
+  "sourceId": "minimal-source",
+  "target": "web-react",
+  "sourceImage": {
+    "path": "source/minimal-button.png",
+    "coordinateSpace": "source_pixel",
+    "crop": { "x": 0, "y": 0, "width": 390, "height": 844 }
+  },
+  "runtime": {
+    "kind": "web",
+    "url": "http://localhost:3000/minimal-button"
+  },
+  "captures": [
+    {
+      "id": "mobile-content",
+      "viewport": { "width": 390, "height": 844, "deviceScaleFactor": 1, "isMobile": true },
+      "state": "content",
+      "outputPath": "review/web-react/mobile-content.png"
+    }
+  ],
+  "thresholds": {
+    "maxPixelDiffRatio": 0.08,
+    "maxMeanChannelDelta": 12,
+    "pixelDeltaThreshold": 16,
+    "requireSameDimensions": true
+  },
+  "checks": ["screenshot_diff", "dimension_match", "text_overflow", "state_variants", "asset_rendering"]
+}

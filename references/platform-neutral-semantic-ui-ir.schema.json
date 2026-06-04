@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/platform-neutral-semantic-ui-ir.schema.json",
+  "title": "Platform-neutral Semantic UI IR",
+  "type": "object",
+  "required": ["artifactType", "sourceId", "coordinateSpace", "screen", "tokens", "nodeTree", "traceability"],
+  "properties": {
+    "artifactType": { "type": "string", "const": "platform_neutral_semantic_ui_ir" },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "coordinateSpace": { "type": "string", "enum": ["source_pixel", "logical"] },
+    "screen": {
+      "type": "object",
+      "required": ["name", "bounds", "states", "safeAreaHints"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "bounds": { "$ref": "#/$defs/bbox" },
+        "states": {
+          "type": "array",
+          "items": { "type": "string" },
+          "contains": { "const": "content" }
+        },
+        "safeAreaHints": {
+          "type": "object",
+          "properties": {
+            "top": { "type": "number", "minimum": 0 },
+            "bottom": { "type": "number", "minimum": 0 },
+            "leading": { "type": "number", "minimum": 0 },
+            "trailing": { "type": "number", "minimum": 0 },
+            "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "tokens": {
+      "type": "object",
+      "required": ["spacing", "radius", "size", "color", "typography"],
+      "additionalProperties": true
+    },
+    "nodeTree": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/semanticNode" }
+    },
+    "traceability": {
+      "type": "object",
+      "required": ["nodeToGroups"],
+      "properties": {
+        "nodeToGroups": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "semanticNode": {
+      "type": "object",
+      "required": ["id", "semanticType", "role", "sourceGroupIds", "bbox", "layoutIntent", "visualMetrics", "contentStructure", "slotMetrics", "states", "events", "confidence", "alternatives", "uncertainties"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "semanticType": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 },
+        "sourceGroupIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "bbox": { "$ref": "#/$defs/bbox" },
+        "layoutIntent": {
+          "type": "object",
+          "required": ["position"],
+          "properties": {
+            "position": { "type": "string", "enum": ["scroll_content", "fixed_top", "fixed_bottom", "overlay", "modal", "background", "unknown"] },
+            "containerId": { "type": "string" },
+            "flow": { "type": "string", "enum": ["vertical", "horizontal", "grid", "absolute", "unknown"] }
+          },
+          "additionalProperties": true
+        },
+        "visualMetrics": {
+          "type": "object",
+          "required": ["height", "padding", "spacing", "typography"],
+          "additionalProperties": true
+        },
+        "contentStructure": {
+          "type": "object",
+          "required": ["layoutPattern", "slots"],
+          "properties": {
+            "layoutPattern": { "type": "string", "enum": ["stack", "split", "overlay", "list", "grid", "button", "input", "media_card", "navigation", "modal", "unknown"] },
+            "slots": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["name", "role"],
+                "properties": {
+                  "name": { "type": "string", "minLength": 1 },
+                  "role": { "type": "string", "minLength": 1 },
+                  "required": { "type": "boolean" },
+                  "maxLines": { "type": "integer", "minimum": 1 },
+                  "alignment": { "type": "string", "enum": ["leading", "center", "trailing", "fill", "unknown"] }
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        "slotMetrics": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "$ref": "#/$defs/slotMetric" }
+        },
+        "states": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "events": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dataHints": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "validation": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "accessibilityHints": {
+          "type": "object",
+          "properties": {
+            "role": { "type": "string" },
+            "label": { "type": "string" },
+            "value": { "type": "string" },
+            "hint": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "alternatives": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "uncertainties": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/semanticNode" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "slotMetric": {
+      "type": "object",
+      "required": ["height"],
+      "properties": {
+        "height": {
+          "type": "object",
+          "required": ["mode"],
+          "properties": {
+            "mode": { "type": "string", "enum": ["fixed", "min", "max", "intrinsic", "ratio", "aspectRatio", "fill", "unknown"] },
+            "value": { "type": "number" },
+            "token": { "type": "string" },
+            "ratio": { "type": "number" },
+            "aspectRatio": { "type": "string", "pattern": "^[0-9]+:[0-9]+$" }
+          },
+          "additionalProperties": true
+        },
+        "spacingAfter": { "oneOf": [{ "type": "number" }, { "type": "string" }] },
+        "lineHeight": { "oneOf": [{ "type": "number" }, { "type": "string" }] },
+        "maxLines": { "type": "integer", "minimum": 1 },
+        "alignment": { "type": "string", "enum": ["leading", "center", "trailing", "fill", "unknown"] }
+      },
+      "additionalProperties": true
+    },
+    "bbox": {
+      "type": "object",
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number", "minimum": 0 },
+        "height": { "type": "number", "minimum": 0 },
+        "rotation": { "type": "number" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

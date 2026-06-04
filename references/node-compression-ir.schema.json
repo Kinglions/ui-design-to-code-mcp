@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/node-compression-ir.schema.json",
+  "title": "Node Compression IR",
+  "type": "object",
+  "required": ["artifactType", "sourceId", "coordinateSpace", "spatialRelations", "groups", "templates", "unassignedPrimitives"],
+  "properties": {
+    "artifactType": { "type": "string", "const": "node_compression_ir" },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "coordinateSpace": { "type": "string", "enum": ["source_pixel"] },
+    "spatialRelations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/spatialRelation" }
+    },
+    "groups": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/group" }
+    },
+    "templates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/template" }
+    },
+    "unassignedPrimitives": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "spatialRelation": {
+      "type": "object",
+      "required": ["id", "type", "sourceId", "targetId", "confidence"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": ["contains", "overlaps", "aligned", "adjacent", "same_style", "same_size", "same_row", "same_column", "z_above", "repeated_geometry"]
+        },
+        "sourceId": { "type": "string", "minLength": 1 },
+        "targetId": { "type": "string", "minLength": 1 },
+        "measurements": {
+          "type": "object",
+          "properties": {
+            "gapX": { "type": "number" },
+            "gapY": { "type": "number" },
+            "overlapRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+            "alignmentDelta": { "type": "number", "minimum": 0 }
+          },
+          "additionalProperties": true
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": true
+    },
+    "group": {
+      "type": "object",
+      "required": ["id", "candidateType", "primitiveIds", "bbox", "groupingEvidence", "slotCandidates", "confidence", "alternatives", "uncertainties"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "candidateType": {
+          "type": "string",
+          "enum": ["button", "card", "input", "list_item", "navigation_item", "media_block", "toolbar", "tab_bar", "chip", "badge", "section", "decorative_group", "unknown"]
+        },
+        "primitiveIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "bbox": { "$ref": "#/$defs/bbox" },
+        "groupingEvidence": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "slotCandidates": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/slotCandidate" }
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "alternatives": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "uncertainties": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "slotCandidate": {
+      "type": "object",
+      "required": ["name", "role", "primitiveIds", "bbox", "confidence"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 },
+        "primitiveIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "bbox": { "$ref": "#/$defs/bbox" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": true
+    },
+    "template": {
+      "type": "object",
+      "required": ["id", "candidateType", "instanceGroupIds", "itemSize", "slotCandidates", "confidence"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "candidateType": { "type": "string", "minLength": 1 },
+        "instanceGroupIds": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "type": "string" }
+        },
+        "itemSize": {
+          "type": "object",
+          "required": ["width", "height"],
+          "properties": {
+            "width": { "type": "number", "exclusiveMinimum": 0 },
+            "height": { "type": "number", "exclusiveMinimum": 0 }
+          },
+          "additionalProperties": true
+        },
+        "slotCandidates": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/slotCandidate" }
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": true
+    },
+    "bbox": {
+      "type": "object",
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number", "minimum": 0 },
+        "height": { "type": "number", "minimum": 0 },
+        "rotation": { "type": "number" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

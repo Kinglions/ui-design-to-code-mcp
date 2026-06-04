@@ -1,0 +1,158 @@
+{
+  "adapter": {
+    "id": "ios-swiftui",
+    "name": "iOS SwiftUI Adapter",
+    "platform": "ios",
+    "language": "Swift",
+    "uiRuntime": "SwiftUI",
+    "version": "1.0.0",
+    "defaultLayout": "SwiftUI layout primitives"
+  },
+  "mappingPriority": [
+    "project_component",
+    "native_view",
+    "generated_reusable_view",
+    "page_private_view",
+    "bitmap_asset"
+  ],
+  "semanticMappings": [
+    {
+      "semanticType": "primary_cta",
+      "preferred": "Button",
+      "fallbacks": [
+        "GeneratedCTAView"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "visual",
+        "interaction",
+        "accessibility"
+      ]
+    },
+    {
+      "semanticType": "input_field",
+      "preferred": "TextField or TextEditor",
+      "fallbacks": [
+        "GeneratedInputView"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "visual",
+        "data.validation"
+      ]
+    },
+    {
+      "semanticType": "content_card",
+      "preferred": "Reusable View",
+      "fallbacks": [
+        "private View builder"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout.slotLayout",
+        "visual"
+      ]
+    },
+    {
+      "semanticType": "vertical_list",
+      "preferred": "LazyVStack or List",
+      "fallbacks": [
+        "ForEach in ScrollView"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "data.template"
+      ]
+    },
+    {
+      "semanticType": "bottom_navigation",
+      "preferred": "TabView or custom HStack",
+      "fallbacks": [
+        "GeneratedBottomNavigation"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "interaction"
+      ]
+    }
+  ],
+  "layoutCapabilities": {
+    "scroll": "ScrollView, List, LazyVStack",
+    "fixed": "safeAreaInset or overlay alignment",
+    "overlay": "overlay and ZStack",
+    "grid": "LazyVGrid or LazyHGrid",
+    "safeArea": "safeAreaInset and ignoresSafeArea",
+    "keyboard": "scrollDismissesKeyboard and focus state"
+  },
+  "stateMappings": {
+    "loading": "enum ViewState.loading",
+    "empty": "enum ViewState.empty",
+    "error": "enum ViewState.error",
+    "content": "enum ViewState.content",
+    "disabled": ".disabled(true)",
+    "focused": "@FocusState",
+    "selected": "selection binding"
+  },
+  "eventMappings": {
+    "tap": "Button action or onTapGesture",
+    "textChanged": "Binding setter",
+    "selectionChanged": "selection binding",
+    "itemSelected": "onTapGesture or NavigationLink"
+  },
+  "accessibilityMappings": {
+    "role": "accessibilityAddTraits",
+    "label": "accessibilityLabel",
+    "value": "accessibilityValue",
+    "hint": "accessibilityHint"
+  },
+  "assetHandling": {
+    "systemIcons": "Image(systemName:)",
+    "bitmap": "Image asset or source crop",
+    "mediaCrop": "resizable, scaledToFill, clipped"
+  },
+  "reviewPlan": {
+    "commands": [
+      "xcodebuild build"
+    ],
+    "runtimeChecks": [
+      "preview or simulator screenshot",
+      "dynamic type",
+      "dark mode",
+      "state variants"
+    ],
+    "visualReview": {
+      "capture": "scripts/run_ios_simulator_review.js or SwiftUI preview snapshot workflow",
+      "compare": "scripts/compare_screenshots.js",
+      "defaultViewports": [
+        {
+          "width": 393,
+          "height": 852,
+          "deviceScaleFactor": 3,
+          "isMobile": true
+        }
+      ],
+      "thresholds": {
+        "maxPixelDiffRatio": 0.08,
+        "maxMeanChannelDelta": 12,
+        "pixelDeltaThreshold": 16,
+        "minSimilarity": 0.9
+      },
+      "requiredStateCaptures": [
+        "content"
+      ],
+      "blockedWhen": [
+        "simulator unavailable",
+        "preview snapshot unavailable"
+      ]
+    }
+  },
+  "rejectWhen": [
+    "node has absolute-only layout without containment evidence",
+    "input node lacks validation",
+    "repeated node lacks stable item id"
+  ]
+}

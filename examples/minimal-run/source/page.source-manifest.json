@@ -1,0 +1,39 @@
+{
+  "source": {
+    "id": "minimal-source",
+    "path": "minimal-button.png",
+    "widthPx": 390,
+    "heightPx": 844,
+    "colorSpace": "sRGB",
+    "pixelDensity": {
+      "scale": 1,
+      "unit": "px",
+      "confidence": 0.5
+    }
+  },
+  "coordinateSpaces": {
+    "sourcePixel": {
+      "origin": "top_left",
+      "unit": "px",
+      "bounds": { "x": 0, "y": 0, "width": 390, "height": 844 }
+    },
+    "normalized": {
+      "origin": "top_left",
+      "range": "0_to_1"
+    },
+    "logical": {
+      "unit": "unknown",
+      "scaleFromSourcePx": 0,
+      "confidence": 0,
+      "evidence": []
+    }
+  },
+  "knownViewport": {
+    "name": "unknown-mobile",
+    "width": 390,
+    "height": 844,
+    "unit": "px",
+    "confidence": 0.7
+  },
+  "uncertainties": ["source image not included in fixture"]
+}

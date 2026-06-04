@@ -1,0 +1,46 @@
+{
+  "name": "ui-design-to-code-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for ingesting UI screenshots and Figma design data into a cross-platform design-to-code artifact pipeline.",
+  "mcpName": "io.github.Kinglions/ui-design-to-code-mcp",
+  "type": "commonjs",
+  "main": "scripts/ui_design_to_code_mcp_server.js",
+  "bin": {
+    "ui-design-to-code-mcp": "bin/ui-design-to-code-mcp.js"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "references/",
+    "examples/",
+    "SKILL.md",
+    "README.md",
+    "server.json",
+    "LICENSE"
+  ],
+  "scripts": {
+    "serve": "node scripts/ui_design_to_code_mcp_server.js",
+    "doctor": "node bin/ui-design-to-code-mcp.js doctor",
+    "check": "node --check scripts/ui_design_to_code_mcp_server.js && node --check scripts/install_mcp_client.js && node --check bin/ui-design-to-code-mcp.js && node scripts/validate_pipeline.js --run examples/minimal-run",
+    "pack:dry-run": "npm pack --dry-run"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "design-to-code",
+    "figma",
+    "screenshot-to-code",
+    "ui"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kinglions/ui-design-to-code-mcp.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

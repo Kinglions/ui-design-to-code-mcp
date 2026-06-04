@@ -1,0 +1,40 @@
+{
+  "artifactType": "platform_conversion_plan",
+  "sourceId": "minimal-source",
+  "crossPlatformNodeDataId": "cross-platform",
+  "targets": [
+    {
+      "id": "web-react",
+      "language": "TypeScript",
+      "uiRuntime": "React",
+      "adapterContract": "references/platform-adapters/web-react.adapter-contract.json",
+      "stateStrategy": "local component state",
+      "componentMapping": [
+        {
+          "nodeId": "xnode-primary-cta",
+          "target": "button",
+          "mappingReason": "primary_cta maps to semantic HTML button"
+        }
+      ],
+      "layoutMapping": [
+        {
+          "nodeId": "xnode-primary-cta",
+          "target": "fixed bottom flex container",
+          "mappingReason": "source node is fixed_bottom and fill width"
+        }
+      ],
+      "assetPlan": [
+        {
+          "sourceNodeId": "xnode-primary-cta",
+          "strategy": "none",
+          "notes": ["button uses CSS only"]
+        }
+      ],
+      "unsupportedPatterns": [],
+      "reviewPlan": {
+        "commands": ["npm run typecheck", "npm run lint"],
+        "checks": ["mobile screenshot", "keyboard focus", "loading empty error content states"]
+      }
+    }
+  ]
+}

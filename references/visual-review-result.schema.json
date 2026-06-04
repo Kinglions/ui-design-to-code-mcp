@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/visual-review-result.schema.json",
+  "title": "Visual Review Result",
+  "type": "object",
+  "required": ["artifactType", "sourceId", "target", "status", "captures", "comparisons", "findings"],
+  "properties": {
+    "artifactType": { "type": "string", "const": "visual_review_result" },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "target": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "enum": ["passed", "failed", "partial", "blocked"] },
+    "captures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "viewport", "state"],
+        "properties": {
+          "id": { "type": "string" },
+          "path": { "type": "string" },
+          "viewport": { "type": "object", "additionalProperties": true },
+          "state": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "comparisons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "sourcePath", "actualPath", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "sourcePath": { "type": "string" },
+          "actualPath": { "type": "string" },
+          "diffPath": { "type": "string" },
+          "status": { "type": "string", "enum": ["passed", "failed", "blocked"] },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "width": { "type": "number" },
+              "height": { "type": "number" },
+              "pixelDiffRatio": { "type": "number" },
+              "similarity": { "type": "number" },
+              "meanChannelDelta": { "type": "number" },
+              "differentPixels": { "type": "number" },
+              "comparedPixels": { "type": "number" },
+              "ignoredPixels": { "type": "number" },
+              "totalPixels": { "type": "number" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["severity", "message"],
+        "properties": {
+          "severity": { "type": "string", "enum": ["error", "warning", "info"] },
+          "nodeId": { "type": "string" },
+          "message": { "type": "string" },
+          "suggestedPatch": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

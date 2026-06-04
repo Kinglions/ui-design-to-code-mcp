@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/target-layout-web-react.schema.json",
+  "title": "Web React Target Layout IR",
+  "type": "object",
+  "required": ["artifactType", "target", "sourceId", "rootComponent", "components"],
+  "properties": {
+    "artifactType": { "type": "string", "const": "target_layout_ir" },
+    "target": { "type": "string", "enum": ["web-react", "web-next"] },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "rootComponent": { "type": "string", "minLength": 1 },
+    "route": { "type": "string" },
+    "renderMode": { "type": "string", "enum": ["client", "server", "hybrid", "unknown"] },
+    "stateModel": { "type": "object", "required": ["states"], "additionalProperties": true },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "sourceNodeId", "element", "layout", "style", "accessibility"],
+        "properties": {
+          "id": { "type": "string" },
+          "sourceNodeId": { "type": "string" },
+          "element": { "type": "string" },
+          "componentName": { "type": "string" },
+          "layout": { "type": "object", "required": ["display"], "additionalProperties": true },
+          "style": { "type": "object", "additionalProperties": true },
+          "props": { "type": "object", "additionalProperties": true },
+          "events": { "type": "object", "additionalProperties": true },
+          "accessibility": { "type": "object", "additionalProperties": true },
+          "children": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": true
+      }
+    },
+    "assets": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+    "reviewChecks": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

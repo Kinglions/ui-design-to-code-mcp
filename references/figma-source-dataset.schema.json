@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/figma-source-dataset.schema.json",
+  "title": "Figma Source Dataset",
+  "type": "object",
+  "required": ["artifactType", "sourceId", "figma", "coordinateSpace", "nodes", "traceability", "uncertainties"],
+  "properties": {
+    "artifactType": { "type": "string", "const": "figma_source_dataset" },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "figma": {
+      "type": "object",
+      "properties": {
+        "fileKey": { "type": "string" },
+        "nodeId": { "type": "string" },
+        "frameId": { "type": "string" },
+        "source": { "type": "string", "enum": ["figma_mcp", "figma_rest", "manual_export", "unknown"] },
+        "screenshotPath": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "coordinateSpace": {
+      "type": "object",
+      "required": ["name", "origin", "unit"],
+      "properties": {
+        "name": { "type": "string", "enum": ["figma_canvas"] },
+        "origin": { "type": "string", "enum": ["top_left"] },
+        "unit": { "type": "string", "enum": ["figma_px"] },
+        "bounds": { "$ref": "#/$defs/rect" }
+      },
+      "additionalProperties": true
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "name"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "parentId": { "type": "string" },
+          "type": { "type": "string" },
+          "name": { "type": "string" },
+          "bbox": { "$ref": "#/$defs/rect" },
+          "visible": { "type": "boolean" },
+          "text": { "type": "string" },
+          "style": { "type": "object", "additionalProperties": true },
+          "layout": { "type": "object", "additionalProperties": true },
+          "effects": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "component": { "type": "object", "additionalProperties": true },
+          "children": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": true
+      }
+    },
+    "traceability": {
+      "type": "object",
+      "properties": {
+        "figmaNodeIds": { "type": "array", "items": { "type": "string" } },
+        "sourceScreenshotPrimitiveIds": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "uncertainties": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "rect": {
+      "type": "object",
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number", "minimum": 0 },
+        "height": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

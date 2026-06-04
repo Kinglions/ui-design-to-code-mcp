@@ -1,0 +1,161 @@
+{
+  "adapter": {
+    "id": "web-next",
+    "name": "Web Next.js Adapter",
+    "platform": "web",
+    "language": "TypeScript",
+    "uiRuntime": "Next.js + React",
+    "version": "1.0.0",
+    "defaultLayout": "Next.js route/page plus reusable React components"
+  },
+  "mappingPriority": [
+    "project_component",
+    "server_component",
+    "client_component",
+    "semantic_html",
+    "generated_component",
+    "bitmap_asset"
+  ],
+  "semanticMappings": [
+    {
+      "semanticType": "primary_cta",
+      "preferred": "button or Link",
+      "fallbacks": [
+        "ProjectButton"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "interaction",
+        "accessibility"
+      ]
+    },
+    {
+      "semanticType": "input_field",
+      "preferred": "client form component",
+      "fallbacks": [
+        "ProjectInput"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "data.validation",
+        "interaction"
+      ]
+    },
+    {
+      "semanticType": "content_card",
+      "preferred": "server or client card component",
+      "fallbacks": [
+        "GeneratedCard"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout.slotLayout",
+        "visual"
+      ]
+    },
+    {
+      "semanticType": "vertical_list",
+      "preferred": "mapped data section",
+      "fallbacks": [
+        "GeneratedList"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "data.template"
+      ]
+    },
+    {
+      "semanticType": "bottom_navigation",
+      "preferred": "nav client component",
+      "fallbacks": [
+        "GeneratedBottomNav"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "interaction"
+      ]
+    }
+  ],
+  "layoutCapabilities": {
+    "scroll": "document or overflow containers",
+    "fixed": "fixed/sticky CSS",
+    "overlay": "portal or positioned layer",
+    "grid": "CSS grid or flexbox",
+    "safeArea": "env(safe-area-inset-*)",
+    "keyboard": "browser form focus behavior"
+  },
+  "stateMappings": {
+    "loading": "loading.tsx, Suspense, or component loading state",
+    "empty": "empty state branch",
+    "error": "error.tsx or component error branch",
+    "content": "content branch",
+    "disabled": "disabled or aria-disabled",
+    "focused": "focus-visible",
+    "selected": "aria-selected or route active state"
+  },
+  "eventMappings": {
+    "tap": "onClick or Link navigation",
+    "textChanged": "onChange in client component",
+    "selectionChanged": "client state update",
+    "itemSelected": "Link or onClick"
+  },
+  "accessibilityMappings": {
+    "role": "semantic HTML or role",
+    "label": "visible label or aria-label",
+    "value": "value or aria value",
+    "hint": "aria-describedby"
+  },
+  "assetHandling": {
+    "systemIcons": "project icon library",
+    "bitmap": "next/image when appropriate",
+    "mediaCrop": "object-fit and sizes"
+  },
+  "reviewPlan": {
+    "commands": [
+      "npm run typecheck",
+      "npm run lint",
+      "npm run build"
+    ],
+    "runtimeChecks": [
+      "desktop screenshot",
+      "mobile screenshot",
+      "responsive layout",
+      "state variants"
+    ],
+    "visualReview": {
+      "capture": "scripts/capture_web_screenshot.js with Playwright after dev server starts",
+      "compare": "scripts/compare_screenshots.js",
+      "defaultViewports": [
+        {
+          "width": 390,
+          "height": 844,
+          "deviceScaleFactor": 1,
+          "isMobile": true
+        },
+        {
+          "width": 1440,
+          "height": 1000,
+          "deviceScaleFactor": 1,
+          "isMobile": false
+        }
+      ],
+      "thresholds": {
+        "maxPixelDiffRatio": 0.08,
+        "maxMeanChannelDelta": 12,
+        "pixelDeltaThreshold": 16,
+        "minSimilarity": 0.9
+      },
+      "requiredStateCaptures": [
+        "content"
+      ],
+      "textOverflowCheck": "check rendered text containers after hydration"
+    }
+  },
+  "rejectWhen": [
+    "client-only interaction is placed in a server-only component",
+    "image dimensions are unknown for next/image without fallback",
+    "form input lacks validation and error message"
+  ]
+}

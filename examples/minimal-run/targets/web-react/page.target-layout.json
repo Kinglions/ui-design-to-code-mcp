@@ -1,0 +1,39 @@
+{
+  "artifactType": "target_layout_ir",
+  "target": "web-react",
+  "sourceId": "minimal-source",
+  "rootComponent": "MinimalButtonScreen",
+  "renderMode": "client",
+  "stateModel": {
+    "states": ["loading", "empty", "error", "content"]
+  },
+  "components": [
+    {
+      "id": "button-continue",
+      "sourceNodeId": "xnode-primary-cta",
+      "element": "button",
+      "componentName": "ContinueButton",
+      "layout": {
+        "display": "flex",
+        "position": "fixed",
+        "bottom": "env(safe-area-inset-bottom)",
+        "left": 24,
+        "right": 24,
+        "height": 56,
+        "alignItems": "center",
+        "justifyContent": "center"
+      },
+      "style": {
+        "borderRadius": 16,
+        "background": "#111111",
+        "color": "#FFFFFF"
+      },
+      "props": { "type": "button" },
+      "events": { "tap": "onClick" },
+      "accessibility": { "label": "Continue" },
+      "children": []
+    }
+  ],
+  "assets": [],
+  "reviewChecks": ["mobile screenshot", "focus-visible", "disabled state"]
+}

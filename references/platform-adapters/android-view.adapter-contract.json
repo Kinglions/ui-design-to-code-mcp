@@ -1,0 +1,157 @@
+{
+  "adapter": {
+    "id": "android-view",
+    "name": "Android View Adapter",
+    "platform": "android",
+    "language": "Kotlin",
+    "uiRuntime": "Android Views",
+    "version": "1.0.0",
+    "defaultLayout": "XML/ViewBinding or programmatic Views"
+  },
+  "mappingPriority": [
+    "project_view",
+    "material_view",
+    "android_native_view",
+    "generated_custom_view",
+    "bitmap_asset"
+  ],
+  "semanticMappings": [
+    {
+      "semanticType": "primary_cta",
+      "preferred": "MaterialButton",
+      "fallbacks": [
+        "Button",
+        "GeneratedCTAView"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "semanticType": "input_field",
+      "preferred": "TextInputLayout + TextInputEditText",
+      "fallbacks": [
+        "EditText"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "data.validation",
+        "interaction"
+      ]
+    },
+    {
+      "semanticType": "content_card",
+      "preferred": "MaterialCardView",
+      "fallbacks": [
+        "ConstraintLayout",
+        "GeneratedCardView"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout.slotLayout",
+        "visual"
+      ]
+    },
+    {
+      "semanticType": "vertical_list",
+      "preferred": "RecyclerView",
+      "fallbacks": [
+        "LinearLayout for static content"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "data.template"
+      ]
+    },
+    {
+      "semanticType": "bottom_navigation",
+      "preferred": "BottomNavigationView",
+      "fallbacks": [
+        "GeneratedBottomNavigationView"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "interaction"
+      ]
+    }
+  ],
+  "layoutCapabilities": {
+    "scroll": "ScrollView, NestedScrollView, RecyclerView",
+    "fixed": "ConstraintLayout constraints or CoordinatorLayout",
+    "overlay": "FrameLayout layers, Dialog, PopupWindow",
+    "grid": "RecyclerView GridLayoutManager",
+    "safeArea": "WindowInsets",
+    "keyboard": "adjustResize and insets listeners"
+  },
+  "stateMappings": {
+    "loading": "UiState.Loading",
+    "empty": "UiState.Empty",
+    "error": "UiState.Error",
+    "content": "UiState.Content",
+    "disabled": "isEnabled = false",
+    "focused": "OnFocusChangeListener",
+    "selected": "isSelected"
+  },
+  "eventMappings": {
+    "tap": "setOnClickListener",
+    "textChanged": "TextWatcher",
+    "selectionChanged": "listener callback",
+    "itemSelected": "adapter click listener"
+  },
+  "accessibilityMappings": {
+    "role": "accessibility class or delegate",
+    "label": "contentDescription or labelFor",
+    "value": "stateDescription",
+    "hint": "hint or accessibility delegate"
+  },
+  "assetHandling": {
+    "systemIcons": "vector drawable",
+    "bitmap": "drawable resource",
+    "mediaCrop": "ImageView scaleType"
+  },
+  "reviewPlan": {
+    "commands": [
+      "./gradlew assembleDebug"
+    ],
+    "runtimeChecks": [
+      "emulator screenshot",
+      "font scale",
+      "dark mode",
+      "state variants"
+    ],
+    "visualReview": {
+      "capture": "scripts/run_android_emulator_review.js",
+      "compare": "scripts/compare_screenshots.js",
+      "defaultViewports": [
+        {
+          "width": 393,
+          "height": 852,
+          "deviceScaleFactor": 1,
+          "isMobile": true
+        }
+      ],
+      "thresholds": {
+        "maxPixelDiffRatio": 0.08,
+        "maxMeanChannelDelta": 12,
+        "pixelDeltaThreshold": 16,
+        "minSimilarity": 0.9
+      },
+      "requiredStateCaptures": [
+        "content"
+      ],
+      "blockedWhen": [
+        "emulator unavailable",
+        "screenshot command unavailable"
+      ]
+    }
+  },
+  "rejectWhen": [
+    "RecyclerView item lacks item model",
+    "input node lacks validation",
+    "absolute positioning is used without constraints"
+  ]
+}

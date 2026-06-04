@@ -1,0 +1,9 @@
+node_modules/
+generated/
+coverage/
+*.tgz
+*.log
+.DS_Store
+.env
+.env.*
+npm-debug.log*

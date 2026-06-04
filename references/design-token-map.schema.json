@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/design-token-map.schema.json",
+  "title": "Design Token Map",
+  "type": "object",
+  "required": ["artifactType", "sourceId", "tokens", "platformMappings"],
+  "properties": {
+    "artifactType": { "type": "string", "const": "design_token_map" },
+    "sourceId": { "type": "string" },
+    "tokens": {
+      "type": "object",
+      "required": ["spacing", "radius", "color", "typography", "elevation"],
+      "additionalProperties": true
+    },
+    "platformMappings": {
+      "type": "object",
+      "properties": {
+        "ios": { "type": "object", "additionalProperties": true },
+        "web": { "type": "object", "additionalProperties": true },
+        "android": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

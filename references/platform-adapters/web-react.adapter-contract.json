@@ -1,0 +1,167 @@
+{
+  "adapter": {
+    "id": "web-react",
+    "name": "Web React Adapter",
+    "platform": "web",
+    "language": "TypeScript",
+    "uiRuntime": "React",
+    "version": "1.0.0",
+    "defaultLayout": "Semantic HTML and project CSS system"
+  },
+  "mappingPriority": [
+    "project_component",
+    "semantic_html",
+    "native_form_control",
+    "generated_reusable_component",
+    "page_private_component",
+    "bitmap_asset"
+  ],
+  "semanticMappings": [
+    {
+      "semanticType": "primary_cta",
+      "preferred": "button",
+      "fallbacks": [
+        "ProjectButton",
+        "GeneratedButton"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "visual",
+        "interaction",
+        "accessibility"
+      ]
+    },
+    {
+      "semanticType": "input_field",
+      "preferred": "input or textarea",
+      "fallbacks": [
+        "ProjectInput",
+        "GeneratedInput"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "visual",
+        "data.validation"
+      ]
+    },
+    {
+      "semanticType": "content_card",
+      "preferred": "article or section",
+      "fallbacks": [
+        "ProjectCard",
+        "GeneratedCard"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout.slotLayout",
+        "visual"
+      ]
+    },
+    {
+      "semanticType": "vertical_list",
+      "preferred": "ul/ol or section with mapped children",
+      "fallbacks": [
+        "GeneratedList"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "data.template"
+      ]
+    },
+    {
+      "semanticType": "bottom_navigation",
+      "preferred": "nav",
+      "fallbacks": [
+        "GeneratedBottomNav"
+      ],
+      "requiredNodeFields": [
+        "core",
+        "layout",
+        "interaction",
+        "accessibility"
+      ]
+    }
+  ],
+  "layoutCapabilities": {
+    "scroll": "overflow containers or document scroll",
+    "fixed": "position fixed or sticky",
+    "overlay": "absolute/fixed layers",
+    "grid": "CSS grid or flexbox",
+    "safeArea": "env(safe-area-inset-*)",
+    "keyboard": "browser viewport and form focus behavior"
+  },
+  "stateMappings": {
+    "loading": "component state loading",
+    "empty": "component state empty",
+    "error": "component state error",
+    "content": "component state content",
+    "disabled": "disabled or aria-disabled",
+    "focused": ":focus-visible and state",
+    "selected": "aria-selected or data-selected"
+  },
+  "eventMappings": {
+    "tap": "onClick",
+    "textChanged": "onChange",
+    "selectionChanged": "onChange or onSelect",
+    "itemSelected": "onClick"
+  },
+  "accessibilityMappings": {
+    "role": "role attribute when semantic HTML is insufficient",
+    "label": "aria-label or visible label",
+    "value": "aria-valuenow or value",
+    "hint": "aria-describedby"
+  },
+  "assetHandling": {
+    "systemIcons": "project icon library or inline SVG",
+    "bitmap": "public asset or imported image",
+    "mediaCrop": "object-fit and object-position"
+  },
+  "reviewPlan": {
+    "commands": [
+      "npm run typecheck",
+      "npm run lint"
+    ],
+    "runtimeChecks": [
+      "desktop screenshot",
+      "mobile screenshot",
+      "loading empty error content states",
+      "keyboard and focus"
+    ],
+    "visualReview": {
+      "capture": "scripts/capture_web_screenshot.js with Playwright",
+      "compare": "scripts/compare_screenshots.js",
+      "defaultViewports": [
+        {
+          "width": 390,
+          "height": 844,
+          "deviceScaleFactor": 1,
+          "isMobile": true
+        },
+        {
+          "width": 1440,
+          "height": 1000,
+          "deviceScaleFactor": 1,
+          "isMobile": false
+        }
+      ],
+      "thresholds": {
+        "maxPixelDiffRatio": 0.08,
+        "maxMeanChannelDelta": 12,
+        "pixelDeltaThreshold": 16,
+        "minSimilarity": 0.9
+      },
+      "requiredStateCaptures": [
+        "content"
+      ],
+      "textOverflowCheck": "check scrollWidth/clientWidth and scrollHeight/clientHeight for text-bearing nodes"
+    }
+  },
+  "rejectWhen": [
+    "interactive element has no accessible label",
+    "text can overflow fixed container without wrapping or clamp rule",
+    "repeated node lacks stable key"
+  ]
+}

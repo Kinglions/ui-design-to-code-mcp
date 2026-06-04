@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui2uikit/schemas/semantic-ui-ir.schema.json",
+  "title": "Semantic UI IR",
+  "type": "object",
+  "required": ["screen"],
+  "properties": {
+    "screen": {
+      "type": "object",
+      "required": ["name", "platform", "deviceClass", "safeAreaAware", "states", "tokens", "nodes"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "platform": { "type": "string", "enum": ["ios"] },
+        "deviceClass": { "type": "string", "enum": ["iphone", "ipad"] },
+        "safeAreaAware": { "type": "boolean" },
+        "states": {
+          "type": "array",
+          "items": { "type": "string" },
+          "contains": { "const": "content" }
+        },
+        "tokens": {
+          "type": "object",
+          "required": ["spacing", "radius", "size", "color", "typography"],
+          "additionalProperties": true
+        },
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/semanticNode" }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "semanticNode": {
+      "type": "object",
+      "required": ["id", "semanticType", "role", "confidence", "layoutIntent", "states", "events", "visualMetrics", "contentStructure", "slotMetrics"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "semanticType": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 },
+        "text": { "type": "string" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "alternatives": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "layoutIntent": {
+          "type": "object",
+          "required": ["position"],
+          "additionalProperties": true
+        },
+        "visualMetrics": {
+          "type": "object",
+          "required": ["padding", "spacing", "typography"],
+          "properties": {
+            "outerCornerRadius": { "$ref": "#/$defs/tokenOrValue" },
+            "height": {
+              "type": "object",
+              "required": ["mode"],
+              "properties": {
+                "mode": { "type": "string", "enum": ["fixed", "min", "intrinsic"] },
+                "token": { "type": "string" },
+                "value": { "type": "number" }
+              },
+              "additionalProperties": true
+            },
+            "padding": { "$ref": "#/$defs/edgeInsets" },
+            "spacing": { "$ref": "#/$defs/spacingSpec" },
+            "typography": {
+              "type": "object",
+              "properties": {
+                "primaryTextStyle": { "type": "string" },
+                "secondaryTextStyle": { "type": "string" },
+                "tertiaryTextStyle": { "type": "string" }
+              },
+              "additionalProperties": true
+            },
+            "mediaAspectRatio": {
+              "type": "string",
+              "pattern": "^[0-9]+:[0-9]+$"
+            }
+          },
+          "additionalProperties": true
+        },
+        "contentStructure": {
+          "type": "object",
+          "required": ["layoutPattern", "slots"],
+          "properties": {
+            "layoutPattern": {
+              "type": "string",
+              "enum": ["stack", "split", "overlay", "list", "grid", "button", "input", "mediaCard", "navigation"]
+            },
+            "slots": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["name", "role"],
+                "properties": {
+                  "name": { "type": "string", "minLength": 1 },
+                  "role": { "type": "string", "minLength": 1 },
+                  "required": { "type": "boolean" },
+                  "maxLines": { "type": "integer", "minimum": 1 },
+                  "alignment": {
+                    "type": "string",
+                    "enum": ["leading", "center", "trailing", "fill"]
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        "slotMetrics": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": ["height"],
+            "properties": {
+              "height": {
+                "type": "object",
+                "required": ["mode"],
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": ["fixed", "min", "max", "intrinsic", "ratio", "aspectRatio", "fill"]
+                  },
+                  "token": { "type": "string" },
+                  "value": { "type": "number" },
+                  "ratio": { "type": "number" },
+                  "aspectRatio": {
+                    "type": "string",
+                    "pattern": "^[0-9]+:[0-9]+$"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "spacingAfter": { "oneOf": [{ "type": "number" }, { "type": "string" }] },
+              "lineHeight": { "oneOf": [{ "type": "number" }, { "type": "string" }] },
+              "maxLines": { "type": "integer", "minimum": 1 },
+              "alignment": {
+                "type": "string",
+                "enum": ["leading", "center", "trailing", "fill"]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "states": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "events": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/semanticNode" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "tokenOrValue": {
+      "type": "object",
+      "properties": {
+        "token": { "type": "string" },
+        "value": { "type": "number" }
+      },
+      "additionalProperties": true
+    },
+    "edgeInsets": {
+      "type": "object",
+      "required": ["top", "bottom", "leading", "trailing"],
+      "properties": {
+        "top": { "oneOf": [{ "type": "number" }, { "type": "string" }] },
+        "bottom": { "oneOf": [{ "type": "number" }, { "type": "string" }] },
+        "leading": { "oneOf": [{ "type": "number" }, { "type": "string" }] },
+        "trailing": { "oneOf": [{ "type": "number" }, { "type": "string" }] }
+      },
+      "additionalProperties": true
+    },
+    "spacingSpec": {
+      "type": "object",
+      "properties": {
+        "vertical": { "oneOf": [{ "type": "number" }, { "type": "string" }] },
+        "horizontal": { "oneOf": [{ "type": "number" }, { "type": "string" }] },
+        "iconToText": { "oneOf": [{ "type": "number" }, { "type": "string" }] },
+        "slotGap": { "oneOf": [{ "type": "number" }, { "type": "string" }] }
+      },
+      "additionalProperties": true
+    }
+  }
+}
