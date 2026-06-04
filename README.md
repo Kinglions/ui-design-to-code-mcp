@@ -16,13 +16,82 @@ through the MCP tools.
 
 ## Install
 
-Dynamic latest install:
+Quick install for all supported local clients:
 
 ```bash
 npx -y ui-design-to-code-mcp@latest install \
   --clients cursor,claude-code,codex \
   --scope project \
   --project-dir .
+```
+
+Quick uninstall for all supported local clients:
+
+```bash
+npx -y ui-design-to-code-mcp@latest uninstall \
+  --clients cursor,claude-code,codex \
+  --scope project \
+  --project-dir .
+```
+
+Cursor project install:
+
+```bash
+npx -y ui-design-to-code-mcp@latest install \
+  --client cursor \
+  --scope project \
+  --project-dir .
+```
+
+Cursor project uninstall:
+
+```bash
+npx -y ui-design-to-code-mcp@latest uninstall \
+  --client cursor \
+  --scope project \
+  --project-dir .
+```
+
+Codex user install:
+
+```bash
+npx -y ui-design-to-code-mcp@latest install --client codex
+```
+
+Codex user uninstall:
+
+```bash
+npx -y ui-design-to-code-mcp@latest uninstall --client codex
+```
+
+Claude Code project install:
+
+```bash
+npx -y ui-design-to-code-mcp@latest install \
+  --client claude-code \
+  --scope project \
+  --project-dir .
+```
+
+Claude Code project uninstall:
+
+```bash
+npx -y ui-design-to-code-mcp@latest uninstall \
+  --client claude-code \
+  --scope project \
+  --project-dir .
+```
+
+Claude Code user install:
+
+```bash
+claude mcp add-json ui-design-to-code '{"type":"stdio","command":"npx","args":["-y","ui-design-to-code-mcp@latest","serve"]}' --scope user
+```
+
+Claude Code user uninstall:
+
+```bash
+claude mcp remove ui-design-to-code --scope user
 ```
 
 Dynamic update:

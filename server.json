@@ -3,7 +3,7 @@
   "name": "io.github.Kinglions/ui-design-to-code-mcp",
   "title": "UI Design to Code",
   "description": "Ingest UI screenshots, Figma MCP node datasets, or hybrid Figma plus screenshot sources into a cross-platform design-to-code artifact pipeline.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": {
     "url": "https://github.com/Kinglions/ui-design-to-code-mcp",
     "source": "github"
@@ -12,7 +12,7 @@
     {
       "registryType": "npm",
       "identifier": "ui-design-to-code-mcp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "transport": {
         "type": "stdio"
       }

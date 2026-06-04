@@ -63,7 +63,7 @@ function parseArgs(argv) {
     }
     fail(`unknown argument: ${arg}`);
   }
-  if (!["install", "update", "config"].includes(options.command)) fail(`unknown command: ${options.command}`);
+  if (!["install", "update", "config", "uninstall"].includes(options.command)) fail(`unknown command: ${options.command}`);
   if (!["project", "user"].includes(options.scope)) fail("--scope must be project or user");
   if (!options.packageSpecExplicit) {
     const channel = options.channel === "stable" ? "latest" : options.channel;
@@ -112,6 +112,12 @@ function installJsonConfig(filePath, packageSpec, dryRun) {
   writeJson(filePath, config, dryRun);
 }
 
+function uninstallJsonConfig(filePath, dryRun) {
+  const config = readJson(filePath);
+  if (config.mcpServers) delete config.mcpServers[serverName];
+  writeJson(filePath, config, dryRun);
+}
+
 function tomlArray(values) {
   return `[${values.map((value) => JSON.stringify(value)).join(", ")}]`;
 }
@@ -139,6 +145,20 @@ function installCodexConfig(filePath, packageSpec, dryRun) {
   }
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, text);
+  console.log(`updated ${filePath}`);
+}
+
+function uninstallCodexConfig(filePath, dryRun) {
+  let text = fs.existsSync(filePath) ? fs.readFileSync(filePath, "utf8") : "";
+  const section = /\n?\[mcp_servers\.ui_design_to_code\]\n(?:[^\n]*\n)*?(?=\n\[|$)/m;
+  text = text.replace(section, "\n").trimEnd();
+  if (dryRun) {
+    console.log(`--- ${filePath}`);
+    console.log(text ? `${text}\n` : "");
+    return;
+  }
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, text ? `${text}\n` : "");
   console.log(`updated ${filePath}`);
 }
 
@@ -173,6 +193,15 @@ function installClient(client, options) {
   const filePath = configPath(client, options);
   if (options.command === "config") {
     printConfig(client, options);
+    return;
+  }
+  if (options.command === "uninstall") {
+    if (client === "claude-code" && options.scope === "user") {
+      console.log(`Run this Claude Code command for user-scope uninstall:\nclaude mcp remove ${serverName} --scope user`);
+      return;
+    }
+    if (client === "codex") uninstallCodexConfig(filePath, options.dryRun);
+    else uninstallJsonConfig(filePath, options.dryRun);
     return;
   }
   if (client === "claude-code" && options.scope === "user") {

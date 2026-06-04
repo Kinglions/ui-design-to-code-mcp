@@ -10,13 +10,82 @@
 
 ## 安装
 
-动态安装最新版：
+所有支持的本地客户端快速安装：
 
 ```bash
 npx -y ui-design-to-code-mcp@latest install \
   --clients cursor,claude-code,codex \
   --scope project \
   --project-dir .
+```
+
+所有支持的本地客户端快速卸载：
+
+```bash
+npx -y ui-design-to-code-mcp@latest uninstall \
+  --clients cursor,claude-code,codex \
+  --scope project \
+  --project-dir .
+```
+
+Cursor 项目级安装：
+
+```bash
+npx -y ui-design-to-code-mcp@latest install \
+  --client cursor \
+  --scope project \
+  --project-dir .
+```
+
+Cursor 项目级卸载：
+
+```bash
+npx -y ui-design-to-code-mcp@latest uninstall \
+  --client cursor \
+  --scope project \
+  --project-dir .
+```
+
+Codex 用户级安装：
+
+```bash
+npx -y ui-design-to-code-mcp@latest install --client codex
+```
+
+Codex 用户级卸载：
+
+```bash
+npx -y ui-design-to-code-mcp@latest uninstall --client codex
+```
+
+Claude Code 项目级安装：
+
+```bash
+npx -y ui-design-to-code-mcp@latest install \
+  --client claude-code \
+  --scope project \
+  --project-dir .
+```
+
+Claude Code 项目级卸载：
+
+```bash
+npx -y ui-design-to-code-mcp@latest uninstall \
+  --client claude-code \
+  --scope project \
+  --project-dir .
+```
+
+Claude Code 用户级安装：
+
+```bash
+claude mcp add-json ui-design-to-code '{"type":"stdio","command":"npx","args":["-y","ui-design-to-code-mcp@latest","serve"]}' --scope user
+```
+
+Claude Code 用户级卸载：
+
+```bash
+claude mcp remove ui-design-to-code --scope user
 ```
 
 动态更新：

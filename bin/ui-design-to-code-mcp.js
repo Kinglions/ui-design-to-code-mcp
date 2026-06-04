@@ -16,6 +16,7 @@ Usage:
   ui-design-to-code-mcp serve
   ui-design-to-code-mcp install [--clients cursor,claude-code,codex] [--scope project|user] [--project-dir <dir>] [--package-spec <pkg>] [--dry-run]
   ui-design-to-code-mcp update [--clients cursor,claude-code,codex] [--channel latest|beta|next|stable]
+  ui-design-to-code-mcp uninstall [--clients cursor,claude-code,codex] [--scope project|user] [--project-dir <dir>] [--dry-run]
   ui-design-to-code-mcp config [--client cursor|claude-code|codex] [--package-spec <pkg>]
   ui-design-to-code-mcp configure-npm-trusted-publishing [--repo owner/name] [--workflow release.yml] [--environment npm-publish] [--dry-run] [--yes]
   ui-design-to-code-mcp configure-registry-token [--token <token>|--stdin] [--repo owner/name]  # fallback only; GitHub Actions uses OIDC
@@ -75,7 +76,7 @@ function main() {
     require(serverPath);
     return;
   }
-  if (command === "install" || command === "update" || command === "config") {
+  if (command === "install" || command === "update" || command === "uninstall" || command === "config") {
     const result = spawnSync(process.execPath, [installerPath, command, ...rest], { stdio: "inherit" });
     process.exit(result.status || 0);
   }
