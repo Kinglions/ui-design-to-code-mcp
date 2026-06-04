@@ -1,5 +1,7 @@
 # UI Design to Code MCP
 
+[中文文档](./README.zh-CN.md) | English
+
 <!-- mcp-name: io.github.Kinglions/ui-design-to-code-mcp -->
 
 MCP server for ingesting UI screenshots, Figma MCP node JSON, or hybrid
