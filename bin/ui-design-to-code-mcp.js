@@ -16,7 +16,7 @@ Usage:
   ui-design-to-code-mcp install [--clients cursor,claude-code,codex] [--scope project|user] [--project-dir <dir>] [--package-spec <pkg>] [--dry-run]
   ui-design-to-code-mcp update [--clients cursor,claude-code,codex] [--channel latest|beta|next|stable]
   ui-design-to-code-mcp config [--client cursor|claude-code|codex] [--package-spec <pkg>]
-  ui-design-to-code-mcp configure-registry-token [--token <token>|--stdin] [--repo owner/name]
+  ui-design-to-code-mcp configure-registry-token [--token <token>|--stdin] [--repo owner/name]  # fallback only; GitHub Actions uses OIDC
   ui-design-to-code-mcp doctor
   ui-design-to-code-mcp version
 `);

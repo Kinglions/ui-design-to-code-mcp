@@ -63,12 +63,6 @@ Health check:
 npx -y ui-design-to-code-mcp@latest doctor
 ```
 
-Configure MCP Registry token for GitHub Actions:
-
-```bash
-printf "%s" "<token>" | npx -y ui-design-to-code-mcp@latest configure-registry-token --stdin
-```
-
 ## Client Config
 
 Cursor or Claude Code project config:
@@ -130,12 +124,14 @@ npm publish --access public
 Official MCP Registry:
 
 ```bash
-mcp-publisher login
+mcp-publisher login github-oidc
 mcp-publisher publish
 ```
 
 For public Registry publishing, `package.json#mcpName` must match
-`server.json#name`, and the npm package must be published first.
+`server.json#name`, and the npm package must be published first. The GitHub
+Actions release workflow uses OIDC, so no long-lived `MCP_REGISTRY_TOKEN` is
+required.
 
 Enterprise internal release:
 

@@ -57,12 +57,6 @@ npx -y ui-design-to-code-mcp@latest serve
 npx -y ui-design-to-code-mcp@latest doctor
 ```
 
-自动配置 GitHub Actions 的 MCP Registry Token：
-
-```bash
-printf "%s" "<token>" | npx -y ui-design-to-code-mcp@latest configure-registry-token --stdin
-```
-
 ## 客户端配置
 
 Cursor 或 Claude Code 项目级配置：
@@ -132,11 +126,12 @@ npm publish --access public
 发布到官方 MCP Registry：
 
 ```bash
-mcp-publisher login
+mcp-publisher login github-oidc
 mcp-publisher publish
 ```
 
 发布到官方 MCP Registry 前，需要先发布 npm 包，并确保 `package.json#mcpName` 与 `server.json#name` 完全一致。
+GitHub Actions 发布流程使用 OIDC，不需要长期保存 `MCP_REGISTRY_TOKEN`。
 
 企业内部发布：
 

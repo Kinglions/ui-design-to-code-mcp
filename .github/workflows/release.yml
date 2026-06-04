@@ -41,12 +41,12 @@ jobs:
     if: ${{ github.event.inputs.publish_mcp_registry == 'true' }}
     permissions:
       contents: read
+      id-token: write
     env:
       MCP_PUBLISHER_VERSION: v1.0.0
-      MCP_REGISTRY_TOKEN: ${{ secrets.MCP_REGISTRY_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - run: |
-          test -n "${MCP_REGISTRY_TOKEN}" || (echo "MCP_REGISTRY_TOKEN is required when publish_mcp_registry=true" && exit 1)
           curl -L "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
-          ./mcp-publisher publish --token "${MCP_REGISTRY_TOKEN}"
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish

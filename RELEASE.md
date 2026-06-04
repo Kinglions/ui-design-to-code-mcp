@@ -10,38 +10,29 @@
    - environment: `npm-publish`
 3. In GitHub, create an Environment named `npm-publish` and require manual
    approval.
-4. Add `MCP_REGISTRY_TOKEN` only if publishing to the official MCP Registry from
-   CI.
+4. MCP Registry publishing uses GitHub Actions OIDC through
+   `mcp-publisher login github-oidc`; no long-lived registry token is required.
 5. Protect `main`: require CI, reviews, and no direct force-push.
 
-## Configure MCP Registry Token
+## MCP Registry Authentication
 
-Get the token from `mcp-publisher` after GitHub login:
+The Release workflow authenticates to the official MCP Registry with GitHub
+Actions OIDC:
 
-```bash
-mcp-publisher login github
+```text
+permissions:
+  id-token: write
 ```
 
-Then configure the GitHub Actions secret with one command:
-
 ```bash
-ui-design-to-code-mcp configure-registry-token --token "<token>"
+mcp-publisher login github-oidc
+mcp-publisher publish
 ```
 
-Or avoid shell history by reading from stdin:
+This avoids storing a long-lived `MCP_REGISTRY_TOKEN` in GitHub Secrets.
 
-```bash
-printf "%s" "<token>" | ui-design-to-code-mcp configure-registry-token --stdin
-```
-
-The command uses GitHub CLI:
-
-```bash
-gh secret set MCP_REGISTRY_TOKEN --repo Kinglions/ui-design-to-code-mcp --body "<token>"
-```
-
-`MCP_REGISTRY_TOKEN` is only required when running the Release workflow with
-`publish_mcp_registry = true`.
+Manual token publishing remains available only as a fallback for local
+operations, not for the default GitHub Actions release path.
 
 ## Branch Flow
 
