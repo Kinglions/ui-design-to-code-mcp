@@ -59,12 +59,55 @@ View. UIKit keeps the legacy schema.
 `decode-only`, `plan-only`, `target-ir`, and `codegen` are documented to prevent
 unnecessary downstream artifacts.
 
+### Mode Selection Gate
+
+Issue: the natural-language skill required mode selection, but the MCP
+`create_design_run` tool previously defaulted to `decode-only` when no mode was
+provided. Tool callers could accidentally bypass the user-facing choice.
+
+Fix: `get_run_modes` now exposes the canonical options, triggers, and target
+platform list. `create_design_run` requires an explicit mode and requires
+targets for `target-ir`, `codegen`, `codegen-with-auto-review`, and
+`runtime-review`.
+
+### MCP Protocol Hygiene
+
+Issue: tool-call errors returned JSON-RPC responses with `id: null`, which made
+it harder for clients to correlate failures to requests. The server also
+reported a hard-coded `serverInfo.version`.
+
+Fix: error responses now preserve the original request id when parsing
+succeeded, and `serverInfo.version` is read from `package.json`.
+
 ### Revision, Asset, and Capability Policies
 
 Revision management, asset naming/dedupe policy, token map schema, and adapter
 capability matrix schema are now documented.
 
 ## Remaining Gaps
+
+### Agent/model-generated IR Boundary
+
+The MCP server registers, validates, and tracks artifacts, but it does not
+automatically infer Vision IR, Node Compression IR, Semantic UI IR, or generated
+platform code from pixels. Those steps are still performed by the calling agent
+or model, which must write schema-compliant artifacts and register them with the
+MCP tools. This is intentional, but docs and client prompts must not imply the
+server alone can fully parse a screenshot into final code.
+
+### Figma MCP Source Dependency
+
+`ingest_figma_source` expects Figma MCP output as JSON or a saved JSON path. It
+does not call Figma itself. A client that wants Figma design input must first
+run the Figma MCP node/screenshot retrieval step, then pass those outputs into
+this MCP as `nodeJson`, `nodeJsonPath`, and optional `screenshotPath`.
+
+### Runtime Review Preconditions
+
+The review scripts can automate browser, iOS Simulator, or Android Emulator
+flows only when the target project has a runnable app, launch command, and
+capture configuration. `codegen-with-auto-review` must report blocked instead
+of deliverable when those runtime prerequisites are missing.
 
 ### Cross-artifact Validator
 

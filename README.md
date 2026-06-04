@@ -162,8 +162,68 @@ Claude Code user-scope install can also use:
 claude mcp add-json ui-design-to-code '{"type":"stdio","command":"npx","args":["-y","ui-design-to-code-mcp@latest","serve"]}' --scope user
 ```
 
+## Triggers and Mode Selection
+
+When an IDE/agent detects a UI screenshot, reference image, Figma design,
+Figma MCP node dataset, or design-to-code task, route into this workflow. If
+the user did not explicitly name an execution mode, ask for mode selection
+before creating a run or artifacts.
+
+Common trigger phrases:
+
+```text
+解析这图
+分析参考图结构
+解析图片结构
+图转节点树
+转代码
+还原页面
+复刻这个页面
+走设计稿流程
+生成页面
+Figma to code
+解析这个 Figma 节点
+根据 Figma MCP 输出继续生成跨平台节点数据
+implement this design
+convert this screenshot
+```
+
+Required mode prompt:
+
+```text
+请选择执行模式：
+1. decode-only：只解析设计源和节点树，不生成平台计划或代码。
+2. plan-only：生成跨平台节点数据和转换计划，不生成布局 IR 或代码。
+3. target-ir：生成目标平台布局 IR，不写代码。
+4. codegen：在目标平台生成/修改代码，做常规项目验证和清理；不强制截图验收。
+5. codegen-with-auto-review：先生成/修改代码，再自动启动浏览器/模拟器/仿真器截图对比；非素材 UI 还原度必须 >= 90% 才可交付。
+6. runtime-review：启动已有实现，在浏览器/模拟器/仿真器中截图并和原图对比，不改代码。
+```
+
+For `target-ir`, `codegen`, `codegen-with-auto-review`, and `runtime-review`,
+also ask for a target platform when missing:
+
+```text
+请选择目标平台：ios-uikit / ios-swiftui / web-react / web-next / android-compose / android-view
+```
+
+Figma flow:
+
+1. Use Figma MCP first to fetch node JSON. If possible, also fetch the same
+   frame screenshot.
+2. Pass the Figma MCP output to `ingest_figma_source` as `nodeJson` or
+   `nodeJsonPath`.
+3. Pass the screenshot as `screenshotPath` to create a hybrid source.
+4. Continue with the selected shared mode. Do not branch into a separate Figma
+   downstream workflow.
+
+Hybrid Figma input is preferred: Figma nodes provide structure, names,
+components, text, styles, and layout metadata; screenshots provide pixel truth,
+visual effects, and later auto-review baselines.
+
 ## Tools
 
+- `get_run_modes`
 - `create_design_run`
 - `ingest_image_source`
 - `ingest_figma_source`

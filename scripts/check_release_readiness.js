@@ -96,6 +96,9 @@ function checkTrustedPublishingWorkflow() {
   if (!workflow.includes("npm install -g npm@^11.10.0")) {
     fail("release workflow must install npm 11.10.0 or newer for Trusted Publishing");
   }
+  if (workflow.includes("package-manager-cache")) {
+    fail("release workflow must not use unsupported setup-node input: package-manager-cache");
+  }
   if (workflow.includes("NPM_TOKEN") || workflow.includes("NODE_AUTH_TOKEN")) {
     fail("release workflow must not use long-lived npm token secrets for publishing");
   }

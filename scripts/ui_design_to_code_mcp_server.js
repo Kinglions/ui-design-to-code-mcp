@@ -5,6 +5,64 @@ const path = require("path");
 const { spawnSync } = require("child_process");
 
 const skillRoot = path.resolve(__dirname, "..");
+const packageInfo = require(path.join(skillRoot, "package.json"));
+const runModes = [
+  {
+    id: "decode-only",
+    label: "Decode only",
+    targetRequired: false,
+    description: "Parse the design source into source manifests, Vision IR, Node Compression IR, and Platform-neutral Semantic UI IR. No platform plan or code."
+  },
+  {
+    id: "plan-only",
+    label: "Plan only",
+    targetRequired: false,
+    description: "Add Cross-platform Node Data and platform conversion planning. No target layout IR or code."
+  },
+  {
+    id: "target-ir",
+    label: "Target IR",
+    targetRequired: true,
+    description: "Generate target-platform layout IR for selected platforms. No code changes."
+  },
+  {
+    id: "codegen",
+    label: "Codegen",
+    targetRequired: true,
+    description: "Generate or modify target-platform code and run normal project validation. Runtime screenshot review is optional."
+  },
+  {
+    id: "codegen-with-auto-review",
+    label: "Codegen with auto review",
+    targetRequired: true,
+    description: "Run codegen, then browser/simulator/emulator screenshot review. Non-material UI similarity must be >= 0.9 before delivery."
+  },
+  {
+    id: "runtime-review",
+    label: "Runtime review",
+    targetRequired: true,
+    description: "Run an existing implementation, capture runtime screenshots, and compare against the source image. No code changes unless explicitly requested later."
+  }
+];
+
+const runModeIds = new Set(runModes.map((mode) => mode.id));
+const targetRequiredModes = new Set(runModes.filter((mode) => mode.targetRequired).map((mode) => mode.id));
+const triggerExamples = [
+  "解析这图",
+  "分析参考图结构",
+  "解析图片结构",
+  "图转节点树",
+  "转代码",
+  "还原页面",
+  "复刻这个页面",
+  "走设计稿流程",
+  "生成页面",
+  "Figma to code",
+  "解析这个 Figma 节点",
+  "根据 Figma MCP 输出继续生成跨平台节点数据",
+  "implement this design",
+  "convert this screenshot"
+];
 
 function fail(message) {
   throw new Error(message);
@@ -162,9 +220,38 @@ function output(content) {
   };
 }
 
+function getRunModes(args = {}) {
+  const prompt = [
+    "请选择执行模式：",
+    "1. decode-only：只解析设计源和节点树，不生成平台计划或代码。",
+    "2. plan-only：生成跨平台节点数据和转换计划，不生成布局 IR 或代码。",
+    "3. target-ir：生成目标平台布局 IR，不写代码。",
+    "4. codegen：在目标平台生成/修改代码，做常规项目验证和清理；不强制截图验收。",
+    "5. codegen-with-auto-review：先生成/修改代码，再自动启动浏览器/模拟器/仿真器截图对比；非素材 UI 还原度必须 >= 90% 才可交付。",
+    "6. runtime-review：启动已有实现，在浏览器/模拟器/仿真器中截图并和原图对比，不改代码。"
+  ].join("\n");
+  const requestText = String(args.requestText || "");
+  const explicitMode = runModes.find((mode) => requestText.includes(mode.id));
+  return output({
+    status: explicitMode ? "mode_explicit" : "mode_selection_required",
+    explicitMode: explicitMode && explicitMode.id,
+    modes: runModes,
+    targetPlatforms: ["ios-uikit", "ios-swiftui", "web-react", "web-next", "android-compose", "android-view"],
+    triggerExamples,
+    prompt,
+    rule: "When a UI screenshot, preview image, Figma MCP node dataset, Figma screenshot, or hybrid source is present and the request does not explicitly name a mode, ask the user to choose one mode before creating artifacts."
+  });
+}
+
 function createDesignRun(args) {
   const workspace = path.resolve(String(args.workspace || process.cwd()));
-  const mode = String(args.mode || "decode-only");
+  if (!args.mode) fail("mode is required. Call get_run_modes and ask the user to choose before create_design_run.");
+  const mode = String(args.mode);
+  if (!runModeIds.has(mode)) fail(`invalid mode: ${mode}`);
+  const targets = Array.isArray(args.targets) ? args.targets : [];
+  if (targetRequiredModes.has(mode) && targets.length === 0) {
+    fail(`targets are required for mode: ${mode}`);
+  }
   const slug = slugify(args.slug || args.sourceName || "design");
   const root = args.useTmp
     ? path.join("/private/tmp/ui-design-to-code", `${timestamp()}-${slug}`)
@@ -183,7 +270,7 @@ function createDesignRun(args) {
       root,
       sourceSummary: args.sourceSummary || "",
       mode,
-      targets: Array.isArray(args.targets) ? args.targets : []
+      targets
     },
     retention: {
       defaultIntermediateTtlHours: 168,
@@ -550,14 +637,25 @@ function runCodegenWithAutoReview(args) {
 }
 
 const tools = {
-  create_design_run: {
-    description: "Create a ui-design-to-code run directory and artifact manifest.",
+  get_run_modes: {
+    description: "Return the required ui-design-to-code execution mode options and trigger examples. Use this before create_design_run when the user did not explicitly choose a mode.",
     inputSchema: {
       type: "object",
       properties: {
+        requestText: { type: "string" }
+      }
+    },
+    handler: getRunModes
+  },
+  create_design_run: {
+    description: "Create a ui-design-to-code run directory and artifact manifest after the user explicitly selected a run mode.",
+    inputSchema: {
+      type: "object",
+      required: ["mode"],
+      properties: {
         workspace: { type: "string" },
         slug: { type: "string" },
-        mode: { type: "string" },
+        mode: { type: "string", enum: runModes.map((mode) => mode.id) },
         targets: { type: "array", items: { type: "string" } },
         sourceSummary: { type: "string" },
         useTmp: { type: "boolean" }
@@ -677,7 +775,7 @@ function handleRequest(request) {
     return {
       protocolVersion: "2024-11-05",
       capabilities: { tools: {} },
-      serverInfo: { name: "ui-design-to-code", version: "1.0.0" }
+      serverInfo: { name: "ui-design-to-code", version: packageInfo.version }
     };
   }
   if (request.method === "tools/list") return { tools: toolList() };
@@ -697,8 +795,10 @@ function writeResponse(response) {
 
 function processRequestPayload(payload) {
   let response;
+  let requestId = null;
   try {
     const request = JSON.parse(payload);
+    requestId = request.id;
     if (!request.id && request.method && request.method.startsWith("notifications/")) return;
     response = {
       jsonrpc: "2.0",
@@ -708,7 +808,7 @@ function processRequestPayload(payload) {
   } catch (error) {
     response = {
       jsonrpc: "2.0",
-      id: null,
+      id: requestId,
       error: { code: -32000, message: error.message }
     };
   }

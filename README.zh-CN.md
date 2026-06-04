@@ -156,8 +156,63 @@ Claude Code 用户级安装也可以使用：
 claude mcp add-json ui-design-to-code '{"type":"stdio","command":"npx","args":["-y","ui-design-to-code-mcp@latest","serve"]}' --scope user
 ```
 
+## 触发方式与模式选择
+
+当 IDE/agent 判断当前任务属于 UI 截图、参考图、Figma 设计稿、Figma MCP
+节点数据或 design-to-code 场景时，应先进入 `ui-design-to-code` 流程。只要用户没有
+明确写出执行模式，就必须先给出模式选项，等用户选择后再继续创建 run 和产物。
+
+常见触发语句：
+
+```text
+解析这图
+分析参考图结构
+解析图片结构
+图转节点树
+转代码
+还原页面
+复刻这个页面
+走设计稿流程
+生成页面
+Figma to code
+解析这个 Figma 节点
+根据 Figma MCP 输出继续生成跨平台节点数据
+implement this design
+convert this screenshot
+```
+
+必须先展示的模式选项：
+
+```text
+请选择执行模式：
+1. decode-only：只解析设计源和节点树，不生成平台计划或代码。
+2. plan-only：生成跨平台节点数据和转换计划，不生成布局 IR 或代码。
+3. target-ir：生成目标平台布局 IR，不写代码。
+4. codegen：在目标平台生成/修改代码，做常规项目验证和清理；不强制截图验收。
+5. codegen-with-auto-review：先生成/修改代码，再自动启动浏览器/模拟器/仿真器截图对比；非素材 UI 还原度必须 >= 90% 才可交付。
+6. runtime-review：启动已有实现，在浏览器/模拟器/仿真器中截图并和原图对比，不改代码。
+```
+
+如果选择 `target-ir`、`codegen`、`codegen-with-auto-review` 或
+`runtime-review`，并且用户没有指定平台，还必须继续询问：
+
+```text
+请选择目标平台：ios-uikit / ios-swiftui / web-react / web-next / android-compose / android-view
+```
+
+Figma 使用场景：
+
+1. 先通过 Figma MCP 获取节点 JSON；如果可以，同时获取同一 frame 的截图。
+2. 将 Figma MCP 输出作为 `ingest_figma_source` 的 `nodeJson` 或 `nodeJsonPath`。
+3. 如果有截图，将截图作为 `screenshotPath`，形成 hybrid 输入。
+4. 后续继续执行用户选择的模式，而不是走另一套 Figma 专用流程。
+
+Figma hybrid 输入优先级最高：Figma 节点负责结构、命名、组件、文本、样式和布局；
+截图负责像素基准、视觉效果和后续自动视觉验收。
+
 ## MCP 工具
 
+- `get_run_modes`：返回标准执行模式、目标平台和触发示例。用户未明确选择模式时，先调用它并展示选项。
 - `create_design_run`：创建设计转换运行目录和 manifest。
 - `ingest_image_source`：接入截图或图片输入。
 - `ingest_figma_source`：接入 Figma MCP 节点 JSON、Figma 截图或混合输入。

@@ -54,6 +54,9 @@ node /Users/wuyb/.codex/skills/ui-design-to-code/scripts/ui_design_to_code_mcp_s
 
 Expected tools:
 
+- `get_run_modes`: return canonical mode options, target platforms, and trigger
+  examples. Call this before `create_design_run` when the user did not
+  explicitly name a mode.
 - `create_design_run`: create a run directory and manifest.
 - `ingest_image_source`: write Design Source Manifest and Source Image Manifest
   for image input.
@@ -75,6 +78,27 @@ The current MCP layer standardizes source ingestion, artifact lifecycle,
 artifact registration, validation, and cleanup. Semantic IR generation and code
 generation are still agent/model-driven steps that write the existing schemas,
 then call the MCP registration and validation tools.
+
+`create_design_run` intentionally requires an explicit mode. This prevents an
+MCP client from skipping the user-facing mode gate and silently defaulting to
+`decode-only`.
+
+## Figma MCP Integration
+
+When a task starts from Figma, run the Figma MCP source step first, then feed the
+result into this shared pipeline:
+
+1. Fetch Figma node JSON through Figma MCP.
+2. Fetch a screenshot/export for the same frame when visual fidelity or
+   auto-review will be needed.
+3. Call `get_run_modes` unless the user already specified one of the six modes.
+4. After mode selection, call `create_design_run`.
+5. Call `ingest_figma_source` with `nodeJson` or `nodeJsonPath`; include
+   `screenshotPath` for hybrid input.
+6. Continue through the same Semantic IR, Cross-platform Node Data, target IR,
+   codegen, and review artifacts.
+
+There is no separate Figma downstream workflow. Figma is only a source adapter.
 
 ## Client Setup
 

@@ -10,6 +10,8 @@ Figma MCP node dataset, Figma screenshot, or hybrid Figma+image source is
 present. Examples:
 
 - `解析这图`
+- `分析参考图结构`
+- `解析图片结构`
 - `转代码`
 - `还原页面`
 - `复刻这个页面`
@@ -19,6 +21,8 @@ present. Examples:
 - `convert this screenshot`
 - `implement this design`
 - `Figma to code`
+- `解析这个 Figma 节点`
+- `根据 Figma MCP 输出继续生成跨平台节点数据`
 
 When one of these commands does not explicitly specify one of `decode-only`,
 `plan-only`, `target-ir`, `codegen`, `codegen-with-auto-review`, or
@@ -33,6 +37,10 @@ When one of these commands does not explicitly specify one of `decode-only`,
 5. codegen-with-auto-review：先生成/修改代码，再自动启动浏览器/模拟器/仿真器截图对比；非素材 UI 还原度必须 >= 90% 才可交付。
 6. runtime-review：启动已有实现，在浏览器/模拟器/仿真器中截图并和原图对比，不改代码。
 ```
+
+MCP clients should call `get_run_modes` to retrieve this canonical option list
+before calling `create_design_run`. `create_design_run` requires an explicit
+mode so the tool layer cannot silently default to `decode-only`.
 
 For `target-ir`, `codegen`, `codegen-with-auto-review`, and `runtime-review`,
 also ask for target platform if missing:

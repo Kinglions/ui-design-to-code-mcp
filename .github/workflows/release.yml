@@ -31,7 +31,6 @@ jobs:
         with:
           node-version: 22.14.0
           registry-url: "https://registry.npmjs.org"
-          package-manager-cache: false
       - run: npm install -g npm@^11.10.0
       - run: npm run release:check
       - run: npm publish --access public --tag "${{ github.event.inputs.npm_tag }}"
