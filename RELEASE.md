@@ -142,3 +142,17 @@ npm deprecate ui-design-to-code-mcp@<bad-version> "Use <previous-good-version> o
 - Personal dynamic install: use `@latest`.
 - Enterprise production: use pinned `--package-spec ui-design-to-code-mcp@x.y.z`.
 - Emergency rollback: update clients back to a known good pinned version.
+
+## Codex Install Policy
+
+Codex installs are optimized for fast MCP startup. The installer writes
+`~/.codex/config.toml` to execute `~/.codex/bin/serve-ui-design-to-code-mcp`
+instead of running `npx` on every MCP startup. The package is installed under
+`~/.codex/mcp-packages/ui-design-to-code-mcp`.
+
+On macOS, the installer also creates
+`~/Library/LaunchAgents/com.wuyb.codex.update-mcp-packages.plist`, which runs
+`~/.codex/bin/update-mcp-packages` daily at 04:15. For `@latest` installs, the
+script checks npm for a newer latest version and installs only when the version
+changes. The updated package is used automatically by the next Codex MCP
+startup or reload.

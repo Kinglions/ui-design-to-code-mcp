@@ -52,6 +52,13 @@ Codex 用户级安装：
 npx -y ui-design-to-code-mcp@latest install --client codex
 ```
 
+Codex 安装器会写入用户级全局配置，并让 MCP 启动路径脱离网络依赖。它会把包安装到
+`~/.codex/mcp-packages/ui-design-to-code-mcp`，让 Codex 指向
+`~/.codex/bin/serve-ui-design-to-code-mcp`，并创建一个 macOS LaunchAgent，每天
+04:15 运行 `~/.codex/bin/update-mcp-packages`。当安装规格是
+`ui-design-to-code-mcp@latest` 时，更新脚本会检测 npm latest 是否有新版本，只在版本
+变化时下载更新。更新后的代码会在 Codex 下一次启动或重新加载该 MCP server 时自动使用。
+
 Codex 用户级卸载：
 
 ```bash
@@ -145,9 +152,9 @@ Codex 配置：
 
 ```toml
 [mcp_servers.ui_design_to_code]
-command = "npx"
-args = ["-y", "ui-design-to-code-mcp@latest", "serve"]
-startup_timeout_sec = 60
+command = "/Users/<user>/.codex/bin/serve-ui-design-to-code-mcp"
+args = []
+startup_timeout_sec = 30
 ```
 
 Claude Code 用户级安装也可以使用：

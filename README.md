@@ -58,6 +58,16 @@ Codex user install:
 npx -y ui-design-to-code-mcp@latest install --client codex
 ```
 
+The Codex installer writes a global user config and keeps runtime startup off
+the network path. It installs the package under
+`~/.codex/mcp-packages/ui-design-to-code-mcp`, points Codex at
+`~/.codex/bin/serve-ui-design-to-code-mcp`, and creates a macOS LaunchAgent
+that runs `~/.codex/bin/update-mcp-packages` once per day at 04:15. When the
+install spec is `ui-design-to-code-mcp@latest`, the updater checks npm for a
+new latest version and downloads it only when the version changes. Updated
+code is used automatically the next time Codex starts or reloads this MCP
+server.
+
 Codex user uninstall:
 
 ```bash
@@ -151,9 +161,9 @@ Codex config:
 
 ```toml
 [mcp_servers.ui_design_to_code]
-command = "npx"
-args = ["-y", "ui-design-to-code-mcp@latest", "serve"]
-startup_timeout_sec = 60
+command = "/Users/<user>/.codex/bin/serve-ui-design-to-code-mcp"
+args = []
+startup_timeout_sec = 30
 ```
 
 Claude Code user-scope install can also use:
