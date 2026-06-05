@@ -96,9 +96,16 @@ git push
 git push --tags
 ```
 
-Pushing a `v*` tag triggers the GitHub Actions `Release` workflow. Tag-triggered
-releases publish the npm package with `latest` and publish `server.json` metadata
-to the MCP Registry.
+Then run the GitHub Actions `Release` workflow with:
+
+```text
+npm_tag = latest
+publish_mcp_registry = true
+```
+
+The current `npm-publish` GitHub Environment is protected for the `main` branch.
+If you want tag push to publish directly, update that environment protection rule
+first to allow `v*` tags.
 
 ## Beta Release
 
