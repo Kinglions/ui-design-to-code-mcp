@@ -1,6 +1,9 @@
 name: Release
 
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       npm_tag:
@@ -33,13 +36,18 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: npm install -g npm@^11.10.0
       - run: npm run release:check
-      - run: npm publish --access public --tag "${{ github.event.inputs.npm_tag }}"
+      - run: |
+          NPM_TAG="${{ github.event.inputs.npm_tag }}"
+          if [ -z "$NPM_TAG" ]; then
+            NPM_TAG="latest"
+          fi
+          npm publish --access public --tag "$NPM_TAG"
 
   mcp-registry:
     needs: publish
     runs-on: ubuntu-latest
     environment: npm-publish
-    if: ${{ github.event.inputs.publish_mcp_registry == 'true' }}
+    if: ${{ github.event_name == 'push' || github.event.inputs.publish_mcp_registry == 'true' }}
     permissions:
       contents: read
       id-token: write

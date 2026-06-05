@@ -861,7 +861,7 @@ function toolList() {
 function handleRequest(request) {
   if (request.method === "initialize") {
     return {
-      protocolVersion: "2024-11-05",
+      protocolVersion: request.params && request.params.protocolVersion || "2024-11-05",
       capabilities: { tools: {} },
       serverInfo: { name: "ui-design-to-code", version: packageInfo.version }
     };
@@ -876,12 +876,16 @@ function handleRequest(request) {
   return {};
 }
 
-function writeResponse(response) {
+function writeResponse(response, framing = "line") {
   const payload = JSON.stringify(response);
-  process.stdout.write(`Content-Length: ${Buffer.byteLength(payload, "utf8")}\r\n\r\n${payload}`);
+  if (framing === "content-length") {
+    process.stdout.write(`Content-Length: ${Buffer.byteLength(payload, "utf8")}\r\n\r\n${payload}`);
+    return;
+  }
+  process.stdout.write(`${payload}\n`);
 }
 
-function processRequestPayload(payload) {
+function processRequestPayload(payload, framing) {
   let response;
   let requestId = null;
   try {
@@ -900,7 +904,7 @@ function processRequestPayload(payload) {
       error: { code: -32000, message: error.message }
     };
   }
-  writeResponse(response);
+  writeResponse(response, framing);
 }
 
 let buffer = Buffer.alloc(0);
@@ -920,7 +924,7 @@ process.stdin.on("data", (chunk) => {
       if (buffer.length < bodyStart + length) return;
       const payload = buffer.slice(bodyStart, bodyStart + length).toString("utf8");
       buffer = buffer.slice(bodyStart + length);
-      processRequestPayload(payload);
+      processRequestPayload(payload, "content-length");
       continue;
     }
 
@@ -928,6 +932,6 @@ process.stdin.on("data", (chunk) => {
     if (newlineIndex < 0) return;
     const line = buffer.slice(0, newlineIndex).toString("utf8").trim();
     buffer = buffer.slice(newlineIndex + 1);
-    if (line) processRequestPayload(line);
+    if (line) processRequestPayload(line, "line");
   }
 });
