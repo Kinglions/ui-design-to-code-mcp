@@ -237,6 +237,7 @@ visual effects, and later auto-review baselines.
 - `create_design_run`
 - `ingest_image_source`
 - `ingest_figma_source`
+- `slice_image_assets`
 - `build_semantic_ir`
 - `build_cross_platform_nodes`
 - `build_target_ir`
@@ -244,6 +245,40 @@ visual effects, and later auto-review baselines.
 - `run_codegen_with_auto_review`
 - `validate_pipeline`
 - `cleanup_design_run`
+
+## Precise Asset Slicing
+
+`slice_image_assets` is opt-in and does not change the existing decode,
+planning, target-IR, or codegen flows. Use it when a screenshot-to-code task
+needs exact bitmap/icon assets from the current source image.
+
+The tool reads a `layers.manifest.json` with `source_bbox` entries:
+
+```json
+[
+  {
+    "id": "icon-tab-home",
+    "type": "bitmap",
+    "source_bbox": { "x": 120, "y": 980, "width": 72, "height": 72 },
+    "asset": "icon-tab-home.png",
+    "transparent_required": true,
+    "z_index": 20
+  }
+]
+```
+
+Default outputs are explicit and always written inside `runRoot`:
+
+```text
+assets/slices/<asset>.png
+assets/slices/layers.manifest.normalized.json
+qa/bbox-preview.svg
+qa/png-asset-audit.json
+```
+
+The slicer uses exact source pixel bboxes and never auto-trims output canvases.
+It preserves source pixels and source alpha; background removal is not
+performed without an external alpha-capable image decoder.
 
 ## Publish
 

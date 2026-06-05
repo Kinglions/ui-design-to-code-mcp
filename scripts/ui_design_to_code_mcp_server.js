@@ -257,7 +257,7 @@ function createDesignRun(args) {
     ? path.join("/private/tmp/ui-design-to-code", `${timestamp()}-${slug}`)
     : path.join(workspace, "generated", "ui-design-to-code", `${timestamp()}-${slug}`);
   mkdirp(root);
-  for (const dir of ["source", "figma", "vision", "compression", "semantic", "cross-platform", "targets", "review"]) {
+  for (const dir of ["source", "figma", "vision", "compression", "semantic", "cross-platform", "targets", "review", "assets", "qa"]) {
     mkdirp(path.join(root, dir));
   }
   const manifest = {
@@ -481,6 +481,74 @@ function runScript(scriptName, args) {
     stdout: result.stdout,
     stderr: result.stderr
   };
+}
+
+function sliceImageAssets(args) {
+  const runRoot = resolveRunRoot(args.runRoot);
+  const { manifestPath, manifest } = loadManifest(runRoot);
+  const sourcePath = path.resolve(String(args.sourcePath || ""));
+  const layersPath = path.resolve(String(args.layersManifestPath || ""));
+  if (!fs.existsSync(sourcePath)) fail(`sourcePath does not exist: ${sourcePath}`);
+  if (!fs.existsSync(layersPath)) fail(`layersManifestPath does not exist: ${layersPath}`);
+
+  const scriptArgs = [
+    "--run", runRoot,
+    "--source", sourcePath,
+    "--layers", layersPath
+  ];
+  if (args.canvasWidth) scriptArgs.push("--canvas-width", String(args.canvasWidth));
+  if (args.onlyType) scriptArgs.push("--only-type", String(args.onlyType));
+  if (args.assetsDir) scriptArgs.push("--assets-dir", String(args.assetsDir));
+  if (args.qaDir) scriptArgs.push("--qa-dir", String(args.qaDir));
+  if (args.manifestOut) scriptArgs.push("--manifest-out", String(args.manifestOut));
+  if (args.auditOut) scriptArgs.push("--audit-out", String(args.auditOut));
+  if (args.previewOut) scriptArgs.push("--preview-out", String(args.previewOut));
+
+  const result = runScript("slice_assets.js", scriptArgs);
+  if (result.exitCode !== 0) fail(result.stderr || result.stdout || "slice_assets failed");
+  const payload = JSON.parse(result.stdout);
+  const artifacts = [
+    {
+      id: "sliced-assets-manifest",
+      path: path.relative(runRoot, payload.normalizedManifestPath),
+      category: "final",
+      artifactType: "sliced_asset_layers_manifest",
+      cleanupStatus: "keep"
+    },
+    {
+      id: "sliced-assets-dir",
+      path: path.relative(runRoot, payload.assetsDir),
+      category: "final",
+      artifactType: "sliced_assets_directory",
+      cleanupStatus: "keep"
+    },
+    {
+      id: "sliced-assets-bbox-preview",
+      path: path.relative(runRoot, payload.bboxPreviewPath),
+      category: "review",
+      artifactType: "bbox_preview_svg",
+      cleanupStatus: "keep"
+    },
+    {
+      id: "sliced-assets-audit",
+      path: path.relative(runRoot, payload.auditPath),
+      category: "review",
+      artifactType: "png_asset_audit",
+      cleanupStatus: "keep"
+    }
+  ];
+  for (const artifact of artifacts) upsertArtifact(manifest, artifact);
+  writeJson(manifestPath, manifest);
+  return output({
+    status: "sliced",
+    runRoot,
+    assetsDir: payload.assetsDir,
+    normalizedManifestPath: payload.normalizedManifestPath,
+    bboxPreviewPath: payload.bboxPreviewPath,
+    auditPath: payload.auditPath,
+    slicedAssets: payload.slicedAssets,
+    rule: "All slice outputs are written inside runRoot. Use assetsDir for PNG files and auditPath/bboxPreviewPath for QA evidence."
+  });
 }
 
 function validatePipeline(args) {
@@ -714,6 +782,26 @@ const tools = {
       properties: { runRoot: { type: "string" }, apply: { type: "boolean" } }
     },
     handler: cleanupDesignRun
+  },
+  slice_image_assets: {
+    description: "Precisely crop bitmap/icon assets from a source image using a layers manifest with source_bbox entries. Outputs PNGs to runRoot/assets/slices by default, plus bbox preview and audit files with explicit paths.",
+    inputSchema: {
+      type: "object",
+      required: ["runRoot", "sourcePath", "layersManifestPath"],
+      properties: {
+        runRoot: { type: "string" },
+        sourcePath: { type: "string" },
+        layersManifestPath: { type: "string" },
+        canvasWidth: { type: "number", default: 750 },
+        onlyType: { type: "string", default: "bitmap" },
+        assetsDir: { type: "string", default: "assets/slices" },
+        qaDir: { type: "string", default: "qa" },
+        manifestOut: { type: "string", default: "assets/slices/layers.manifest.normalized.json" },
+        auditOut: { type: "string", default: "qa/png-asset-audit.json" },
+        previewOut: { type: "string", default: "qa/bbox-preview.svg" }
+      }
+    },
+    handler: sliceImageAssets
   },
   build_semantic_ir: {
     description: "Register model-generated Platform-neutral Semantic UI IR or return the required schema/prompt contract.",

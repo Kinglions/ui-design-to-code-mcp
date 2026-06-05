@@ -223,6 +223,7 @@ Figma hybrid 输入优先级最高：Figma 节点负责结构、命名、组件�
 - `create_design_run`：创建设计转换运行目录和 manifest。
 - `ingest_image_source`：接入截图或图片输入。
 - `ingest_figma_source`：接入 Figma MCP 节点 JSON、Figma 截图或混合输入。
+- `slice_image_assets`：根据包含 `source_bbox` 的 `layers.manifest.json`，从源图中精确裁切 bitmap/icon 资源。默认输出 PNG 到 `runRoot/assets/slices`，输出归一化 manifest 到 `runRoot/assets/slices/layers.manifest.normalized.json`，输出 bbox 预览到 `runRoot/qa/bbox-preview.svg`，输出审计报告到 `runRoot/qa/png-asset-audit.json`。
 - `build_semantic_ir`：登记 Semantic UI IR，或返回需要生成该产物的 schema/prompt contract。
 - `build_cross_platform_nodes`：登记 Cross-platform Node Data。
 - `build_target_ir`：登记目标平台 Layout IR。
@@ -230,6 +231,37 @@ Figma hybrid 输入优先级最高：Figma 节点负责结构、命名、组件�
 - `run_codegen_with_auto_review`：记录带自动视觉验收的 codegen 结果，并执行非素材区域相似度 `>= 0.9` 的交付门禁。
 - `validate_pipeline`：运行跨产物 pipeline 校验。
 - `cleanup_design_run`：运行产物清理，默认 dry-run。
+
+## 精确切图
+
+`slice_image_assets` 是显式调用的增量工具，不会改变现有 decode、plan、
+target-IR 或 codegen 流程。仅当截图还原任务需要从当前源图精确导出图片资源时调用。
+
+输入 manifest 示例：
+
+```json
+[
+  {
+    "id": "icon-tab-home",
+    "type": "bitmap",
+    "source_bbox": { "x": 120, "y": 980, "width": 72, "height": 72 },
+    "asset": "icon-tab-home.png",
+    "transparent_required": true,
+    "z_index": 20
+  }
+]
+```
+
+默认输出地址明确且全部位于 `runRoot` 内：
+
+```text
+assets/slices/<asset>.png
+assets/slices/layers.manifest.normalized.json
+qa/bbox-preview.svg
+qa/png-asset-audit.json
+```
+
+切图脚本使用源图像素坐标精确裁切，不做自动 trim，也不会改变输出画布尺寸。当前版本保留源像素和源 alpha；在没有外部 alpha 图像解码器时，不执行背景抠除。
 
 ## 支持的输入
 
