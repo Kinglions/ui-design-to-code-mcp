@@ -4,127 +4,50 @@
 
 <!-- mcp-name: io.github.Kinglions/ui-design-to-code-mcp -->
 
-`ui-design-to-code-mcp` 是一个可发布的 MCP server，用于把 UI 截图、Figma MCP 节点 JSON，或 Figma 节点加截图的混合输入，统一接入跨平台 design-to-code 产物流程。
+`ui-design-to-code-mcp` 是一个可发布的 MCP server，用于把 UI 截图、Figma MCP
+节点 JSON，或 Figma 节点加截图的混合输入，接入结构化的跨平台 design-to-code
+产物流程。
 
-它负责标准化设计源输入、Figma 数据集、运行目录、产物登记、codegen 结果记录、自动视觉验收门禁、pipeline 校验和产物清理。Semantic IR 生成和平台代码生成仍由调用方 agent/model 执行，并通过 MCP 工具登记到同一套产物结构中。
+它不替代真正写代码的 agent/model。它负责标准化运行目录、输入清单、Figma 数据集、
+中间 IR 合约、目标平台布局产物、代码生成记录、精确切图产物、视觉验收门禁、产物校验
+和清理。
 
-## 安装
+## 能力概览
 
-所有支持的本地客户端快速安装：
+- 为 Codex、Cursor、Claude Code 提供可复用 MCP server。
+- 创建标准运行目录：`generated/ui-design-to-code/<run-id>` 或
+  `/private/tmp/ui-design-to-code/<run-id>`。
+- 统一接入图片、截图、Figma 节点 JSON、Figma 截图混合输入。
+- 支持 decode-only、plan-only、target-ir、codegen、自动视觉验收、runtime review。
+- 提供 Semantic UI IR、Cross-platform Node Data、Target Layout IR、视觉验收、
+  产物生命周期等 schema 合约。
+- 支持从源图按 bbox 精确裁切 bitmap/icon 资源，并输出明确产物路径。
+- Codex 安装后不再每次 MCP 启动都走 `npx @latest`，启动更稳定。
 
-```bash
-npx -y ui-design-to-code-mcp@latest install \
-  --clients cursor,claude-code,codex \
-  --scope project \
-  --project-dir .
-```
+## 快速开始
 
-所有支持的本地客户端快速卸载：
-
-```bash
-npx -y ui-design-to-code-mcp@latest uninstall \
-  --clients cursor,claude-code,codex \
-  --scope project \
-  --project-dir .
-```
-
-Cursor 项目级安装：
-
-```bash
-npx -y ui-design-to-code-mcp@latest install \
-  --client cursor \
-  --scope project \
-  --project-dir .
-```
-
-Cursor 项目级卸载：
-
-```bash
-npx -y ui-design-to-code-mcp@latest uninstall \
-  --client cursor \
-  --scope project \
-  --project-dir .
-```
-
-Codex 用户级安装：
+安装到 Codex：
 
 ```bash
 npx -y ui-design-to-code-mcp@latest install --client codex
 ```
 
-Codex 安装器会写入用户级全局配置，并让 MCP 启动路径脱离网络依赖。它会把包安装到
-`~/.codex/mcp-packages/ui-design-to-code-mcp`，让 Codex 指向
-`~/.codex/bin/serve-ui-design-to-code-mcp`，并创建一个 macOS LaunchAgent，每天
-04:15 运行 `~/.codex/bin/update-mcp-packages`。当安装规格是
-`ui-design-to-code-mcp@latest` 时，更新脚本会检测 npm latest 是否有新版本，只在版本
-变化时下载更新。更新后的代码会在 Codex 下一次启动或重新加载该 MCP server 时自动使用。
-
-Codex 用户级卸载：
-
-```bash
-npx -y ui-design-to-code-mcp@latest uninstall --client codex
-```
-
-Claude Code 项目级安装：
+安装到 Cursor 项目级配置：
 
 ```bash
 npx -y ui-design-to-code-mcp@latest install \
-  --client claude-code \
+  --client cursor \
   --scope project \
   --project-dir .
 ```
 
-Claude Code 项目级卸载：
+一次安装到所有支持的本地客户端：
 
 ```bash
-npx -y ui-design-to-code-mcp@latest uninstall \
-  --client claude-code \
+npx -y ui-design-to-code-mcp@latest install \
+  --clients cursor,claude-code,codex \
   --scope project \
   --project-dir .
-```
-
-Claude Code 用户级安装：
-
-```bash
-claude mcp add-json ui-design-to-code '{"type":"stdio","command":"npx","args":["-y","ui-design-to-code-mcp@latest","serve"]}' --scope user
-```
-
-Claude Code 用户级卸载：
-
-```bash
-claude mcp remove ui-design-to-code --scope user
-```
-
-动态更新：
-
-```bash
-npx -y ui-design-to-code-mcp@latest update \
-  --clients cursor,claude-code,codex \
-  --channel latest
-```
-
-Beta 灰度：
-
-```bash
-npx -y ui-design-to-code-mcp@latest update \
-  --clients cursor,claude-code,codex \
-  --channel beta
-```
-
-固定版本安装：
-
-```bash
-npx -y ui-design-to-code-mcp@0.1.0 install \
-  --clients cursor,claude-code,codex \
-  --scope project \
-  --project-dir . \
-  --package-spec ui-design-to-code-mcp@0.1.0
-```
-
-直接启动 MCP server：
-
-```bash
-npx -y ui-design-to-code-mcp@latest serve
 ```
 
 健康检查：
@@ -133,9 +56,64 @@ npx -y ui-design-to-code-mcp@latest serve
 npx -y ui-design-to-code-mcp@latest doctor
 ```
 
-## 客户端配置
+直接启动 MCP server：
 
-Cursor 或 Claude Code 项目级配置：
+```bash
+npx -y ui-design-to-code-mcp@latest serve
+```
+
+## 安装行为
+
+### Codex
+
+Codex 安装器会写入用户级 MCP 配置，并让运行时启动路径脱离网络依赖。
+
+包会安装到：
+
+```text
+~/.codex/mcp-packages/ui-design-to-code-mcp
+```
+
+Codex 会指向：
+
+```text
+~/.codex/bin/serve-ui-design-to-code-mcp
+```
+
+macOS 下还会创建每日更新任务：
+
+```text
+~/Library/LaunchAgents/com.wuyb.codex.update-mcp-packages.plist
+```
+
+更新任务每天 04:15 运行：
+
+```text
+~/.codex/bin/update-mcp-packages
+```
+
+当安装规格是 `ui-design-to-code-mcp@latest` 时，更新脚本每天检查一次 npm latest，
+只有版本变化时才下载更新。更新后的包会在 Codex 下一次启动或重新加载该 MCP server
+时生效。
+
+Codex 配置示例：
+
+```toml
+[mcp_servers.ui_design_to_code]
+command = "/Users/<user>/.codex/bin/serve-ui-design-to-code-mcp"
+args = []
+startup_timeout_sec = 30
+```
+
+卸载：
+
+```bash
+npx -y ui-design-to-code-mcp@latest uninstall --client codex
+```
+
+### Cursor
+
+项目级配置：
 
 ```json
 {
@@ -148,94 +126,181 @@ Cursor 或 Claude Code 项目级配置：
 }
 ```
 
-Codex 配置：
-
-```toml
-[mcp_servers.ui_design_to_code]
-command = "/Users/<user>/.codex/bin/serve-ui-design-to-code-mcp"
-args = []
-startup_timeout_sec = 30
-```
-
-Claude Code 用户级安装也可以使用：
+安装：
 
 ```bash
-claude mcp add-json ui-design-to-code '{"type":"stdio","command":"npx","args":["-y","ui-design-to-code-mcp@latest","serve"]}' --scope user
+npx -y ui-design-to-code-mcp@latest install \
+  --client cursor \
+  --scope project \
+  --project-dir .
 ```
 
-## 触发方式与模式选择
+卸载：
 
-当 IDE/agent 判断当前任务属于 UI 截图、参考图、Figma 设计稿、Figma MCP
-节点数据或 design-to-code 场景时，应先进入 `ui-design-to-code` 流程。只要用户没有
-明确写出执行模式，就必须先给出模式选项，等用户选择后再继续创建 run 和产物。
+```bash
+npx -y ui-design-to-code-mcp@latest uninstall \
+  --client cursor \
+  --scope project \
+  --project-dir .
+```
 
-常见触发语句：
+### Claude Code
+
+项目级安装：
+
+```bash
+npx -y ui-design-to-code-mcp@latest install \
+  --client claude-code \
+  --scope project \
+  --project-dir .
+```
+
+用户级安装：
+
+```bash
+claude mcp add-json ui-design-to-code \
+  '{"type":"stdio","command":"npx","args":["-y","ui-design-to-code-mcp@latest","serve"]}' \
+  --scope user
+```
+
+## 核心概念
+
+### Run Root
+
+所有流程从 `create_design_run` 开始。它会创建独立 `runRoot` 和
+`artifact-run-manifest.json`。
+
+项目内默认目录：
 
 ```text
-解析这图
-分析参考图结构
-解析图片结构
-图转节点树
-转代码
-还原页面
-复刻这个页面
-走设计稿流程
-生成页面
-Figma to code
-解析这个 Figma 节点
-根据 Figma MCP 输出继续生成跨平台节点数据
-implement this design
-convert this screenshot
+generated/ui-design-to-code/<timestamp>-<slug>/
+  artifact-run-manifest.json
+  source/
+  figma/
+  vision/
+  compression/
+  semantic/
+  cross-platform/
+  targets/
+  assets/
+  qa/
+  review/
 ```
 
-必须先展示的模式选项：
+临时运行目录：
 
 ```text
-请选择执行模式：
-1. decode-only：只解析设计源和节点树，不生成平台计划或代码。
-2. plan-only：生成跨平台节点数据和转换计划，不生成布局 IR 或代码。
-3. target-ir：生成目标平台布局 IR，不写代码。
-4. codegen：在目标平台生成/修改代码，做常规项目验证和清理；不强制截图验收。
-5. codegen-with-auto-review：先生成/修改代码，再自动启动浏览器/模拟器/仿真器截图对比；非素材 UI 还原度必须 >= 90% 才可交付。
-6. runtime-review：启动已有实现，在浏览器/模拟器/仿真器中截图并和原图对比，不改代码。
+/private/tmp/ui-design-to-code/<timestamp>-<slug>/
 ```
 
-如果选择 `target-ir`、`codegen`、`codegen-with-auto-review` 或
-`runtime-review`，并且用户没有指定平台，还必须继续询问：
+### 执行模式
+
+当用户提供 UI 截图、参考图、Figma 设计或 design-to-code 任务，但没有明确指定模式时，
+agent 应先调用 `get_run_modes`。
+
+支持的模式：
+
+| 模式 | 是否需要 target | 用途 |
+| --- | --- | --- |
+| `decode-only` | 否 | 只解析源输入和节点结构，不生成平台计划或代码。 |
+| `plan-only` | 否 | 生成跨平台节点数据和平台转换计划，不生成目标布局或代码。 |
+| `target-ir` | 是 | 登记目标平台布局 IR，不改代码。 |
+| `codegen` | 是 | 生成或修改实现代码，并记录常规验证结果。 |
+| `codegen-with-auto-review` | 是 | 记录代码生成和视觉验收结果，并执行相似度门禁。 |
+| `runtime-review` | 是 | 对已有运行时实现做截图验收，不改代码。 |
+
+目标平台示例：
 
 ```text
-请选择目标平台：ios-uikit / ios-swiftui / web-react / web-next / android-compose / android-view
+ios-uikit / ios-swiftui / web-react / web-next / android-compose / android-view
 ```
 
-Figma 使用场景：
+### 输入类型
 
-1. 先通过 Figma MCP 获取节点 JSON；如果可以，同时获取同一 frame 的截图。
-2. 将 Figma MCP 输出作为 `ingest_figma_source` 的 `nodeJson` 或 `nodeJsonPath`。
-3. 如果有截图，将截图作为 `screenshotPath`，形成 hybrid 输入。
-4. 后续继续执行用户选择的模式，而不是走另一套 Figma 专用流程。
+支持：
 
-Figma hybrid 输入优先级最高：Figma 节点负责结构、命名、组件、文本、样式和布局；
-截图负责像素基准、视觉效果和后续自动视觉验收。
+- 图片或截图路径。
+- Figma MCP 节点 JSON。
+- Figma 节点 JSON + 对应截图的混合输入。
 
-## MCP 工具
+如果可以拿到 Figma 节点和截图，优先使用混合输入：Figma 节点提供结构、命名、文本、
+组件、样式和布局元数据；截图提供像素级视觉基准，用于效果复核和后续视觉验收。
 
-- `get_run_modes`：返回标准执行模式、目标平台和触发示例。用户未明确选择模式时，先调用它并展示选项。
-- `create_design_run`：创建设计转换运行目录和 manifest。
-- `ingest_image_source`：接入截图或图片输入。
-- `ingest_figma_source`：接入 Figma MCP 节点 JSON、Figma 截图或混合输入。
-- `slice_image_assets`：根据包含 `source_bbox` 的 `layers.manifest.json`，从源图中精确裁切 bitmap/icon 资源。默认输出 PNG 到 `runRoot/assets/slices`，输出归一化 manifest 到 `runRoot/assets/slices/layers.manifest.normalized.json`，输出 bbox 预览到 `runRoot/qa/bbox-preview.svg`，输出审计报告到 `runRoot/qa/png-asset-audit.json`。
-- `build_semantic_ir`：登记 Semantic UI IR，或返回需要生成该产物的 schema/prompt contract。
-- `build_cross_platform_nodes`：登记 Cross-platform Node Data。
-- `build_target_ir`：登记目标平台 Layout IR。
-- `run_codegen`：记录普通 codegen 的改动文件和项目验证结果。
-- `run_codegen_with_auto_review`：记录带自动视觉验收的 codegen 结果，并执行非素材区域相似度 `>= 0.9` 的交付门禁。
-- `validate_pipeline`：运行跨产物 pipeline 校验。
-- `cleanup_design_run`：运行产物清理，默认 dry-run。
+## 工具参考
 
-## 精确切图
+### `get_run_modes`
 
-`slice_image_assets` 是显式调用的增量工具，不会改变现有 decode、plan、
-target-IR 或 codegen 流程。仅当截图还原任务需要从当前源图精确导出图片资源时调用。
+返回支持的执行模式、目标平台、触发示例和模式选择提示。用户没有明确选择模式时，
+应先调用它。
+
+典型输入：
+
+```json
+{ "requestText": "convert this screenshot to web code" }
+```
+
+### `create_design_run`
+
+创建运行目录和 `artifact-run-manifest.json`。
+
+关键入参：
+
+- `workspace`：生成目录所在项目根目录。
+- `slug`：可读的 run 名称后缀。
+- `mode`：执行模式。
+- `targets`：target/codegen/review 模式必填。
+- `useTmp`：为 true 时写入 `/private/tmp`。
+
+返回：
+
+- `runRoot`
+- `manifestPath`
+- `mode`
+
+### `ingest_image_source`
+
+把截图或图片登记为源输入。
+
+输出：
+
+```text
+source/design-source-manifest.json
+source/page.source-manifest.json
+```
+
+关键入参：
+
+- `runRoot`
+- `imagePath`
+- `sourceId`
+- 无法自动读取尺寸时传 `widthPx`、`heightPx`
+- `knownViewport`
+- `logicalUnit`
+
+### `ingest_figma_source`
+
+登记 Figma MCP 节点 JSON、可选截图，或两者组成的 hybrid 输入。
+
+输出：
+
+```text
+source/design-source-manifest.json
+figma/figma-source-dataset.json
+```
+
+关键入参：
+
+- `runRoot`
+- `figma.fileKey`
+- `figma.nodeId`
+- `nodeJson` 或 `nodeJsonPath`
+- `screenshotPath`
+- `figmaBounds`
+
+### `slice_image_assets`
+
+根据 `layers.manifest.json` 中的 `source_bbox`，从源图精确裁切 bitmap/icon 资源。
+这是显式调用的独立工具，不会改变 decode、plan、target-IR 或 codegen 的默认流程。
 
 输入 manifest 示例：
 
@@ -252,7 +317,19 @@ target-IR 或 codegen 流程。仅当截图还原任务需要从当前源图精�
 ]
 ```
 
-默认输出地址明确且全部位于 `runRoot` 内：
+典型 tool 入参：
+
+```json
+{
+  "runRoot": "/path/to/run",
+  "sourcePath": "/path/to/source.png",
+  "layersManifestPath": "/path/to/layers.manifest.json",
+  "canvasWidth": 750,
+  "onlyType": "bitmap"
+}
+```
+
+默认输出：
 
 ```text
 assets/slices/<asset>.png
@@ -261,86 +338,175 @@ qa/bbox-preview.svg
 qa/png-asset-audit.json
 ```
 
-切图脚本使用源图像素坐标精确裁切，不做自动 trim，也不会改变输出画布尺寸。当前版本保留源像素和源 alpha；在没有外部 alpha 图像解码器时，不执行背景抠除。
+切图脚本使用源图像素坐标，不自动 trim，不改变输出画布尺寸。它会保留源像素和源
+alpha。当前版本不引入额外图像依赖，因此不做背景抠除；当无法读取 alpha 细节时，
+审计报告会把透明/贴边检查标记为不可用。
 
-## 支持的输入
+### `build_semantic_ir`
 
-- 图片或截图。
-- Figma MCP 节点 JSON。
-- Figma 节点 JSON + Figma 截图的混合输入。
+登记 model 生成的 Platform-neutral Semantic UI IR。如果没有传 `artifactPath`，
+工具会返回需要生成该产物的 schema 和参考说明。
 
-混合输入优先级最高：Figma 节点提供结构、命名、组件、文本、样式和布局信息；截图提供像素级视觉基准，用于后续自动视觉验收。
+默认 artifact type：
 
-## 发布
+```text
+platform_neutral_semantic_ui_ir
+```
 
-先运行发布门禁：
+### `build_cross_platform_nodes`
+
+登记 Cross-platform Node Data。如果没有传 `artifactPath`，工具会返回对应 schema 合约。
+
+默认 artifact type：
+
+```text
+cross_platform_node_data
+```
+
+### `build_target_ir`
+
+登记目标平台布局 IR。
+
+schema 提示按 target 名称选择：
+
+- Android target 使用 Android layout schema。
+- iOS target 使用 iOS SwiftUI layout schema。
+- 其他 target 使用 Web React layout schema。
+
+### `run_codegen`
+
+记录实现代码变更和常规验证结果，不执行视觉验收门禁。
+
+输出：
+
+```text
+review/codegen-result.json
+```
+
+### `run_codegen_with_auto_review`
+
+记录代码生成结果和视觉验收依据。
+
+当提供 `visualReviewResultPath` 时，只有满足下面条件才标记为可交付：
+
+```text
+review.status == "passed"
+minimum non-material similarity >= 0.9
+```
+
+输出：
+
+```text
+review/codegen-with-auto-review-result.json
+```
+
+### `validate_pipeline`
+
+校验现有 run 的跨产物链路。它会检查必需产物是否存在，以及 vision、compression、
+semantic、cross-platform、target planning 之间的 traceability 是否一致。
+
+### `cleanup_design_run`
+
+运行产物清理，默认 dry-run。
+
+典型入参：
+
+```json
+{ "runRoot": "/path/to/run", "apply": false }
+```
+
+只有确认要删除可清理产物时，才设置 `apply: true`。
+
+## 常见工作流
+
+### 截图转 Web 代码
+
+1. 用户未指定模式时，调用 `get_run_modes`。
+2. 调用 `create_design_run`，选择 `mode: "codegen"` 或
+   `mode: "codegen-with-auto-review"`，并设置 `targets: ["web-react"]`。
+3. 调用 `ingest_image_source` 登记截图。
+4. 生成或登记 semantic IR、cross-platform nodes、target IR。
+5. 在宿主项目里实现代码。
+6. 调用 `run_codegen` 或 `run_codegen_with_auto_review`。
+7. 调用 `validate_pipeline`。
+
+### Figma Hybrid 到 Target IR
+
+1. 通过 Figma MCP 获取节点 JSON。
+2. 提供或截取同一 frame 的截图。
+3. 调用 `create_design_run`，设置 `mode: "target-ir"` 和目标平台。
+4. 调用 `ingest_figma_source`，传入 `nodeJson` 和 `screenshotPath`。
+5. 生成目标平台 Layout IR。
+6. 调用 `build_target_ir` 登记产物。
+7. 调用 `validate_pipeline`。
+
+### 截图精确切图
+
+1. 调用 `create_design_run`。
+2. 调用 `ingest_image_source`。
+3. 创建包含源图像素 bbox 的 `layers.manifest.json`。
+4. 调用 `slice_image_assets`。
+5. 在生成代码中使用 `assets/slices/` 下的 PNG。
+6. 检查 `qa/bbox-preview.svg` 和 `qa/png-asset-audit.json`。
+
+## 更新和灰度
+
+更新客户端配置到指定 channel：
 
 ```bash
+npx -y ui-design-to-code-mcp@latest update \
+  --clients cursor,claude-code,codex \
+  --channel latest
+```
+
+安装固定版本：
+
+```bash
+npx -y ui-design-to-code-mcp@0.1.4 install \
+  --client codex \
+  --package-spec ui-design-to-code-mcp@0.1.4
+```
+
+稳定生产环境建议使用固定版本。需要 Codex 每日自动更新或 `npx` 客户端动态获取新版时，
+使用 `@latest`。
+
+## 开发
+
+运行校验：
+
+```bash
+npm run check
 npm run release:check
 ```
 
-推荐的公共 npm 发布路径：
+打包预览：
 
-1. 为这个包配置 npm Trusted Publishing：
+```bash
+npm pack --dry-run
+```
+
+## 发布
+
+推荐公共 npm 发布路径：
+
+1. 配置 npm Trusted Publishing：
 
    ```bash
    node bin/ui-design-to-code-mcp.js configure-npm-trusted-publishing --dry-run
    ```
 
-   确认参数无误后去掉 `--dry-run` 执行，或者在
-   `npmjs.com -> Package -> Settings -> Trusted publishing` 中手动配置。
+2. 从 `main` 分支触发 GitHub Actions 的 `Release` workflow。
 
-2. 从 `main` 分支手动触发 GitHub Actions 的 `Release` workflow。
+Release workflow 使用 GitHub Actions OIDC（`id-token: write`），不需要
+`NPM_TOKEN` 或长期 MCP Registry token。npm 账号 2FA 应保持开启。
 
-Release workflow 使用 GitHub Actions OIDC（`id-token: write`）执行 `npm
-publish`，因此不需要 `NPM_TOKEN`，也不会在 CI 发布时要求本地 OTP。使用
-Trusted Publishing 时，npm 会自动发布 provenance 证明。
+完整发布、Registry、回滚和安全策略见：
 
-不要为了发布关闭 npm 账号的 2FA/OTP。交互式本地 `npm publish` 只作为首次建包
-或紧急兜底流程，npm 可能会要求一次性 OTP，这是正常的安全保护。
-
-发布到官方 MCP Registry：
-
-```bash
-mcp-publisher login github-oidc
-mcp-publisher publish
-```
-
-发布到官方 MCP Registry 前，需要先发布 npm 包，并确保 `package.json#mcpName` 与 `server.json#name` 完全一致。
-GitHub Actions 发布流程使用 OIDC，不需要长期保存 `MCP_REGISTRY_TOKEN`。
-
-企业内部发布：
-
-```bash
-npm publish --registry https://npm.your-company.internal
-npx -y ui-design-to-code-mcp@latest install --clients cursor,claude-code,codex
-```
-
-内部稳定环境建议使用：
-
-```bash
---package-spec ui-design-to-code-mcp@<version>
-```
-
-需要动态更新时使用：
-
-```bash
---channel latest
-```
-
-需要灰度时使用：
-
-```bash
---channel beta
-```
+- [RELEASE.md](./RELEASE.md)
+- [SECURITY.md](./SECURITY.md)
 
 ## 仓库
-
-GitHub:
 
 ```text
 https://github.com/Kinglions/ui-design-to-code-mcp.git
 ```
-
-完整安全发布、灰度和回滚策略见 [RELEASE.md](./RELEASE.md) 与
-[SECURITY.md](./SECURITY.md)。
