@@ -4,38 +4,29 @@
 
 <!-- mcp-name: io.github.Kinglions/ui-design-to-code-mcp -->
 
-`ui-design-to-code-mcp` is an MCP server for turning UI screenshots, Figma MCP
-node JSON, or Figma-plus-screenshot hybrid sources into a structured
-design-to-code artifact pipeline.
+`ui-design-to-code-mcp` is an MCP server that standardizes the artifact pipeline for converting UI screenshots, Figma MCP node JSON, or Figma-plus-screenshot hybrid sources into implementation-ready design-to-code outputs.
 
-It does not try to replace the agent or model that writes code. Instead, it
-standardizes the run directory, source manifests, Figma datasets, intermediate
-IR contracts, target layout artifacts, codegen records, asset slicing outputs,
-visual review gates, validation, and cleanup.
+It does **not** replace the coding agent or model. Instead, it gives agents a reliable workflow for run directories, source manifests, Figma datasets, intermediate IR contracts, target layout artifacts, codegen records, asset slicing outputs, visual review gates, validation, and cleanup.
 
-## What It Provides
+## Highlights
 
-- A reusable MCP server for Codex, Cursor, and Claude Code.
-- Standard artifact runs under `generated/ui-design-to-code/<run-id>` or
-  `/private/tmp/ui-design-to-code/<run-id>`.
-- Shared input handling for images, screenshots, Figma node JSON, and hybrid
-  Figma screenshot sources.
-- Execution modes for decode-only, planning, target IR, codegen, auto-review,
-  and runtime review.
-- Schema-backed contracts for semantic UI IR, cross-platform nodes, target
-  layout IR, visual review, and artifact lifecycle.
-- Precise source-image asset slicing with explicit output directories.
-- A Codex install path that avoids running `npx @latest` on every MCP startup.
+- Works with **Codex**, **Cursor**, and **Claude Code**.
+- Creates isolated artifact runs under `generated/ui-design-to-code/<run-id>` or `/private/tmp/ui-design-to-code/<run-id>`.
+- Supports screenshots, source images, Figma node JSON, and hybrid Figma + screenshot input.
+- Covers the full pipeline: decode, planning, target IR, codegen, auto review, runtime review, validation, and cleanup.
+- Provides schema-backed contracts for Semantic UI IR, Cross-platform Node Data, Target Layout IR, visual review, and artifact lifecycle.
+- Supports precise source-image asset slicing using explicit `source_bbox` layer manifests.
+- Optimizes Codex startup by installing a stable local MCP serve command instead of running `npx @latest` on every startup.
 
 ## Quick Start
 
-Install for Codex:
+### Install for Codex
 
 ```bash
 npx -y ui-design-to-code-mcp@latest install --client codex
 ```
 
-Install for a project-level Cursor config:
+### Install for Cursor project config
 
 ```bash
 npx -y ui-design-to-code-mcp@latest install \
@@ -44,7 +35,7 @@ npx -y ui-design-to-code-mcp@latest install \
   --project-dir .
 ```
 
-Install for all supported local clients:
+### Install for all supported local clients
 
 ```bash
 npx -y ui-design-to-code-mcp@latest install \
@@ -53,55 +44,111 @@ npx -y ui-design-to-code-mcp@latest install \
   --project-dir .
 ```
 
-Check the server:
+### Check or run the server
 
 ```bash
 npx -y ui-design-to-code-mcp@latest doctor
-```
-
-Run the server directly:
-
-```bash
 npx -y ui-design-to-code-mcp@latest serve
 ```
 
-## Install Behavior
+## Recommended Workflow
+
+1. Choose a mode with `get_run_modes` when the user has not specified one.
+2. Create an artifact run with `create_design_run`.
+3. Register source input with `ingest_image_source` or `ingest_figma_source`.
+4. Generate and register Semantic UI IR, Cross-platform Node Data, and Target Layout IR.
+5. Generate or modify code in the host project.
+6. Record results with `run_codegen` or `run_codegen_with_auto_review`.
+7. Validate the full artifact chain with `validate_pipeline`.
+8. Optionally clean generated artifacts with `cleanup_design_run`.
+
+## Execution Modes
+
+| Mode | Target required | Main use |
+| --- | --- | --- |
+| `decode-only` | No | Capture source manifests, vision/compression/semantic artifacts. No target plan or code. |
+| `plan-only` | No | Add cross-platform node data and conversion planning. No target layout or code. |
+| `target-ir` | Yes | Register target-platform layout IR. No code changes. |
+| `codegen` | Yes | Generate or modify implementation code and record validation. |
+| `codegen-with-auto-review` | Yes | Record codegen plus visual review evidence and similarity gate. |
+| `runtime-review` | Yes | Review an existing runtime implementation against the source. No code changes. |
+
+Target platform examples:
+
+```text
+ios-uikit / ios-swiftui / web-react / web-next / android-compose / android-view
+```
+
+## Source Input Strategy
+
+| Source type | Use when | Recommended tool |
+| --- | --- | --- |
+| Screenshot or image | The design source is a rendered image. | `ingest_image_source` |
+| Figma MCP node JSON | You need structure, names, text, components, styles, and layout metadata. | `ingest_figma_source` |
+| Figma node JSON + screenshot | You need both structural metadata and pixel-level visual truth. | `ingest_figma_source` |
+
+Hybrid Figma input is preferred when available because Figma nodes provide structure while screenshots provide the pixel baseline for visual review.
+
+## Artifact Run Layout
+
+Every workflow starts with `create_design_run`, which creates a dedicated `runRoot` and an `artifact-run-manifest.json`.
+
+Project run layout:
+
+```text
+generated/ui-design-to-code/<timestamp>-<slug>/
+  artifact-run-manifest.json
+  source/
+  figma/
+  vision/
+  compression/
+  semantic/
+  cross-platform/
+  targets/
+  assets/
+  qa/
+  review/
+```
+
+Temporary runs use:
+
+```text
+/private/tmp/ui-design-to-code/<timestamp>-<slug>/
+```
+
+## Client Installation
 
 ### Codex
 
-The Codex installer writes a user-level MCP config and keeps runtime startup
-off the network path.
+The Codex installer writes a user-level MCP config and keeps runtime startup off the network path.
 
-It installs the package under:
+Installed package:
 
 ```text
 ~/.codex/mcp-packages/ui-design-to-code-mcp
 ```
 
-It points Codex at:
+Codex serve command:
 
 ```text
 ~/.codex/bin/serve-ui-design-to-code-mcp
 ```
 
-On macOS it also creates a daily updater:
+Daily updater on macOS:
 
 ```text
 ~/Library/LaunchAgents/com.wuyb.codex.update-mcp-packages.plist
 ```
 
-The updater runs:
+Updater command:
 
 ```text
 ~/.codex/bin/update-mcp-packages
 ```
 
-When the install spec is `ui-design-to-code-mcp@latest`, the updater checks npm
-once per day at 04:15 and downloads a new version only when npm latest changes.
-The updated package is used the next time Codex starts or reloads this MCP
-server.
+When the install spec is `ui-design-to-code-mcp@latest`, the updater checks npm once per day at 04:15 and downloads a new version only when `npm latest` changes. The updated package is used the next time Codex starts or reloads this MCP server.
 
-Codex config:
+Codex config example:
 
 ```toml
 [mcp_servers.ui_design_to_code]
@@ -168,77 +215,13 @@ claude mcp add-json ui-design-to-code \
   --scope user
 ```
 
-## Core Concepts
-
-### Run Root
-
-Every workflow starts with `create_design_run`, which creates a dedicated
-`runRoot` and an `artifact-run-manifest.json`.
-
-Default project layout:
-
-```text
-generated/ui-design-to-code/<timestamp>-<slug>/
-  artifact-run-manifest.json
-  source/
-  figma/
-  vision/
-  compression/
-  semantic/
-  cross-platform/
-  targets/
-  assets/
-  qa/
-  review/
-```
-
-Temporary runs use:
-
-```text
-/private/tmp/ui-design-to-code/<timestamp>-<slug>/
-```
-
-### Execution Modes
-
-Agents should call `get_run_modes` when the user provides a UI screenshot,
-reference image, Figma design, or design-to-code task without naming a mode.
-
-Supported modes:
-
-| Mode | Target Required | Purpose |
-| --- | --- | --- |
-| `decode-only` | No | Capture source manifests, vision/compression/semantic artifacts. No platform plan or code. |
-| `plan-only` | No | Add cross-platform node data and platform conversion planning. No target layout or code. |
-| `target-ir` | Yes | Register target-platform layout IR. No code changes. |
-| `codegen` | Yes | Generate or modify implementation code and record normal validation. |
-| `codegen-with-auto-review` | Yes | Record codegen plus visual review, with a non-material similarity gate. |
-| `runtime-review` | Yes | Review an existing runtime implementation against the source without changing code. |
-
-Target platform examples:
-
-```text
-ios-uikit / ios-swiftui / web-react / web-next / android-compose / android-view
-```
-
-### Source Types
-
-The server supports:
-
-- A screenshot or image path.
-- Figma MCP node JSON.
-- Figma node JSON plus a matching screenshot.
-
-Hybrid Figma input is preferred when available: Figma nodes provide structure,
-names, text, components, styles, and layout metadata; screenshots provide pixel
-truth for effects and later visual review.
-
 ## Tool Reference
 
 ### `get_run_modes`
 
-Returns supported execution modes, target platforms, trigger examples, and the
-mode-selection prompt. Use it before creating a run when the user did not
-explicitly choose a mode.
+Returns supported modes, target platforms, trigger examples, and the mode-selection prompt.
+
+Use it when the user provides a UI screenshot, reference image, Figma design, or design-to-code request without naming a mode.
 
 Typical input:
 
@@ -250,11 +233,11 @@ Typical input:
 
 Creates the run directory and `artifact-run-manifest.json`.
 
-Important inputs:
+Key inputs:
 
 - `workspace`: project root for generated outputs.
 - `slug`: readable run suffix.
-- `mode`: one of the supported modes.
+- `mode`: one supported execution mode.
 - `targets`: required for target/codegen/review modes.
 - `useTmp`: writes under `/private/tmp` when true.
 
@@ -273,7 +256,7 @@ source/design-source-manifest.json
 source/page.source-manifest.json
 ```
 
-Important inputs:
+Key inputs:
 
 - `runRoot`
 - `imagePath`
@@ -293,7 +276,7 @@ source/design-source-manifest.json
 figma/figma-source-dataset.json
 ```
 
-Important inputs:
+Key inputs:
 
 - `runRoot`
 - `figma.fileKey`
@@ -304,11 +287,11 @@ Important inputs:
 
 ### `slice_image_assets`
 
-Precisely crops bitmap/icon assets from a source image using a
-`layers.manifest.json` with `source_bbox` entries. This tool is opt-in and does
-not alter decode, planning, target-IR, or codegen flows.
+Crops bitmap/icon assets from a source image using a `layers.manifest.json` with `source_bbox` entries.
 
-Input manifest example:
+This tool is opt-in and does not alter decode, planning, target IR, or codegen flows.
+
+Layer manifest example:
 
 ```json
 [
@@ -344,15 +327,13 @@ qa/bbox-preview.svg
 qa/png-asset-audit.json
 ```
 
-The slicer uses exact source pixel bboxes and never auto-trims output canvases.
-It preserves source pixels and source alpha. Background removal is not
-performed without an external alpha-capable image decoder, so the audit report
-marks alpha-specific checks as unavailable when it cannot inspect them.
+The slicer uses exact source pixel bboxes and never auto-trims output canvases. It preserves source pixels and source alpha. Background removal is not performed without an external alpha-capable image decoder, so the audit report marks alpha-specific checks as unavailable when it cannot inspect them.
 
 ### `build_semantic_ir`
 
-Registers model-generated platform-neutral Semantic UI IR, or returns the
-schema and reference path when `artifactPath` is missing.
+Registers model-generated Platform-neutral Semantic UI IR.
+
+When `artifactPath` is missing, the tool returns the schema and reference path.
 
 Default artifact type:
 
@@ -362,8 +343,9 @@ platform_neutral_semantic_ui_ir
 
 ### `build_cross_platform_nodes`
 
-Registers Cross-platform Node Data, or returns the required schema contract
-when `artifactPath` is missing.
+Registers Cross-platform Node Data.
+
+When `artifactPath` is missing, the tool returns the required schema contract.
 
 Default artifact type:
 
@@ -375,16 +357,15 @@ cross_platform_node_data
 
 Registers target-platform layout IR for a selected target.
 
-The schema hint is selected from the target name:
+Schema hint selection:
 
 - Android targets use Android layout schemas.
 - iOS targets use iOS SwiftUI layout schemas.
-- Other targets use web React layout schemas.
+- Other targets use Web React layout schemas.
 
 ### `run_codegen`
 
-Records implementation output and validation summary without enforcing visual
-review.
+Records implementation output and validation summary without enforcing visual review.
 
 Output:
 
@@ -394,10 +375,9 @@ review/codegen-result.json
 
 ### `run_codegen_with_auto_review`
 
-Records codegen output plus visual review evidence.
+Records implementation output plus visual review evidence.
 
-When `visualReviewResultPath` is provided, delivery is marked as ready only
-when:
+When `visualReviewResultPath` is provided, delivery is ready only when:
 
 ```text
 review.status == "passed"
@@ -412,9 +392,7 @@ review/codegen-with-auto-review-result.json
 
 ### `validate_pipeline`
 
-Runs cross-artifact validation for an existing run. It checks that required
-artifacts exist and that traceability links between vision, compression,
-semantic, cross-platform, and target planning artifacts are coherent.
+Validates an existing run by checking required artifacts and traceability links between vision, compression, semantic, cross-platform, and target planning artifacts.
 
 ### `cleanup_design_run`
 
@@ -426,23 +404,21 @@ Use:
 { "runRoot": "/path/to/run", "apply": false }
 ```
 
-Set `apply: true` only when you want cleanup to actually remove eligible
-artifacts.
+Set `apply: true` only when cleanup should actually remove eligible artifacts.
 
 ## Common Workflows
 
-### Screenshot To Web Code
+### Screenshot to Web Code
 
 1. Call `get_run_modes` if the user has not chosen a mode.
-2. Call `create_design_run` with `mode: "codegen"` or
-   `mode: "codegen-with-auto-review"` and `targets: ["web-react"]`.
+2. Call `create_design_run` with `mode: "codegen"` or `mode: "codegen-with-auto-review"` and `targets: ["web-react"]`.
 3. Call `ingest_image_source` with the source screenshot.
-4. Generate or register semantic IR, cross-platform nodes, and target IR.
+4. Generate or register Semantic UI IR, Cross-platform Node Data, and Target Layout IR.
 5. Implement code in the host project.
 6. Call `run_codegen` or `run_codegen_with_auto_review`.
 7. Call `validate_pipeline`.
 
-### Figma Hybrid To Target IR
+### Figma Hybrid to Target IR
 
 1. Fetch Figma node JSON through Figma MCP.
 2. Capture or provide the matching Figma frame screenshot.
@@ -456,13 +432,12 @@ artifacts.
 
 1. Call `create_design_run`.
 2. Call `ingest_image_source`.
-3. Create a `layers.manifest.json` with source pixel bboxes for bitmap/icon
-   layers.
+3. Create a `layers.manifest.json` with source pixel bboxes for bitmap/icon layers.
 4. Call `slice_image_assets`.
 5. Use `assets/slices/` in generated code.
 6. Review `qa/bbox-preview.svg` and `qa/png-asset-audit.json`.
 
-## Update And Rollout
+## Update and Versioning
 
 Update client configs to a channel:
 
@@ -480,8 +455,7 @@ npx -y ui-design-to-code-mcp@0.1.4 install \
   --package-spec ui-design-to-code-mcp@0.1.4
 ```
 
-Use pinned versions for stable production environments. Use `@latest` when you
-want the Codex daily updater or `npx`-based clients to pick up future releases.
+Use pinned versions for stable production environments. Use `@latest` when you want the Codex daily updater or `npx`-based clients to pick up future releases.
 
 ## Development
 
@@ -510,8 +484,7 @@ Recommended public npm release path:
 
 2. Trigger the GitHub Actions `Release` workflow from `main`.
 
-The workflow uses GitHub Actions OIDC (`id-token: write`) and does not require
-`NPM_TOKEN` or a long-lived MCP Registry token. Keep npm account 2FA enabled.
+The workflow uses GitHub Actions OIDC (`id-token: write`) and does not require `NPM_TOKEN` or a long-lived MCP Registry token. Keep npm account 2FA enabled.
 
 For full release, registry, rollback, and security policy, see:
 

@@ -1,6 +1,6 @@
 {
   "name": "ui-design-to-code-mcp",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "MCP server for ingesting UI screenshots and Figma design data into a cross-platform design-to-code artifact pipeline.",
   "mcpName": "io.github.Kinglions/ui-design-to-code-mcp",
   "type": "commonjs",
