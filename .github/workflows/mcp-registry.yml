@@ -10,7 +10,7 @@ jobs:
       contents: read
       id-token: write
     env:
-      MCP_PUBLISHER_VERSION: v1.0.0
+      MCP_PUBLISHER_VERSION: v1.7.9
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,6 +20,6 @@ jobs:
       - run: node scripts/check_release_readiness.js
       - run: npm view ui-design-to-code-mcp@$(node -p "require('./package.json').version") version
       - run: |
-          curl -L "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          curl --fail --show-error -L "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
           ./mcp-publisher login github-oidc
           ./mcp-publisher publish
