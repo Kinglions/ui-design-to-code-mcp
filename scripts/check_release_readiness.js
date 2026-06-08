@@ -35,6 +35,9 @@ function checkPackageMetadata() {
   const server = readJson("server.json");
   if (pkg.mcpName !== server.name) fail("package.json#mcpName must match server.json#name");
   if (pkg.version !== server.version) fail("package.json#version must match server.json#version");
+  if (!server.description || server.description.length > 100) {
+    fail(`server.json#description must be 100 characters or fewer: ${server.description ? server.description.length : 0}`);
+  }
   if (!server.packages || !server.packages[0]) fail("server.json missing packages[0]");
   if (server.packages[0].identifier !== pkg.name) fail("server package identifier must match package name");
   if (server.packages[0].version !== pkg.version) fail("server package version must match package version");
