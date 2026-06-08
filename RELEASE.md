@@ -50,6 +50,14 @@ This avoids storing a long-lived `MCP_REGISTRY_TOKEN` in GitHub Secrets.
 Manual token publishing remains available only as a fallback for local
 operations, not for the default GitHub Actions release path.
 
+## Registry-only Publish
+
+If the npm package version is already published but the MCP Registry job is
+blocked or skipped, use the `Publish MCP Registry` workflow. It validates the
+package metadata, verifies that the current package version exists on npm, and
+publishes `server.json` with GitHub Actions OIDC without running `npm publish`
+again.
+
 ## npm Authentication
 
 The default npm publishing path is GitHub Actions Trusted Publishing:

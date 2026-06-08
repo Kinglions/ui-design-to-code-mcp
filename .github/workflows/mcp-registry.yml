@@ -1,0 +1,25 @@
+name: Publish MCP Registry
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-mcp-registry:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      MCP_PUBLISHER_VERSION: v1.0.0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+      - run: npm run check
+      - run: node scripts/check_release_readiness.js
+      - run: npm view ui-design-to-code-mcp@$(node -p "require('./package.json').version") version
+      - run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish
