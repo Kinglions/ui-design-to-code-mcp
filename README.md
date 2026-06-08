@@ -122,6 +122,32 @@ Temporary runs use:
 
 The Codex installer writes a user-level MCP config and keeps runtime startup off the network path.
 
+Codex plugin marketplace install:
+
+```bash
+codex plugin marketplace add Kinglions/ui-design-to-code-mcp --ref main
+codex plugin list --marketplace ui-design-to-code
+codex plugin add ui-design-to-code@ui-design-to-code
+```
+
+After installation, verify the MCP server:
+
+```bash
+codex mcp list
+```
+
+The plugin registers `ui_design_to_code` with:
+
+```bash
+npx -y ui-design-to-code-mcp@latest serve
+```
+
+Direct npm-based MCP install remains available:
+
+```bash
+npx -y ui-design-to-code-mcp@latest install --client codex
+```
+
 Installed package:
 
 ```text

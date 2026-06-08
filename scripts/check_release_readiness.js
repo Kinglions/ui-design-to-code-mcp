@@ -49,6 +49,32 @@ function checkPackageMetadata() {
   }
 }
 
+function checkCodexPluginMarketplace() {
+  const pkg = readJson("package.json");
+  const marketplace = readJson(".agents/plugins/marketplace.json");
+  const plugin = readJson("plugins/ui-design-to-code/.codex-plugin/plugin.json");
+  const mcp = readJson("plugins/ui-design-to-code/.mcp.json");
+  if (marketplace.name !== "ui-design-to-code") fail("Codex marketplace name must be ui-design-to-code");
+  const entry = (marketplace.plugins || []).find((item) => item.name === "ui-design-to-code");
+  if (!entry) fail("Codex marketplace must include ui-design-to-code plugin");
+  if (!entry.source || entry.source.path !== "./plugins/ui-design-to-code") {
+    fail("Codex marketplace entry must point to ./plugins/ui-design-to-code");
+  }
+  if (!entry.policy || entry.policy.installation !== "AVAILABLE" || entry.policy.authentication !== "ON_INSTALL") {
+    fail("Codex marketplace entry must be available with ON_INSTALL authentication policy");
+  }
+  if (plugin.name !== "ui-design-to-code") fail("Codex plugin name must be ui-design-to-code");
+  if (plugin.version !== pkg.version) fail("Codex plugin version must match package version");
+  if (plugin.mcpServers !== "./.mcp.json") fail("Codex plugin must reference ./.mcp.json");
+  const server = mcp.mcpServers && mcp.mcpServers.ui_design_to_code;
+  if (!server) fail("Codex plugin .mcp.json must register ui_design_to_code");
+  if (server.command !== "npx") fail("Codex plugin MCP command must use npx");
+  const expectedArgs = ["-y", `${pkg.name}@latest`, "serve"];
+  if (JSON.stringify(server.args) !== JSON.stringify(expectedArgs)) {
+    fail(`Codex plugin MCP args must be ${JSON.stringify(expectedArgs)}`);
+  }
+}
+
 function checkPackageFiles() {
   const pkg = readJson("package.json");
   const requiredFiles = [
@@ -56,6 +82,9 @@ function checkPackageFiles() {
     "README.zh-CN.md",
     "LICENSE",
     "server.json",
+    ".agents/plugins/marketplace.json",
+    "plugins/ui-design-to-code/.codex-plugin/plugin.json",
+    "plugins/ui-design-to-code/.mcp.json",
     "bin/ui-design-to-code-mcp.js",
     "scripts/ui_design_to_code_mcp_server.js",
     "references/design-source-manifest.schema.json",
@@ -120,6 +149,7 @@ function main() {
   process.chdir(path.resolve(__dirname, ".."));
   checkSkillDescription();
   checkPackageMetadata();
+  checkCodexPluginMarketplace();
   checkPackageFiles();
   checkLifecycleScripts();
   checkTrustedPublishingWorkflow();

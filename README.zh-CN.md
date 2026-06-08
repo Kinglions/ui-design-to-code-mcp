@@ -122,6 +122,32 @@ generated/ui-design-to-code/<timestamp>-<slug>/
 
 Codex 安装器会写入用户级 MCP 配置，并让运行时启动路径脱离网络依赖。
 
+Codex plugin marketplace 安装：
+
+```bash
+codex plugin marketplace add Kinglions/ui-design-to-code-mcp --ref main
+codex plugin list --marketplace ui-design-to-code
+codex plugin add ui-design-to-code@ui-design-to-code
+```
+
+安装后检查 MCP server：
+
+```bash
+codex mcp list
+```
+
+该插件会把 `ui_design_to_code` 注册为：
+
+```bash
+npx -y ui-design-to-code-mcp@latest serve
+```
+
+仍然可以使用 npm 方式直接安装 MCP：
+
+```bash
+npx -y ui-design-to-code-mcp@latest install --client codex
+```
+
 安装包路径：
 
 ```text

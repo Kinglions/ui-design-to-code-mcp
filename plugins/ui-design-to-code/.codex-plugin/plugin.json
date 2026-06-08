@@ -1,0 +1,43 @@
+{
+  "name": "ui-design-to-code",
+  "version": "0.1.6",
+  "description": "Codex plugin for the ui-design-to-code-mcp design-to-code artifact pipeline.",
+  "author": {
+    "name": "Kinglions",
+    "email": "kinglionsfrank@163.com",
+    "url": "https://github.com/Kinglions"
+  },
+  "homepage": "https://github.com/Kinglions/ui-design-to-code-mcp",
+  "repository": "https://github.com/Kinglions/ui-design-to-code-mcp",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "design-to-code",
+    "figma",
+    "screenshot-to-code",
+    "visual-review",
+    "codex"
+  ],
+  "interface": {
+    "displayName": "UI Design to Code",
+    "shortDescription": "Turn UI screenshots and Figma data into traceable design-to-code artifacts",
+    "longDescription": "Use UI Design to Code in Codex to create isolated artifact runs, ingest UI screenshots or Figma node data, validate design-to-code intermediate representations, record target layout outputs, slice source-image assets, and track visual implementation review evidence.",
+    "developerName": "Kinglions",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/Kinglions/ui-design-to-code-mcp",
+    "privacyPolicyURL": "https://github.com/Kinglions/ui-design-to-code-mcp/blob/main/SECURITY.md",
+    "termsOfServiceURL": "https://github.com/Kinglions/ui-design-to-code-mcp/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Set up a design-to-code artifact run for this UI task",
+      "Ingest this screenshot or Figma data into a traceable UI pipeline",
+      "Validate the generated design-to-code artifacts"
+    ],
+    "brandColor": "#2563EB",
+    "screenshots": []
+  },
+  "mcpServers": "./.mcp.json"
+}

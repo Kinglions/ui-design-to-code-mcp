@@ -157,6 +157,26 @@ npm deprecate ui-design-to-code-mcp@<bad-version> "Use <previous-good-version> o
 
 ## Codex Install Policy
 
+Codex marketplace discovery is backed by this repository's plugin marketplace
+snapshot:
+
+```text
+.agents/plugins/marketplace.json
+plugins/ui-design-to-code/.codex-plugin/plugin.json
+plugins/ui-design-to-code/.mcp.json
+```
+
+Users can add the marketplace and install the plugin with:
+
+```bash
+codex plugin marketplace add Kinglions/ui-design-to-code-mcp --ref main
+codex plugin list --marketplace ui-design-to-code
+codex plugin add ui-design-to-code@ui-design-to-code
+```
+
+The plugin registers `ui_design_to_code` through
+`npx -y ui-design-to-code-mcp@latest serve`.
+
 Codex installs are optimized for fast MCP startup. The installer writes
 `~/.codex/config.toml` to execute `~/.codex/bin/serve-ui-design-to-code-mcp`
 instead of running `npx` on every MCP startup. The package is installed under

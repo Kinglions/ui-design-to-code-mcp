@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ui_design_to_code": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "ui-design-to-code-mcp@latest",
+        "serve"
+      ]
+    }
+  }
+}
