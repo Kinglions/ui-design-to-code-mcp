@@ -56,11 +56,13 @@ npx -y ui-design-to-code-mcp@latest serve
 1. Choose a mode with `get_run_modes` when the user has not specified one.
 2. Create an artifact run with `create_design_run`.
 3. Register source input with `ingest_image_source` or `ingest_figma_source`.
-4. Generate and register Semantic UI IR, Cross-platform Node Data, and Target Layout IR.
-5. Generate or modify code in the host project.
-6. Record results with `run_codegen` or `run_codegen_with_auto_review`.
-7. Validate the full artifact chain with `validate_pipeline`.
-8. Optionally clean generated artifacts with `cleanup_design_run`.
+4. For screenshot/image input, produce and register Reference Image Analysis with `build_reference_analysis`.
+5. Generate and register Semantic UI IR, Cross-platform Node Data, and Target Layout IR.
+6. Audit image decoding quality with `audit_image_decoding` when Vision/Compression/Semantic artifacts exist.
+7. Generate or modify code in the host project.
+8. Record results with `run_codegen` or `run_codegen_with_auto_review`.
+9. Validate the full artifact chain with `validate_pipeline`.
+10. Optionally clean generated artifacts with `cleanup_design_run`.
 
 ## Execution Modes
 
@@ -100,6 +102,7 @@ generated/ui-design-to-code/<timestamp>-<slug>/
   artifact-run-manifest.json
   source/
   figma/
+  analysis/
   vision/
   compression/
   semantic/
@@ -355,6 +358,18 @@ qa/png-asset-audit.json
 
 The slicer uses exact source pixel bboxes and never auto-trims output canvases. It preserves source pixels and source alpha. Background removal is not performed without an external alpha-capable image decoder, so the audit report marks alpha-specific checks as unavailable when it cannot inspect them.
 
+### `build_reference_analysis`
+
+Registers model-generated Reference Image Analysis before Vision IR. This captures the original pixel size, root frame, semantic top-level groups, text/media/icon/material inventory, bottom navigation, strict extraction settings, high-risk zones, and the audit plan used for later decoding.
+
+When `artifactPath` is missing, the tool returns the schema and reference path.
+
+Default artifact type:
+
+```text
+reference_analysis
+```
+
 ### `build_semantic_ir`
 
 Registers model-generated Platform-neutral Semantic UI IR.
@@ -420,6 +435,16 @@ review/codegen-with-auto-review-result.json
 
 Validates an existing run by checking required artifacts and traceability links between vision, compression, semantic, cross-platform, and target planning artifacts.
 
+### `audit_image_decoding`
+
+Audits screenshot/image decoding artifacts. It checks that reference analysis matches source dimensions, top-level groups stay in bounds, audit sections are present, text runs carry font metrics, media/icon regions are accounted for, semantic nodes keep traceability, single-line text avoids wrap risk, bottom navigation exposes slots, and uncertain nodes provide alternatives.
+
+Default output:
+
+```text
+qa/image-decoding-audit.json
+```
+
 ### `cleanup_design_run`
 
 Runs artifact cleanup in dry-run mode by default.
@@ -439,10 +464,12 @@ Set `apply: true` only when cleanup should actually remove eligible artifacts.
 1. Call `get_run_modes` if the user has not chosen a mode.
 2. Call `create_design_run` with `mode: "codegen"` or `mode: "codegen-with-auto-review"` and `targets: ["web-react"]`.
 3. Call `ingest_image_source` with the source screenshot.
-4. Generate or register Semantic UI IR, Cross-platform Node Data, and Target Layout IR.
-5. Implement code in the host project.
-6. Call `run_codegen` or `run_codegen_with_auto_review`.
-7. Call `validate_pipeline`.
+4. Call `build_reference_analysis` after analyzing the screenshot structure.
+5. Generate or register Semantic UI IR, Cross-platform Node Data, and Target Layout IR.
+6. Call `audit_image_decoding` after Vision/Compression/Semantic artifacts are available.
+7. Implement code in the host project.
+8. Call `run_codegen` or `run_codegen_with_auto_review`.
+9. Call `validate_pipeline`.
 
 ### Figma Hybrid to Target IR
 

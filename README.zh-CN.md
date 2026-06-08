@@ -56,11 +56,13 @@ npx -y ui-design-to-code-mcp@latest serve
 1. 用户没有指定模式时，先调用 `get_run_modes` 选择执行模式。
 2. 调用 `create_design_run` 创建独立产物运行目录。
 3. 使用 `ingest_image_source` 或 `ingest_figma_source` 登记源输入。
-4. 生成并登记 Semantic UI IR、Cross-platform Node Data、Target Layout IR。
-5. 在宿主项目中生成或修改目标代码。
-6. 使用 `run_codegen` 或 `run_codegen_with_auto_review` 记录结果。
-7. 调用 `validate_pipeline` 校验完整产物链路。
-8. 需要时使用 `cleanup_design_run` 清理生成产物。
+4. 对截图/图片输入，先生成并用 `build_reference_analysis` 登记 Reference Image Analysis。
+5. 生成并登记 Semantic UI IR、Cross-platform Node Data、Target Layout IR。
+6. 当已有 Vision/Compression/Semantic 产物后，调用 `audit_image_decoding` 审计图片解析质量。
+7. 在宿主项目中生成或修改目标代码。
+8. 使用 `run_codegen` 或 `run_codegen_with_auto_review` 记录结果。
+9. 调用 `validate_pipeline` 校验完整产物链路。
+10. 需要时使用 `cleanup_design_run` 清理生成产物。
 
 ## 执行模式
 
@@ -100,6 +102,7 @@ generated/ui-design-to-code/<timestamp>-<slug>/
   artifact-run-manifest.json
   source/
   figma/
+  analysis/
   vision/
   compression/
   semantic/
@@ -357,6 +360,18 @@ qa/png-asset-audit.json
 
 切图脚本使用源图像素坐标，不自动 trim，不改变输出画布尺寸。它会保留源像素和源 alpha。当前版本不引入额外图像依赖，因此不做背景抠除；当无法读取 alpha 细节时，审计报告会把透明/贴边检查标记为不可用。
 
+### `build_reference_analysis`
+
+登记模型生成的 Reference Image Analysis。它位于 Vision IR 之前，用来记录原始像素尺寸、根画板、语义顶层分组、文本/媒体/图标/材质清单、底部导航、严格提取设置、高风险区域和后续审计计划。
+
+如果没有传 `artifactPath`，工具会返回需要生成该产物的 schema 和参考说明。
+
+默认 artifact type：
+
+```text
+reference_analysis
+```
+
 ### `build_semantic_ir`
 
 登记 model 生成的 Platform-neutral Semantic UI IR。
@@ -422,6 +437,16 @@ review/codegen-with-auto-review-result.json
 
 校验现有 run 的跨产物链路。它会检查必需产物是否存在，以及 vision、compression、semantic、cross-platform、target planning 之间的 traceability 是否一致。
 
+### `audit_image_decoding`
+
+审计截图/图片解析产物。它会检查 reference analysis 是否匹配源图尺寸、顶层分组是否越界、审计章节是否齐全、文本是否有字体度量、媒体/图标区域是否被纳入、semantic node 是否保留 traceability、单行文本是否存在换行风险、底部导航是否包含槽位，以及低置信节点是否提供 alternatives。
+
+默认输出：
+
+```text
+qa/image-decoding-audit.json
+```
+
 ### `cleanup_design_run`
 
 运行产物清理，默认 dry-run。
@@ -441,10 +466,12 @@ review/codegen-with-auto-review-result.json
 1. 用户未指定模式时，调用 `get_run_modes`。
 2. 调用 `create_design_run`，选择 `mode: "codegen"` 或 `mode: "codegen-with-auto-review"`，并设置 `targets: ["web-react"]`。
 3. 调用 `ingest_image_source` 登记截图。
-4. 生成或登记 Semantic UI IR、Cross-platform Node Data、Target Layout IR。
-5. 在宿主项目里实现代码。
-6. 调用 `run_codegen` 或 `run_codegen_with_auto_review`。
-7. 调用 `validate_pipeline`。
+4. 分析截图结构后调用 `build_reference_analysis`。
+5. 生成或登记 Semantic UI IR、Cross-platform Node Data、Target Layout IR。
+6. Vision/Compression/Semantic 产物就绪后调用 `audit_image_decoding`。
+7. 在宿主项目里实现代码。
+8. 调用 `run_codegen` 或 `run_codegen_with_auto_review`。
+9. 调用 `validate_pipeline`。
 
 ### Figma Hybrid 到 Target IR
 

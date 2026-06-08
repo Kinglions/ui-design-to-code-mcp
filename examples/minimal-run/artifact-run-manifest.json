@@ -22,6 +22,13 @@
       "cleanupStatus": "keep"
     },
     {
+      "id": "reference-analysis",
+      "path": "analysis/page.reference-analysis.json",
+      "category": "intermediate",
+      "artifactType": "reference_analysis",
+      "cleanupStatus": "cleanup_eligible"
+    },
+    {
       "id": "vision",
       "path": "vision/page.vision.json",
       "category": "intermediate",

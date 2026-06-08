@@ -87,8 +87,10 @@ function checkPackageFiles() {
     "plugins/ui-design-to-code/.mcp.json",
     "bin/ui-design-to-code-mcp.js",
     "scripts/ui_design_to_code_mcp_server.js",
+    "scripts/audit_image_decoding.js",
     "references/design-source-manifest.schema.json",
-    "references/figma-source-dataset.schema.json"
+    "references/figma-source-dataset.schema.json",
+    "references/reference-analysis.schema.json"
   ];
   for (const filePath of requiredFiles) assertFile(filePath);
   for (const filePath of ["README.md", "README.zh-CN.md"]) {

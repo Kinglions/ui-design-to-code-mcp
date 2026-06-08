@@ -257,7 +257,7 @@ function createDesignRun(args) {
     ? path.join("/private/tmp/ui-design-to-code", `${timestamp()}-${slug}`)
     : path.join(workspace, "generated", "ui-design-to-code", `${timestamp()}-${slug}`);
   mkdirp(root);
-  for (const dir of ["source", "figma", "vision", "compression", "semantic", "cross-platform", "targets", "review", "assets", "qa"]) {
+  for (const dir of ["source", "figma", "analysis", "vision", "compression", "semantic", "cross-platform", "targets", "review", "assets", "qa"]) {
     mkdirp(path.join(root, dir));
   }
   const manifest = {
@@ -558,6 +558,30 @@ function validatePipeline(args) {
   return output(result);
 }
 
+function auditImageDecoding(args) {
+  const runRoot = resolveRunRoot(args.runRoot);
+  const auditOut = args.auditOut || "qa/image-decoding-audit.json";
+  const scriptArgs = ["--run", runRoot, "--out", auditOut];
+  if (args.sourcePath) scriptArgs.push("--source", String(args.sourcePath));
+  if (args.referenceAnalysisPath) scriptArgs.push("--reference-analysis", String(args.referenceAnalysisPath));
+  if (args.visionPath) scriptArgs.push("--vision", String(args.visionPath));
+  if (args.compressionPath) scriptArgs.push("--compression", String(args.compressionPath));
+  if (args.semanticPath) scriptArgs.push("--semantic", String(args.semanticPath));
+
+  const result = runScript("audit_image_decoding.js", scriptArgs);
+  if (result.exitCode !== 0) fail(result.stderr || result.stdout || "audit_image_decoding failed");
+  const { manifestPath, manifest } = loadManifest(runRoot);
+  upsertArtifact(manifest, {
+    id: "image-decoding-audit",
+    path: auditOut,
+    category: "review",
+    artifactType: "image_decoding_audit",
+    cleanupStatus: "keep"
+  });
+  writeJson(manifestPath, manifest);
+  return output(JSON.parse(result.stdout));
+}
+
 function cleanupDesignRun(args) {
   const runRoot = resolveRunRoot(args.runRoot);
   const scriptArgs = ["--run", runRoot];
@@ -605,6 +629,18 @@ function buildSemanticIr(args) {
     schemaPath: "references/platform-neutral-semantic-ui-ir.schema.json",
     referencePath: "references/vision-to-semantic-ir.md",
     missingMessage: "Generate or provide Platform-neutral Semantic UI IR, then call build_semantic_ir with artifactPath to register it."
+  });
+}
+
+function buildReferenceAnalysis(args) {
+  return registerArtifact(args, {
+    id: "reference-analysis",
+    artifactType: "reference_analysis",
+    category: "intermediate",
+    cleanupStatus: "keep",
+    schemaPath: "references/reference-analysis.schema.json",
+    referencePath: "references/design-image-decoding-workflow.md",
+    missingMessage: "Analyze the reference image first, produce Reference Image Analysis, then call build_reference_analysis with artifactPath to register it."
   });
 }
 
@@ -774,6 +810,23 @@ const tools = {
     },
     handler: validatePipeline
   },
+  audit_image_decoding: {
+    description: "Audit image-decoding artifacts for reference pre-analysis, text overflow risks, media accounting, navigation structure, semantic traceability, and node-tree quality gates.",
+    inputSchema: {
+      type: "object",
+      required: ["runRoot"],
+      properties: {
+        runRoot: { type: "string" },
+        sourcePath: { type: "string" },
+        referenceAnalysisPath: { type: "string" },
+        visionPath: { type: "string" },
+        compressionPath: { type: "string" },
+        semanticPath: { type: "string" },
+        auditOut: { type: "string", default: "qa/image-decoding-audit.json" }
+      }
+    },
+    handler: auditImageDecoding
+  },
   cleanup_design_run: {
     description: "Run cleanup_artifacts.js for a design run. Dry-run by default.",
     inputSchema: {
@@ -811,6 +864,15 @@ const tools = {
       properties: { runRoot: { type: "string" }, artifactPath: { type: "string" }, artifactId: { type: "string" } }
     },
     handler: buildSemanticIr
+  },
+  build_reference_analysis: {
+    description: "Register model-generated Reference Image Analysis, or return the required schema for pre-decode image structure, media, text, navigation, and pixel-parity planning.",
+    inputSchema: {
+      type: "object",
+      required: ["runRoot"],
+      properties: { runRoot: { type: "string" }, artifactPath: { type: "string" }, artifactId: { type: "string" } }
+    },
+    handler: buildReferenceAnalysis
   },
   build_cross_platform_nodes: {
     description: "Register model-generated Cross-platform Node Data or return the required schema contract.",

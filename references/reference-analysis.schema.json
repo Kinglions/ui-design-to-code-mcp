@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.ui-design-to-code/schemas/reference-analysis.schema.json",
+  "title": "Reference Image Analysis",
+  "type": "object",
+  "required": [
+    "artifactType",
+    "sourceId",
+    "originalPixelSize",
+    "coordinateSpace",
+    "pageStructure",
+    "visualInventory",
+    "auditPlan",
+    "highRiskZones"
+  ],
+  "properties": {
+    "artifactType": { "type": "string", "const": "reference_analysis" },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "coordinateSpace": { "type": "string", "enum": ["source_pixel"] },
+    "mode": {
+      "type": "object",
+      "properties": {
+        "strictExtraction": { "type": "boolean" },
+        "targetCanvasWidth": { "type": "number", "exclusiveMinimum": 0 },
+        "scaleFactor": { "type": "number", "exclusiveMinimum": 0 },
+        "absolutePositioningRequired": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "originalPixelSize": {
+      "type": "object",
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "pageStructure": {
+      "type": "object",
+      "required": ["rootFrame", "topLevelGroups"],
+      "properties": {
+        "rootFrame": { "$ref": "#/$defs/bbox" },
+        "topLevelGroups": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/structureGroup" }
+        },
+        "fixedRegions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/structureGroup" }
+        },
+        "scrollRegions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/structureGroup" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "visualInventory": {
+      "type": "object",
+      "properties": {
+        "textRuns": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/textRunAnalysis" }
+        },
+        "mediaRegions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/mediaRegionAnalysis" }
+        },
+        "icons": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/iconAnalysis" }
+        },
+        "materials": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/materialAnalysis" }
+        },
+        "bottomNavigation": {
+          "type": "object",
+          "properties": {
+            "visible": { "type": "boolean" },
+            "bbox": { "$ref": "#/$defs/bbox" },
+            "itemCount": { "type": "integer", "minimum": 0 },
+            "hasHomeIndicator": { "type": "boolean" },
+            "activeStateDescription": { "type": "string" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "assetSourcingStrategy": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["role", "strategy"],
+        "properties": {
+          "role": { "type": "string", "minLength": 1 },
+          "strategy": {
+            "type": "string",
+            "enum": ["user_provided", "sourced_raster", "extract_from_reference", "editable_vector", "placeholder"]
+          },
+          "searchTerms": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "sourceUrl": { "type": "string" },
+          "fidelityRisk": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "auditPlan": {
+      "type": "object",
+      "required": ["text", "media", "navigation", "structure", "transparentBounds"],
+      "properties": {
+        "text": { "$ref": "#/$defs/auditPlanSection" },
+        "media": { "$ref": "#/$defs/auditPlanSection" },
+        "navigation": { "$ref": "#/$defs/auditPlanSection" },
+        "structure": { "$ref": "#/$defs/auditPlanSection" },
+        "transparentBounds": { "$ref": "#/$defs/auditPlanSection" },
+        "pixelParity": { "$ref": "#/$defs/auditPlanSection" }
+      },
+      "additionalProperties": true
+    },
+    "highRiskZones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "bbox", "risk", "mitigation"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "bbox": { "$ref": "#/$defs/bbox" },
+          "risk": { "type": "string", "minLength": 1 },
+          "mitigation": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": true
+      }
+    },
+    "uncertainties": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "bbox": {
+      "type": "object",
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number", "minimum": 0 },
+        "height": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": true
+    },
+    "structureGroup": {
+      "type": "object",
+      "required": ["id", "name", "bbox", "role"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "bbox": { "$ref": "#/$defs/bbox" },
+        "role": { "type": "string", "minLength": 1 },
+        "expectedChildren": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "textRunAnalysis": {
+      "type": "object",
+      "required": ["id", "bbox", "expectedText", "expectedLineCount", "noWrap"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "bbox": { "$ref": "#/$defs/bbox" },
+        "expectedText": { "type": "string" },
+        "expectedLineCount": { "type": "integer", "minimum": 1 },
+        "noWrap": { "type": "boolean" },
+        "parentConstraint": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "mediaRegionAnalysis": {
+      "type": "object",
+      "required": ["id", "bbox", "role", "strategy"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "bbox": { "$ref": "#/$defs/bbox" },
+        "role": { "type": "string", "minLength": 1 },
+        "strategy": {
+          "type": "string",
+          "enum": ["user_provided", "sourced_raster", "extract_from_reference", "placeholder"]
+        },
+        "cropIntent": { "type": "string" },
+        "sourcePrimitiveId": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "iconAnalysis": {
+      "type": "object",
+      "required": ["id", "bbox", "role", "strategy"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "bbox": { "$ref": "#/$defs/bbox" },
+        "role": { "type": "string", "minLength": 1 },
+        "strategy": {
+          "type": "string",
+          "enum": ["editable_vector", "extract_png", "component_instance", "placeholder"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "materialAnalysis": {
+      "type": "object",
+      "required": ["id", "bbox", "material"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "bbox": { "$ref": "#/$defs/bbox" },
+        "material": { "type": "string", "minLength": 1 },
+        "effects": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "auditPlanSection": {
+      "type": "object",
+      "required": ["required", "checks"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "checks": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

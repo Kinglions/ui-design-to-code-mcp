@@ -9,6 +9,11 @@ iOS, Web, Android, or other platform adapters.
 Do not generate platform code from these artifacts. Do not collapse raw visual
 evidence into semantic nodes without keeping traceable intermediate IDs.
 
+For screenshot or rendered-image input, create Reference Image Analysis before
+Vision IR. This mirrors the 1:1 editable-Figma reconstruction discipline: decode
+the image at original pixel size, name semantic top-level regions, record text
+and media inventory, and define the audit plan before primitive grouping.
+
 ## Coordinate Systems
 
 Every artifact must declare the coordinate system it uses. Coordinates are
@@ -70,6 +75,32 @@ Minimum fields:
 - `coordinateSpaces.logical`
 - `knownViewport`
 - `uncertainties`
+
+### 0.5 Reference Image Analysis
+
+File suffix: `.reference-analysis.json`
+
+Purpose: capture human-readable visual structure before raw primitive detection
+and semantic compression.
+
+Required content:
+
+- Original source pixel size and coordinate-space contract.
+- Root frame bounds, fixed regions, scroll regions, and semantic top-level
+  groups with non-generic names.
+- Inventory of visible text runs, line breaks, font estimates, media regions,
+  icon candidates, material surfaces, colors, corner radii, shadows, and bottom
+  navigation structure.
+- Asset sourcing strategy for media and icon regions: slice from source, rebuild
+  as vector/layer, or mark as placeholder with explicit uncertainty.
+- High-risk zones such as dense text, overlapping layers, transparent images,
+  nav bars, home indicators, and clipped media.
+- Audit plan for text overflow, media coverage, navigation slots, semantic
+  group naming, transparent bounds/crop checks, and pixel parity.
+
+The Reference Image Analysis must use source-image pixel coordinates and must
+not replace Vision IR. It is the planning and QA baseline used to detect missing
+structure later in the node tree.
 
 ### 1. Vision IR
 
@@ -218,6 +249,14 @@ Run this audit after producing the three artifacts:
 6. Are unresolved ambiguities explicit instead of silently normalized?
 7. Can a future platform adapter map the same node tree to iOS, Web, or Android
    without re-reading the image?
+8. Does Reference Image Analysis match the original source dimensions and root
+   frame?
+9. Do semantic top-level groups, bottom navigation slots, text runs, media
+   regions, and high-risk zones survive into later artifacts or the audit report?
 
 If any answer is no, split the artifact into smaller nodes or add missing
 measurements before platform mapping.
+
+Run `scripts/audit_image_decoding.js --run <runRoot>` after Vision IR, Node
+Compression IR, and Semantic UI IR exist. Treat errors as blocking and warnings
+as repair-loop input.

@@ -1,0 +1,104 @@
+{
+  "artifactType": "reference_analysis",
+  "sourceId": "minimal-source",
+  "coordinateSpace": "source_pixel",
+  "mode": {
+    "strictExtraction": false,
+    "absolutePositioningRequired": false
+  },
+  "originalPixelSize": {
+    "width": 390,
+    "height": 844
+  },
+  "pageStructure": {
+    "rootFrame": { "x": 0, "y": 0, "width": 390, "height": 844 },
+    "topLevelGroups": [
+      {
+        "id": "group-background",
+        "name": "00 Background / material",
+        "bbox": { "x": 0, "y": 0, "width": 390, "height": 844 },
+        "role": "screen_background",
+        "expectedChildren": []
+      },
+      {
+        "id": "group-primary-action",
+        "name": "03 Main content / primary action",
+        "bbox": { "x": 24, "y": 720, "width": 342, "height": 56 },
+        "role": "fixed_primary_cta",
+        "expectedChildren": ["button_background", "button_label"]
+      }
+    ],
+    "fixedRegions": [
+      {
+        "id": "fixed-primary-action",
+        "name": "Primary fixed action",
+        "bbox": { "x": 24, "y": 720, "width": 342, "height": 56 },
+        "role": "fixed_bottom_cta"
+      }
+    ],
+    "scrollRegions": []
+  },
+  "visualInventory": {
+    "textRuns": [
+      {
+        "id": "text-button-label",
+        "bbox": { "x": 164, "y": 738, "width": 62, "height": 20 },
+        "expectedText": "Continue",
+        "expectedLineCount": 1,
+        "noWrap": true,
+        "parentConstraint": "centered inside primary CTA"
+      }
+    ],
+    "mediaRegions": [],
+    "icons": [],
+    "materials": [
+      {
+        "id": "button-material",
+        "bbox": { "x": 24, "y": 720, "width": 342, "height": 56 },
+        "material": "solid rounded button background",
+        "effects": ["cornerRadius:16", "fill:#111111"]
+      }
+    ],
+    "bottomNavigation": {
+      "visible": false,
+      "itemCount": 0,
+      "hasHomeIndicator": false
+    }
+  },
+  "assetSourcingStrategy": [],
+  "auditPlan": {
+    "text": {
+      "required": true,
+      "checks": ["single-line CTA label", "text bbox remains centered", "no overflow"]
+    },
+    "media": {
+      "required": false,
+      "checks": ["confirm no visible media regions"]
+    },
+    "navigation": {
+      "required": false,
+      "checks": ["confirm no bottom navigation is visible"]
+    },
+    "structure": {
+      "required": true,
+      "checks": ["semantic top-level groups", "fixed CTA outside scroll content"]
+    },
+    "transparentBounds": {
+      "required": false,
+      "checks": ["no transparent PNG assets in minimal fixture"]
+    },
+    "pixelParity": {
+      "required": true,
+      "checks": ["root frame dimensions match source image", "CTA bbox preserved"]
+    }
+  },
+  "highRiskZones": [
+    {
+      "id": "primary-cta-text",
+      "bbox": { "x": 164, "y": 738, "width": 62, "height": 20 },
+      "risk": "CTA label may wrap or drift when mapped to platform text metrics.",
+      "mitigation": "Preserve maxLines=1, intrinsic text slot height, and center alignment."
+    }
+  ],
+  "uncertainties": []
+}

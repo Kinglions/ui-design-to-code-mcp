@@ -13,31 +13,35 @@ The system must optimize for implementation quality, not screenshot-only similar
    - Required metadata: source image path, source image pixel size, known viewport if any, and coordinate-space assumptions.
    - Default coordinate system: source-image pixels with top-left origin.
 
-2. Vision IR
+2. Reference Image Analysis
+   - Decode the reference at original pixel size before grouping primitives.
+   - Record semantic top-level groups, text/media/icon inventory, bottom navigation, high-risk zones, and the audit plan.
+
+3. Vision IR
    - Extract raw visual elements: text, icons, shapes, images, backgrounds, color samples, shadows, dividers, and bounding boxes.
    - Keep raw confidence scores.
    - Keep text, icons, shell shapes, effects, image regions, and spacing samples as separate primitives.
    - Do not map raw nodes to any platform widget.
 
-3. Node compression
+4. Node compression
    - Merge visual primitives into grouped candidates.
    - Examples: button background + label + icon -> `button_candidate`; card background + title + metadata + thumbnail -> `card_candidate`.
    - Detect repeated patterns and convert them into templates.
    - Preserve primitive IDs, grouped candidate IDs, slot candidates, grouping evidence, confidence, alternatives, and uncertainties.
 
-4. Platform-neutral Semantic UI IR
+5. Platform-neutral Semantic UI IR
    - Classify compressed candidates into product semantics such as `primary_cta`, `prompt_input`, `option_selector`, `content_card`, `vertical_list`, `tab_bar`.
    - Every semantic node must include confidence.
    - Any node below the review threshold must include alternatives.
    - Keep source group IDs and bbox data so later platform adapters can run without re-reading the image.
    - Do not use platform class names in this artifact.
 
-5. UIKit mapping, only when UIKit implementation is requested
+6. UIKit mapping, only when UIKit implementation is requested
    - Resolve every semantic node through `contracts/uikit-mapping-contract.json`.
    - Mapping priority: project component, UIKit native control, generated reusable component, page-private view, bitmap fallback.
    - The mapper must record why a preferred or fallback mapping was selected.
 
-6. UIKit Layout IR
+7. UIKit Layout IR
    - Build UIKit hierarchy, layout containers, fixed regions, scroll containers, cell templates, state containers, events, and data model stubs.
    - Use design tokens for spacing, radius, colors, type, and standard sizes.
    - Avoid magic numbers except measured constants that are explicitly marked as temporary.
@@ -106,11 +110,12 @@ When confidence is low, keep the detail measurement with an uncertainty note ins
 
 ## Acceptance Criteria
 
-- Source Image Manifest, Vision IR, Node Compression IR, and Platform-neutral Semantic UI IR are separate artifacts.
+- Source Image Manifest, Reference Image Analysis, Vision IR, Node Compression IR, and Platform-neutral Semantic UI IR are separate artifacts.
 - No raw visual node is mapped directly to platform code without semantic compression.
 - Every semantic node traces back to grouped candidate IDs and primitive IDs.
 - Every bbox is interpretable through a declared coordinate system.
 - Every semantic node resolves through the mapping contract when platform mapping is requested.
+- Image decoding runs pass `audit_image_decoding` before platform mapping when screenshot-derived Vision/Compression/Semantic artifacts exist.
 - Repeated lists and grids generate cell templates and sample data, not hard-coded duplicate views.
 - Fixed bottom CTAs are outside scroll content and anchored to safe area.
 - Scroll content accounts for fixed bottom controls with content inset.

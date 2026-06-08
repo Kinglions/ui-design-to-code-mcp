@@ -24,7 +24,7 @@
   "scripts": {
     "serve": "node scripts/ui_design_to_code_mcp_server.js",
     "doctor": "node bin/ui-design-to-code-mcp.js doctor",
-    "check": "node --check scripts/ui_design_to_code_mcp_server.js && node --check scripts/install_mcp_client.js && node --check scripts/slice_assets.js && node --check scripts/configure_mcp_registry_token.js && node --check scripts/configure_npm_trusted_publishing.js && node --check scripts/check_release_readiness.js && node --check bin/ui-design-to-code-mcp.js && node scripts/validate_pipeline.js --run examples/minimal-run",
+    "check": "node --check scripts/ui_design_to_code_mcp_server.js && node --check scripts/install_mcp_client.js && node --check scripts/slice_assets.js && node --check scripts/audit_image_decoding.js && node --check scripts/configure_mcp_registry_token.js && node --check scripts/configure_npm_trusted_publishing.js && node --check scripts/check_release_readiness.js && node --check bin/ui-design-to-code-mcp.js && node scripts/validate_pipeline.js --run examples/minimal-run && node scripts/audit_image_decoding.js --run examples/minimal-run",
     "release:check": "npm run check && node scripts/check_release_readiness.js && npm pack --dry-run",
     "pack:dry-run": "npm pack --dry-run",
     "prepublishOnly": "npm run release:check"

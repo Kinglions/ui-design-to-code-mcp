@@ -20,15 +20,20 @@ Use source-image pixel coordinates by default:
 1. Produce Source Image Manifest.
    - Record image dimensions and coordinate spaces.
    - Mark logical unit scale as unknown unless evidence is explicit.
-2. Produce Vision IR.
+2. Produce Reference Image Analysis.
+   - Record original pixel size, strict extraction scale factor, root frame, semantic top-level groups, fixed regions, and scroll regions.
+   - Inventory visible text runs, media regions, icon candidates, material surfaces, bottom navigation, and high-risk zones before primitive grouping.
+   - Preserve visible text line breaks, font size/weight estimates, color/radius/shadow evidence, and asset sourcing strategy.
+   - Define the audit plan for text overflow, media coverage, navigation slots, semantic group naming, transparent bounds, and pixel parity.
+3. Produce Vision IR.
    - Detect raw visual primitives: text runs, icon candidates, shapes, image regions, effects, color samples, spacing samples, and bounding boxes.
    - Preserve noisy measurements, style evidence, primitive confidence, and uncertainties.
    - Keep text, icons, background shells, strokes, shadows, overlays, media, and spacing as separate primitives.
-3. Produce Node Compression IR.
+4. Produce Node Compression IR.
    - Compress primitives into grouped candidates: buttons, inputs, cards, list items, tab bars, headers, option selectors, media blocks, sections, and decorative groups.
    - Every group must preserve primitive IDs, grouping evidence, bbox, slot candidates, confidence, alternatives, and uncertainties.
    - Detect repeated cards/lists and output templates with instance IDs, item size, slot candidates, and sample data.
-4. Produce Platform-neutral Semantic UI IR.
+5. Produce Platform-neutral Semantic UI IR.
    - Classify each grouped candidate into a semantic type without platform class names.
    - Infer layout intent: scroll content, fixed regions, overlays, modal surfaces, stacks, grids, safe-area hints, and keyboard-sensitive areas.
    - Capture detail geometry for every visible card, button, input, and header: corner radius, height mode, content insets, inter-item spacing, text style hierarchy, line count, and media aspect ratio where visible.
@@ -50,6 +55,9 @@ Reject your own output before returning it when a card, hero, prompt input, CTA,
 Return separate JSON artifacts matching:
 
 - `image-source-manifest.schema.json`
+- `reference-analysis.schema.json`
 - `vision-ir.schema.json`
 - `node-compression-ir.schema.json`
 - `platform-neutral-semantic-ui-ir.schema.json`
+
+After the artifacts exist, run `audit_image_decoding` to catch missing reference structure, text overflow risks, media accounting gaps, generic group names, bottom navigation omissions, and traceability regressions.

@@ -31,6 +31,7 @@ Preview Image
   -> Design Source Manifest
   -> Source Image Manifest
   -> Figma Source Dataset when Figma input exists
+  -> Reference Image Analysis for screenshot/image inputs
   -> Vision IR
   -> Node Compression
   -> Platform-neutral Semantic UI IR
@@ -52,7 +53,7 @@ Simple trigger rule: if the user uploads or references a UI screenshot/design im
 
 If the user did not explicitly specify one of `decode-only`, `plan-only`, `target-ir`, `codegen`, `codegen-with-auto-review`, or `runtime-review`, do not start producing artifacts yet. First ask the user to choose one execution mode:
 
-1. `decode-only`: parse the image into source manifest, Vision IR, Node Compression IR, and platform-neutral Semantic UI node tree. No platform plan or code.
+1. `decode-only`: parse the image into source manifest, Reference Image Analysis, Vision IR, Node Compression IR, and platform-neutral Semantic UI node tree. No platform plan or code.
 2. `plan-only`: add Cross-platform Node Data and compare target-platform conversion plans. No target layout IR or code.
 3. `target-ir`: generate target-platform layout IR for selected targets. No code.
 4. `codegen`: generate or modify target-platform code, run normal project validation, and cleanup artifacts. Runtime screenshot review is not mandatory in this mode.
@@ -104,7 +105,14 @@ Large temporary crops, screenshots, and debug images should default to `/private
    - Keep Figma canvas coordinates separate from screenshot pixel coordinates.
    - When screenshot input also exists, record the mapping evidence between Figma canvas and source pixels.
 
-5. Build `Vision IR`.
+5. Build `Reference Image Analysis` when an image or screenshot pixel baseline is available.
+   - Record original pixel size, strict extraction scale factor, root frame, semantic top-level groups, fixed regions, and scroll regions.
+   - Inventory visible text runs, media regions, icon candidates, materials, bottom navigation, and high-risk zones before grouping primitives.
+   - Preserve visible line breaks, font size/weight estimates, color/radius/shadow evidence, and asset sourcing strategy.
+   - Define the audit plan for text overflow, media coverage, navigation slots, semantic group naming, transparent bounds, and pixel parity.
+   - Use `build_reference_analysis` to register the artifact.
+
+6. Build `Vision IR`.
    - Extract raw visual primitives before grouping.
    - For image-only input, derive primitives from the screenshot or preview image.
    - For Figma-only input, normalize Figma nodes into primitive candidates without inventing pixel-only effects.
@@ -113,13 +121,13 @@ Large temporary crops, screenshots, and debug images should default to `/private
    - Preserve raw primitive IDs, bounding boxes, style evidence, content, confidence, and uncertainties.
    - Split text by visible line or run, keep icons separate from background shells, and keep effects separate from shapes.
 
-6. Build `Node Compression IR`.
+7. Build `Node Compression IR`.
    - Group primitives by containment, alignment, shared background, proximity, z-order, and repeated geometry.
    - Every group must keep `primitiveIds`, `bbox`, `slotCandidates`, grouping evidence, confidence, alternatives, and uncertainties.
    - Repeated lists, rails, and grids must become templates with sampled instance IDs, item size, and slot candidates.
    - Leave ambiguous primitives unassigned instead of forcing them into a semantic node.
 
-7. Build `Platform-neutral Semantic UI IR`.
+8. Build `Platform-neutral Semantic UI IR`.
    - Convert grouped candidates into product-semantic nodes.
    - Capture detail geometry before token normalization: outer radius, height mode, content insets, inner spacing, media aspect ratio, text style hierarchy, and line limits.
    - Capture slot-level height allocation before token normalization: media height or aspect ratio, text block line heights, badge height, footer height, CTA height, and progress/control heights.
@@ -130,19 +138,20 @@ Large temporary crops, screenshots, and debug images should default to `/private
    - Add validation and error behavior for every user input node.
    - Every interactive or content-bearing node must include `visualMetrics`, `contentStructure`, and slot-level measurement data for each visible slot.
    - Keep the node tree platform-neutral. Do not use UIKit, SwiftUI, DOM, React, Compose, or Android View class names here.
+   - Run `audit_image_decoding` after Vision IR, Node Compression IR, and Semantic UI IR are available.
 
-8. Build `Cross-platform Node Data`.
+9. Build `Cross-platform Node Data`.
    - Convert semantic nodes into adapter-ready nodes without platform class names.
    - Preserve source bboxes, source group IDs, primitive traceability, states, events, data requirements, accessibility hints, visual metrics, slot metrics, and responsive constraints.
    - Split node data into stable `core`, `visual`, `layout`, `interaction`, `data`, `accessibility`, and `traceability` sections.
    - Add `platformHints` only as optional hints. They must not replace platform-neutral node data.
 
-9. Build `Platform Conversion Plan`.
+10. Build `Platform Conversion Plan`.
    - Choose target adapters such as `ios-uikit`, `ios-swiftui`, `web-react`, `web-next`, `android-compose`, or `android-view`.
    - For each target, map cross-platform nodes through a versioned adapter contract.
    - Record unsupported patterns, required assets, required project components, state-management assumptions, and review commands.
 
-10. Apply a platform adapter contract only for target implementation tasks.
+11. Apply a platform adapter contract only for target implementation tasks.
    - Prefer existing project components.
    - Then use native target-platform controls.
    - Then generated reusable components.
@@ -235,6 +244,7 @@ not produce larger downstream artifacts than the user requested.
 - `references/platform-adapters/*.json`: default adapter contracts for UIKit, SwiftUI, React, Next.js, Compose, and Android View.
 - `references/uikit-mapping-contract.json`: default semantic-to-UIKit contract.
 - `references/image-source-manifest.schema.json`: source image metadata and coordinate-space schema.
+- `references/reference-analysis.schema.json`: pre-decode reference image structure and audit-plan schema.
 - `references/vision-ir.schema.json`: raw visual primitive schema.
 - `references/node-compression-ir.schema.json`: grouped-candidate and repeated-template schema.
 - `references/platform-neutral-semantic-ui-ir.schema.json`: platform-neutral semantic node-tree schema.
@@ -246,6 +256,7 @@ not produce larger downstream artifacts than the user requested.
 - `examples/ai-image-home.uikit.json`: example UIKit Layout IR.
 - `scripts/cleanup_artifacts.js`: dependency-free cleanup utility with dry-run default.
 - `scripts/validate_pipeline.js`: dependency-free cross-artifact pipeline validator.
+- `scripts/audit_image_decoding.js`: dependency-free image-decoding quality audit for reference analysis, text/media/navigation, and semantic traceability.
 - `scripts/capture_web_screenshot.js`: Playwright-based web runtime screenshot capture.
 - `scripts/run_ios_simulator_review.js`: iOS Simulator build/install/launch/screenshot workflow.
 - `scripts/run_android_emulator_review.js`: Android emulator build/install/launch/screenshot workflow.
@@ -261,6 +272,14 @@ Run the cross-artifact validator before accepting any full pipeline output:
 
 ```bash
 node <skill-dir>/scripts/validate_pipeline.js \
+  --run path/to/run
+```
+
+For image decoding runs, also run the decoding audit after Vision IR, Node
+Compression IR, and Semantic UI IR exist:
+
+```bash
+node <skill-dir>/scripts/audit_image_decoding.js \
   --run path/to/run
 ```
 
