@@ -4,6 +4,25 @@
 
 <!-- mcp-name: io.github.Kinglions/ui-design-to-code-mcp -->
 
+MCP server for **Codex**, **Cursor**, and **Claude Code** that turns UI screenshots, source images, Figma MCP node JSON, and Figma-plus-screenshot hybrid input into traceable design-to-code artifacts.
+
+```bash
+npx -y ui-design-to-code-mcp@latest install --client codex
+```
+
+Use it when you need more than a one-shot screenshot-to-code prompt:
+
+- Decode UI screenshots and Figma data into source manifests, reference analysis, Vision IR, Node Compression IR, and Semantic UI node trees.
+- Preserve traceability from generated code plans back to visual primitives, grouped candidates, and source pixels.
+- Generate adapter-ready artifacts for Web, iOS, Android, and other UI implementation targets.
+- Run audit gates for text overflow, media coverage, navigation structure, visual review evidence, and cleanup.
+
+Links:
+
+- npm: <https://www.npmjs.com/package/ui-design-to-code-mcp>
+- MCP Registry: `io.github.Kinglions/ui-design-to-code-mcp`
+- GitHub: <https://github.com/Kinglions/ui-design-to-code-mcp>
+
 ## 中文
 
 `ui-design-to-code-mcp` 是一个用于 UI design-to-code 流程的 MCP server。它可以把 UI 截图、Figma MCP 节点 JSON，或 Figma 节点 + 截图的混合输入，接入一套结构化、可追踪、可校验的产物流水线。

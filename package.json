@@ -1,7 +1,7 @@
 {
   "name": "ui-design-to-code-mcp",
-  "version": "0.1.8",
-  "description": "MCP server for ingesting UI screenshots and Figma design data into a cross-platform design-to-code artifact pipeline.",
+  "version": "0.1.9",
+  "description": "MCP server for Codex, Cursor, and Claude Code to turn UI screenshots and Figma data into design-to-code artifacts.",
   "mcpName": "io.github.Kinglions/ui-design-to-code-mcp",
   "type": "commonjs",
   "main": "scripts/ui_design_to_code_mcp_server.js",
@@ -30,11 +30,21 @@
   },
   "keywords": [
     "mcp",
+    "mcp-server",
     "model-context-protocol",
+    "codex",
+    "cursor",
+    "claude-code",
     "design-to-code",
     "figma",
+    "figma-mcp",
     "screenshot-to-code",
-    "ui"
+    "ui-to-code",
+    "image-to-code",
+    "ui-analysis",
+    "visual-review",
+    "artifact-pipeline",
+    "frontend"
   ],
   "license": "MIT",
   "engines": {
@@ -43,6 +53,10 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Kinglions/ui-design-to-code-mcp.git"
+  },
+  "homepage": "https://github.com/Kinglions/ui-design-to-code-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/Kinglions/ui-design-to-code-mcp/issues"
   },
   "publishConfig": {
     "access": "public"
