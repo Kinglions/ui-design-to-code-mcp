@@ -79,7 +79,6 @@ function checkPackageFiles() {
   const pkg = readJson("package.json");
   const requiredFiles = [
     "README.md",
-    "README.zh-CN.md",
     "LICENSE",
     "server.json",
     ".agents/plugins/marketplace.json",
@@ -93,7 +92,7 @@ function checkPackageFiles() {
     "references/reference-analysis.schema.json"
   ];
   for (const filePath of requiredFiles) assertFile(filePath);
-  for (const filePath of ["README.md", "README.zh-CN.md"]) {
+  for (const filePath of ["README.md"]) {
     if (!(pkg.files || []).includes(filePath)) fail(`package files must include ${filePath}`);
   }
 }
