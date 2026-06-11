@@ -1,6 +1,6 @@
 {
   "name": "ui-design-to-code-mcp",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "MCP server for Codex, Cursor, and Claude Code to turn UI screenshots and Figma data into design-to-code artifacts.",
   "mcpName": "io.github.Kinglions/ui-design-to-code-mcp",
   "type": "commonjs",

@@ -113,6 +113,46 @@
     "bitmap": "drawable resource",
     "mediaCrop": "ImageView scaleType"
   },
+  "visualFidelityRules": [
+    {
+      "id": "android-view-paint-alpha-isolation",
+      "appliesTo": [
+        "generated_custom_view",
+        "Canvas",
+        "Paint",
+        "gradient fills",
+        "bitmap icons",
+        "Figma exported icons"
+      ],
+      "rule": "When implementing Figma visuals with Android Canvas/Paint, do not reuse a Paint instance across translucent surfaces, gradients, text, and bitmap draws unless alpha, colorFilter, shader, blendMode, and color are reset before every draw. Prefer dedicated Paint instances for bitmap assets and gradient fills.",
+      "rationale": "Paint keeps mutable alpha and shader state. A previous semi-transparent card/background draw can leak into later drawBitmap or gradient button rendering, making Android output much darker than the Figma/iOS reference, especially CTA gradients and icons.",
+      "requiredChecks": [
+        "Before drawBitmap for icons/assets, ensure paint.alpha == 255 and paint.colorFilter == null unless the Figma layer explicitly has opacity.",
+        "Before gradient CTA/background fills, ensure paint.alpha == 255 and use fully opaque gradient colors unless the source layer opacity is less than 100%.",
+        "After shader-based draws, clear paint.shader before subsequent non-gradient draws.",
+        "During runtime review, sample CTA and icon pixels against the Figma screenshot; investigate if mean channel values are consistently lower while geometry matches."
+      ]
+    },
+    {
+      "id": "android-view-icon-text-alignment",
+      "appliesTo": [
+        "generated_custom_view",
+        "Canvas",
+        "ImageView",
+        "TextView",
+        "Figma exported icons",
+        "icon plus text rows"
+      ],
+      "rule": "When a Figma icon appears next to text, preserve the wrapper bbox and inner graphic visual center separately. Align the icon wrapper to the source bbox, then align the visible icon center to the text optical center or recorded Figma y-center. Do not place icons by ad hoc x/y offsets from the text baseline.",
+      "rationale": "Figma icon wrapper nodes often include padding or an inner vector that is not centered on the exported bitmap bounds. If code aligns the bitmap top-left or a custom-drawn path to text baseline heuristics, small icons such as credit stars/sparkles drift vertically or horizontally relative to numbers even when the text and card geometry match.",
+      "requiredChecks": [
+        "For each icon+text pair, record icon wrapper bbox, inner graphic bbox, text bbox, horizontal gap, and centerY delta from the source image or Figma node data.",
+        "For custom Canvas icons, draw the path around the wrapper/inner visual center from the source, not around a guessed center derived only from text y.",
+        "For ImageView icons, set explicit width/height and constraints/margins from the wrapper bbox; use scaleType centerInside when the exported asset includes wrapper padding.",
+        "During runtime review, crop each icon+text pair and compare icon center, text bounding box, and gap before declaring visual parity."
+      ]
+    }
+  ],
   "reviewPlan": {
     "commands": [
       "./gradlew assembleDebug"

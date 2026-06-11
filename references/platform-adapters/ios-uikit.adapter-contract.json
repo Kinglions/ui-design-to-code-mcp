@@ -120,6 +120,28 @@
     "bitmap": "asset catalog or source crop",
     "mediaCrop": "UIImageView contentMode"
   },
+  "visualFidelityRules": [
+    {
+      "id": "ios-uikit-icon-text-alignment",
+      "appliesTo": [
+        "generated_reusable_view",
+        "page_private_view",
+        "UIView drawing",
+        "UIImageView",
+        "UILabel",
+        "Figma exported icons",
+        "icon plus text rows"
+      ],
+      "rule": "When a Figma icon appears next to text, preserve the wrapper bbox and inner graphic visual center separately. Align the icon wrapper to the source bbox, then align the visible icon center to the text optical center or recorded Figma y-center. Do not place icons by ad hoc x/y offsets from label baseline heuristics.",
+      "rationale": "Figma icon wrapper nodes can include padding and inner vectors that are not centered on the exported image bounds. UIKit code that uses UIImageView frames or custom UIBezierPath centers without wrapper/inner bbox evidence can drift relative to adjacent UILabel text, especially for small credit star/sparkle icons.",
+      "requiredChecks": [
+        "For each icon+text pair, record icon wrapper bbox, inner graphic bbox, label bbox, horizontal gap, and centerY delta from the source image or Figma node data.",
+        "For custom CoreGraphics/UIBezierPath icons, draw around the source-derived visual center rather than a guessed center from the label origin.",
+        "For UIImageView icons, set explicit frame/constraints from the wrapper bbox; use contentMode center or centerInside when the exported image includes wrapper padding.",
+        "During simulator review, crop each icon+text pair and compare icon center, label bounding box, and gap before declaring visual parity."
+      ]
+    }
+  ],
   "reviewPlan": {
     "commands": [
       "xcodebuild build"

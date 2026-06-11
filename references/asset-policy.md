@@ -70,6 +70,12 @@ Every Figma asset plan item must record:
 
 Target code must place the image using the wrapper bbox and parent layout metadata. Do not center or resize the image based on the internal vector bounds unless the wrapper node is absent.
 
+For icons placed next to text, the asset plan must also preserve the sibling
+text bbox, wrapper-to-text gap, wrapper centerY versus text bbox centerY, and
+inner graphic bbox when available. Do not trim wrapper padding or recenter from
+the exported bitmap bounds unless visual review proves that behavior matches
+the source.
+
 ## Figma Design Notes
 
 During Figma REST ingestion, fetch file comments when a token is available and scan the node tree for annotation/callout/spec labels. Persist these into `figma/figma-design-notes.json`. Codegen and target IR must read this artifact before implementation and treat notes/comments as requirements unless an explicit user instruction overrides them.

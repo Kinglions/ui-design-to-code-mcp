@@ -134,6 +134,36 @@ Typical flow:
 
 If no emulator exists, pass `--avd <name>` or start one outside the script.
 
+Android View custom drawing color check:
+
+- If Android geometry matches the Figma/iOS reference but CTA gradients, icon
+  assets, or selected states are globally darker, audit Canvas `Paint` reuse
+  before changing design tokens.
+- `Paint` is mutable. Reset `alpha`, `shader`, `colorFilter`, `blendMode`, and
+  color before each draw group, or use dedicated paints for bitmap icons,
+  gradient fills, text, and translucent surfaces.
+- `drawBitmap(..., paint)` inherits `paint.alpha`; a previous translucent card
+  fill can darken Figma-exported icons even when the PNG itself is correct.
+- Gradient fills for primary buttons should use `alpha == 255` unless the
+  source Figma layer explicitly has opacity below 100%.
+
+Icon and text alignment review:
+
+- Treat every icon+text pair as a single review unit. Check the icon shape,
+  icon wrapper position, visible icon center, text bbox, and gap together.
+- Required evidence for each pair: source icon wrapper bbox, inner graphic bbox
+  when available, text bbox, horizontal gap, centerY delta, and state variant
+  such as default, selected, disabled, or pressed.
+- If the icon shape is correct but appears shifted relative to the label, crop
+  the pair from the source and runtime screenshot before changing global layout.
+- Custom-drawn icons must use the source-derived wrapper center and inner visual
+  center. Do not infer icon y from text baseline or font metrics alone.
+- Exported Figma icons must preserve wrapper padding. Place the wrapper bbox in
+  layout and use centered rendering inside it when the inner vector is smaller
+  than the wrapper.
+- Do not mark icon rows as visually matched until runtime review confirms icon
+  center, text bbox, and wrapper-to-text gap against the source crop.
+
 ## Patch Loop
 
 Use this order when visual review fails:
