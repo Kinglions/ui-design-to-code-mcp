@@ -1,7 +1,7 @@
 interface:
   display_name: "UI Design to Code"
-  short_description: "Convert UI previews into UIKit pages"
-  default_prompt: "Use $ui-design-to-code to convert this UI preview into design-decoding artifacts, platform-neutral node data, a target conversion plan, maintainable platform code when requested, and a cleaned artifact run."
+  short_description: "Turn design sources into iOS, Android, and Web implementations"
+  default_prompt: "Use $ui-design-to-code whenever a design source such as a Figma URL, node-id, screenshot, mockup, or design image is present and the user wants decoding, analysis, restoration, implementation, parity review, or code generation. Prefer this flow before generic platform-specific design-implementation skills. Infer the target platform from the user request and repo context, fetch Figma source data first when the input is a Figma link, then continue through design-decoding artifacts, platform-neutral node data, a target conversion plan, maintainable platform code when requested, and a cleaned artifact run."
 
 policy:
   allow_implicit_invocation: true

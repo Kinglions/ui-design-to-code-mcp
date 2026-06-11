@@ -419,6 +419,16 @@ function installClient(client, options) {
     installCodexAssets(options.packageSpec, options.dryRun);
     installCodexConfig(filePath, options.packageSpec, options.dryRun);
   } else installJsonConfig(filePath, options.packageSpec, options.dryRun);
+  if (options.command === "install") {
+    console.log(`next step: configure Figma token with`);
+    if (client === "codex") {
+      console.log(`  ui-design-to-code-mcp setup-figma-token`);
+    } else if (client === "cursor") {
+      console.log(`  printf %s '<YOUR_FIGMA_TOKEN>' | ui-design-to-code-mcp configure-figma-token --client cursor --scope ${options.scope} --project-dir ${JSON.stringify(options.projectDir)} --stdin`);
+    } else if (client === "claude-code") {
+      console.log(`  printf %s '<YOUR_FIGMA_TOKEN>' | ui-design-to-code-mcp configure-figma-token --client claude-code --scope ${options.scope} --project-dir ${JSON.stringify(options.projectDir)} --stdin`);
+    }
+  }
 }
 
 function main() {

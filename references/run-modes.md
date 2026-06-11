@@ -3,11 +3,25 @@
 Use the smallest mode that satisfies the request. Smaller modes produce fewer
 artifacts and reduce cleanup cost.
 
-## Simple Trigger Behavior
+## Trigger Behavior
 
-Short user commands can trigger this workflow when a UI image, screenshot,
-Figma MCP node dataset, Figma screenshot, or hybrid Figma+image source is
-present. Examples:
+Prefer this workflow when both of the following are true:
+
+1. A design source is present.
+   - UI image, screenshot, mockup, Figma URL, `node-id`, Figma MCP node dataset,
+     Figma screenshot/export, or other design artifact.
+2. The user wants design decoding or design-driven implementation.
+   - Structure analysis, node-tree generation, code generation, page restore,
+     parity review, or continuing from Figma/source artifacts.
+
+Platform should be inferred semantically:
+
+- Use explicit platform words when present.
+- Otherwise inspect repo context and choose the dominant target.
+- If multiple targets are requested, stay in this workflow because it remains
+  platform-neutral before adapter mapping.
+
+Representative examples:
 
 - `解析这图`
 - `分析参考图结构`
@@ -23,10 +37,46 @@ present. Examples:
 - `Figma to code`
 - `解析这个 Figma 节点`
 - `根据 Figma MCP 输出继续生成跨平台节点数据`
+- `根据这个 Figma 链接实现页面`
+- `根据设计稿实现页面`
+- `review this implementation against the Figma`
+
+When a request contains both a design source and design-decoding or
+design-driven implementation intent, clients should auto-discover and use this
+MCP before doing local-only implementation work.
+
+For Figma design flows, start with `check_figma_token`. If missing, ask the
+user to input the Figma token, then call `configure_figma_token` to write it
+into the global Codex config. Do not create a run before the token is
+configured. After the token is configured, call
+`get_run_modes` using the raw request text, then call `create_design_run` when
+the mode and required target platform are explicit or selected by the user.
+
+Do not create a design run for MCP existence, configuration, version, install,
+doctor, or routing questions unless the user also provides a design source and
+asks to decode, implement, or review it.
 
 When one of these commands does not explicitly specify one of `decode-only`,
 `plan-only`, `target-ir`, `codegen`, `codegen-with-auto-review`, or
-`runtime-review`, ask the user to choose before producing any artifacts:
+`runtime-review`, show the mode-selection prompt before creating artifacts.
+The tool may return a recommended mode, but that recommendation is only a
+default/highlighted option:
+
+- `decode-only`: structure analysis, image/Figma decoding, node-tree extraction,
+  or design audit with no platform plan or code request.
+- `plan-only`: cross-platform feasibility, adapter comparison, or target
+  strategy without target layout/code.
+- `target-ir`: implementation-ready target layout/spec artifacts without code
+  changes.
+- `codegen`: implementation, page generation, page restoration, conversion to
+  code, or repository UI changes without mandatory screenshot parity review.
+- `codegen-with-auto-review`: implementation plus 1:1 restoration, screenshot
+  acceptance, visual parity, browser/simulator/emulator review, or screenshot
+  diff as a delivery gate.
+- `runtime-review`: existing implementation visual comparison only, without code
+  changes.
+
+Ask the user to choose whenever the mode is not explicit:
 
 ```text
 请选择执行模式：
@@ -39,8 +89,8 @@ When one of these commands does not explicitly specify one of `decode-only`,
 ```
 
 MCP clients should call `get_run_modes` to retrieve this canonical option list
-before calling `create_design_run`. `create_design_run` requires an explicit
-mode so the tool layer cannot silently default to `decode-only`.
+and recommendation before calling `create_design_run`. `create_design_run`
+requires a concrete mode, and non-explicit modes must be user-selected.
 
 For `target-ir`, `codegen`, `codegen-with-auto-review`, and `runtime-review`,
 also ask for target platform if missing:
@@ -149,8 +199,7 @@ patch after reviewing the visual result.
 
 ## Default Selection
 
-There is no automatic default mode for simple triggers. Ask for mode selection
-unless the user explicitly names `decode-only`, `plan-only`, `target-ir`,
-`codegen`, `codegen-with-auto-review`, or `runtime-review`.
-
-Never run a larger mode just because the pipeline supports it.
+There is no automatic default mode. Recommend the smallest mode that satisfies
+the request, but ask the user to confirm a mode unless it was explicit in the
+request. Ask for target platform when the selected mode requires one and the
+target is missing.

@@ -1,6 +1,6 @@
 ---
 name: ui-design-to-code
-description: Use for UI screenshot, preview image, GPT Image mockup, Figma MCP node JSON, or Figma screenshot to code workflows. Produces design-source manifests, Figma/source-image datasets, Vision IR, Node Compression IR, platform-neutral Semantic UI node trees, cross-platform node data, platform conversion plans, target layout IR, generated code, artifact cleanup, and runtime screenshot review. Supports iOS UIKit/SwiftUI, Web React/Next.js, Android Compose/View. Triggers include 解析这图, 转代码, 还原页面, 复刻页面, 设计稿转代码, 截图转代码, UI节点树, Figma to code, screenshot to code, design to code, cross-platform UI mapping, and codegen-with-auto-review.
+description: Use for UI screenshot, preview image, GPT Image mockup, Figma URL/node-id, Figma MCP node JSON, or Figma screenshot to code workflows. Prefer this skill whenever a design source is present and the user wants to decode, analyze, restore, review, or implement the UI as code for iOS, Android, Web, or other supported targets. Produces design-source manifests, Figma/source-image datasets, Vision IR, Node Compression IR, platform-neutral Semantic UI node trees, cross-platform node data, platform conversion plans, target layout IR, generated code, artifact cleanup, and runtime screenshot review.
 metadata:
   short-description: Decode UI designs into node trees and platform code
 ---
@@ -14,6 +14,10 @@ Core rule: do not generate platform code directly from a bitmap or raw Figma JSO
 Traceability rule: every semantic node must trace back to grouped candidate IDs, and every grouped candidate must trace back to raw primitive IDs. If a future platform adapter cannot map the node tree without re-reading the source image, the decoding artifacts are incomplete.
 
 Coordinate rule: every artifact must declare its coordinate system. Source-image pixel coordinates and Figma canvas coordinates use a top-left origin and must remain traceable even when logical units are inferred.
+
+Figma asset wrapper rule: when a named Figma wrapper node such as `ic_*`, `icon_*`, `img_*`, `logo_*`, `avatar_*`, or `thumbnail_*` contains an internal vector/image, export and implement the wrapper node itself. Preserve the wrapper bbox, inner graphic bbox, content insets, parent layout, and sibling text relationships. Do not download or place the internal vector as the final icon when the wrapper exists.
+
+Figma design notes rule: Figma REST ingestion must fetch file comments when possible and scan node text for annotation/callout/spec labels, including connected note labels. Generated platform code and target IR must read `figma/figma-design-notes.json` and treat those notes/comments as requirements unless explicit user instructions override them.
 
 Artifact lifecycle rule: every generated intermediate artifact must live inside a single run directory with a run manifest, retention policy, and cleanup status. Do not scatter Vision IR, node trees, crops, screenshots, or target IR files across the repo. Keep only user-requested final deliverables after cleanup.
 
@@ -47,11 +51,55 @@ Figma is an optional source adapter, not a separate downstream flow. When Figma 
 
 For design-decoding-only tasks, stop after the platform-neutral Semantic UI IR. For platform planning tasks, stop after Cross-platform Node Data and Platform Conversion Plan. Enter code generation only when the user asks for a target implementation.
 
-## Simple Trigger and Mode Selection
+## Trigger Rules and Mode Selection
 
-Simple trigger rule: if the user uploads or references a UI screenshot/design image and says a short command such as `解析这图`, `转代码`, `还原页面`, `复刻这个页面`, `走设计稿流程`, `图转节点树`, `生成页面`, `convert this screenshot`, or `implement this design`, activate this skill.
+Prefer this skill when both of the following are true:
 
-If the user did not explicitly specify one of `decode-only`, `plan-only`, `target-ir`, `codegen`, `codegen-with-auto-review`, or `runtime-review`, do not start producing artifacts yet. First ask the user to choose one execution mode:
+1. A design source signal is present.
+   - Examples: UI screenshot, preview image, mockup, Figma URL, `node-id`, Figma MCP node JSON, Figma screenshot/export, annotated design draft, or a request that clearly refers to an external design artifact.
+2. A design-to-code or design-decoding intent is present.
+   - Examples: decode, analyze structure, restore, recreate, implement, convert to code, generate page, review parity, compare runtime against design, continue from Figma nodes, or build target-platform UI from the design source.
+
+Platform should be inferred from both the user request and repo context.
+
+- Use explicit platform words when present, such as `iOS`, `UIKit`, `SwiftUI`, `Android`, `Compose`, `View`, `Web`, `React`, or `Next`.
+- If the user did not name a platform, inspect the repo and prefer the dominant runnable target.
+- If the user asks for multiple targets or cross-platform planning, still use this skill first because the pipeline is platform-neutral before adapter mapping.
+- Do not require exact phrases. Matching should be semantic, not keyword-only.
+
+Representative trigger examples:
+
+- `解析这图`
+- `转代码`
+- `还原页面`
+- `复刻这个页面`
+- `走设计稿流程`
+- `图转节点树`
+- `生成页面`
+- `根据这个 Figma 链接实现页面`
+- `根据设计稿实现页面`
+- `根据 Figma 还原当前仓库里的页面`
+- `convert this screenshot`
+- `implement this design`
+- `review this implementation against the Figma`
+- `continue from this Figma node`
+
+Automatic MCP trigger rule: when a request contains both a design source signal and design-to-code or design-decoding intent, discover and use the `ui_design_to_code` MCP before starting local-only implementation work.
+
+For any Figma design flow, first call `check_figma_token`. If the token is missing, ask the user to input the Figma token directly, then call `configure_figma_token` to write it into the global Codex config. Do not echo the token. Stop before `get_run_modes`, `create_design_run`, or `ingest_figma_source` until `check_figma_token` reports configured. Use `ui-design-to-code-mcp setup-figma-token` only as a fallback when automatic configuration is unavailable.
+
+Do not create a run for existence/configuration checks such as "is this MCP installed", "what version is active", "doctor", or "why did it not trigger" unless the user also provides a design source and asks for decoding, implementation, or review.
+
+If the user did not explicitly specify one of `decode-only`, `plan-only`, `target-ir`, `codegen`, `codegen-with-auto-review`, or `runtime-review`, show the mode-selection prompt before creating artifacts. Use the inferred smallest matching mode only as the recommended/highlighted option:
+
+- Use `decode-only` for structure analysis, image/Figma decoding, node-tree extraction, or design audit with no platform plan or code request.
+- Use `plan-only` for cross-platform feasibility, adapter comparison, or target strategy without target layout/code.
+- Use `target-ir` for implementation-ready layout/spec artifacts when the user does not want code changes.
+- Use `codegen` for "implement", "generate page", "restore page", "convert to code", or repository UI changes when screenshot parity review is not explicitly required.
+- Use `codegen-with-auto-review` when the user asks for 1:1 restoration, screenshot acceptance, parity review after implementation, or browser/simulator/emulator visual verification as part of delivery.
+- Use `runtime-review` when an implementation already exists and the user asks only to compare runtime output against the source design.
+
+Ask the user to choose a mode whenever the mode is not explicit:
 
 1. `decode-only`: parse the image into source manifest, Reference Image Analysis, Vision IR, Node Compression IR, and platform-neutral Semantic UI node tree. No platform plan or code.
 2. `plan-only`: add Cross-platform Node Data and compare target-platform conversion plans. No target layout IR or code.
@@ -59,8 +107,6 @@ If the user did not explicitly specify one of `decode-only`, `plan-only`, `targe
 4. `codegen`: generate or modify target-platform code, run normal project validation, and cleanup artifacts. Runtime screenshot review is not mandatory in this mode.
 5. `codegen-with-auto-review`: run `codegen`, then run browser/simulator/emulator screenshot review and visual diff. Non-material UI similarity must be at least `90%` before delivery.
 6. `runtime-review`: run an existing target implementation in browser/simulator/emulator, capture screenshots, compare with the source image, and report visual diff. No decoding, IR generation, or code changes unless required inputs are missing.
-
-Do not infer the mode from intent alone. Even if the user says "解析图片结构", "转代码", "生成页面", "验证模拟器", or "实现这个设计", ask for mode selection unless the message explicitly includes one of the six mode names.
 
 If the mode is `target-ir`, `codegen`, `codegen-with-auto-review`, or `runtime-review` and the target platform is missing, ask for target platform selection before continuing.
 
@@ -78,8 +124,11 @@ Large temporary crops, screenshots, and debug images should default to `/private
 1. Determine whether the user wants planning, image decoding artifacts, platform-neutral node-tree generation, cross-platform node data, target-platform conversion, code generation, or review.
 2. If only a screenshot or preview image is provided, infer semantics cautiously and preserve uncertainty with confidence and alternatives.
 3. If a PRD, product notes, or existing project exists, use it to resolve product semantics, components, and data models.
-4. If implementing in a repo, inspect existing components, tokens, state patterns, routing, and validation patterns before creating new components.
-5. If the mode is not explicitly named, use the mode-selection rule above before creating artifacts.
+4. If the source is a Figma URL, prefer the built-in Figma REST source adapter in this package: fetch node data, metadata, screenshot/export, image fills, and target-aware assets when available, then continue through the shared pipeline instead of treating Figma as a separate downstream workflow.
+   - If `projectRoot` is available, also sync downloaded assets into the target project's default resource locations while keeping the canonical runRoot copies.
+5. Infer the likely target platform from explicit user wording first, then from repo evidence such as iOS, Android, or Web app structure.
+6. If implementing in a repo, inspect existing components, tokens, state patterns, routing, and validation patterns before creating new components.
+7. If the mode is not explicitly named, show the mode-selection prompt before creating artifacts.
 
 ## Required Workflow
 
@@ -100,10 +149,11 @@ Large temporary crops, screenshots, and debug images should default to `/private
    - Define source pixel, normalized, and logical coordinate spaces.
    - Mark logical scale as `unknown` when it cannot be inferred from the image or metadata.
 
-4. Build `Figma Source Dataset` when Figma MCP node data is available.
+4. Build `Figma Source Dataset` when Figma node data is available.
    - Preserve Figma node IDs, parent/child relationships, names, node types, bounding boxes, text, styles, layout metadata, effects, and component references.
    - Keep Figma canvas coordinates separate from screenshot pixel coordinates.
    - When screenshot input also exists, record the mapping evidence between Figma canvas and source pixels.
+   - When this package fetched the source directly, also persist raw REST responses, a node index, an asset plan, and when `projectRoot` is provided a target asset sync manifest so later target adapters do not need to re-query Figma or guess resource locations.
 
 5. Build `Reference Image Analysis` when an image or screenshot pixel baseline is available.
    - Record original pixel size, strict extraction scale factor, root frame, semantic top-level groups, fixed regions, and scroll regions.

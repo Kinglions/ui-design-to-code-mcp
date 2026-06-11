@@ -47,6 +47,19 @@ Links:
 npx -y ui-design-to-code-mcp@latest install --client codex
 ```
 
+配置 Figma token：
+
+```bash
+ui-design-to-code-mcp setup-figma-token
+```
+
+该命令会提示粘贴 token，并写入 `~/.codex/config.toml` 的
+`[mcp_servers.ui_design_to_code.env]`。如果要在脚本里使用：
+
+```bash
+printf %s '<YOUR_FIGMA_TOKEN>' | ui-design-to-code-mcp configure-figma-token --client codex --stdin
+```
+
 ### 安装到 Cursor 项目级配置
 
 ```bash
@@ -54,6 +67,12 @@ npx -y ui-design-to-code-mcp@latest install \
   --client cursor \
   --scope project \
   --project-dir .
+```
+
+配置 Figma token：
+
+```bash
+ui-design-to-code-mcp configure-figma-token --client cursor --scope project --project-dir . --token <YOUR_FIGMA_TOKEN>
 ```
 
 ### 一次安装到所有支持的本地客户端
@@ -74,14 +93,25 @@ npx -y ui-design-to-code-mcp@latest serve
 
 ## 推荐执行流程
 
-1. 用户没有指定模式时，先调用 `get_run_modes` 选择执行模式。
-2. 调用 `create_design_run` 创建独立产物运行目录。
-3. 使用 `ingest_image_source` 或 `ingest_figma_source` 登记源输入。
-4. 对截图/图片输入，先生成并用 `build_reference_analysis` 登记 Reference Image Analysis。
-5. 生成并登记 Semantic UI IR、Cross-platform Node Data、Target Layout IR。
-6. 当已有 Vision/Compression/Semantic 产物后，调用 `audit_image_decoding` 审计图片解析质量。
-7. 在宿主项目中生成或修改目标代码。
-8. 使用 `run_codegen` 或 `run_codegen_with_auto_review` 记录结果。
+当请求同时包含设计源和 design-to-code / design-decoding 意图时，客户端应先自动发现并调用 `ui_design_to_code` MCP，而不是先走纯本地实现流程。典型设计源包括 UI 截图、预览图、GPT Image mockup、Figma URL / `node-id`、Figma MCP 节点 JSON、Figma 截图或导出图。
+
+不要为 MCP 存在性、版本、安装、doctor 或路由排查请求创建 run，除非用户同时提供设计源并要求解析、实现或视觉验收。
+
+1. 如果流程包含 Figma 设计稿，先调用 `check_figma_token`。
+   - token 缺失时，直接要求用户输入 Figma token；收到后调用 `configure_figma_token` 自动写入全局 Codex 配置，不要创建 run。
+   - 只有交互式自动写入不可用时，才提示备用命令 `ui-design-to-code-mcp setup-figma-token`。
+   - token 已配置后，继续进入执行模式选择。
+2. 用户没有显式指定模式时，再调用 `get_run_modes`，把返回的模式选择提示展示给用户。
+   - `recommendedMode` 只能作为默认高亮选项，不能当作用户已同意。
+   - 用户必须选择 `decode-only`、`plan-only`、`target-ir`、`codegen`、`codegen-with-auto-review` 或 `runtime-review` 之一。
+3. 用户确认模式后，再调用 `create_design_run` 创建独立产物运行目录。
+4. 使用 `ingest_image_source` 或 `ingest_figma_source` 登记源输入。
+   - `ingest_figma_source` 支持两种来源：外部已获取的 Figma 节点 JSON，或 Figma URL / `fileKey` / `nodeId` + token 直连 Figma REST API 由本 MCP 自行拉取节点树、截图和 image fills。
+5. 对截图/图片输入，先生成并用 `build_reference_analysis` 登记 Reference Image Analysis。
+6. 生成并登记 Semantic UI IR、Cross-platform Node Data、Target Layout IR。
+7. 当已有 Vision/Compression/Semantic 产物后，调用 `audit_image_decoding` 审计图片解析质量。
+8. 在宿主项目中生成或修改目标代码。
+9. 使用 `run_codegen` 或 `run_codegen_with_auto_review` 记录结果。
 9. 调用 `validate_pipeline` 校验完整产物链路。
 10. 需要时使用 `cleanup_design_run` 清理生成产物。
 
@@ -107,8 +137,8 @@ ios-uikit / ios-swiftui / web-react / web-next / android-compose / android-view
 | 输入类型 | 适用场景 | 推荐工具 |
 | --- | --- | --- |
 | 截图或图片 | 设计源是渲染后的图像。 | `ingest_image_source` |
-| Figma MCP 节点 JSON | 需要结构、命名、文本、组件、样式和布局元数据。 | `ingest_figma_source` |
-| Figma 节点 JSON + 截图 | 同时需要结构化信息和像素级视觉基准。 | `ingest_figma_source` |
+| Figma 节点 JSON 或 Figma REST 直连 | 需要结构、命名、文本、组件、样式和布局元数据。 | `ingest_figma_source` |
+| Figma 节点 + 截图 / REST 导出截图 | 同时需要结构化信息和像素级视觉基准。 | `ingest_figma_source` |
 
 能同时拿到 Figma 节点和截图时，优先使用混合输入：Figma 节点提供结构化信息，截图提供像素级视觉基准，便于后续视觉复核。
 
@@ -319,23 +349,60 @@ source/page.source-manifest.json
 
 ### `ingest_figma_source`
 
-登记 Figma MCP 节点 JSON、可选截图，或两者组成的 hybrid 输入。
+登记 Figma 输入源。支持：
+
+1. 传入现成 Figma 节点 JSON。
+2. 提供 Figma URL / `figma.fileKey` / `figma.nodeId`，并通过 `apiToken` 或环境变量（默认尝试 `FIGMA_API_TOKEN`、`FIGMA_ACCESS_TOKEN`、`FIGMA_OAUTH_TOKEN`）让 MCP 直接调用 Figma REST API。
+3. 在 1 或 2 的基础上附带截图，或让 MCP 自动导出截图和 target-aware 资产。
+4. 如果同时提供 `projectRoot`，MCP 会在下载完成后把资产自动同步到目标工程的默认资源目录，同时保留 runRoot 中的归档副本。
 
 输出：
 
 ```text
 source/design-source-manifest.json
 figma/figma-source-dataset.json
+figma/figma-node-index.json
+figma/figma-asset-plan.json
+figma/raw-node-response.json
+figma/raw-file-metadata.json
+figma/raw-image-fills.json
+figma/figma-asset-downloads.json
+targets/asset-sync-manifest.json
 ```
 
 关键入参：
 
 - `runRoot`
+- `figmaUrl`
 - `figma.fileKey`
 - `figma.nodeId`
 - `nodeJson` 或 `nodeJsonPath`
 - `screenshotPath`
 - `figmaBounds`
+- `fetchFromApi`
+- `apiToken` / `tokenEnvVar`
+- `downloadScreenshot`
+- `downloadAssets`
+- `screenshotScale`
+- `projectRoot`
+
+资源同步规则：
+
+- `web-react` / `web-next`：默认同步到 `public/ui-design-to-code/figma/...`；若无 `public/`，回退到 `src/assets/ui-design-to-code/figma/...`
+- `ios-uikit` / `ios-swiftui`：优先同步到首个发现的 `.xcassets`，自动创建 `.imageset`
+- `android-compose` / `android-view`：默认同步到 `app/src/main/res/drawable`；若无则搜索 `src/main/res`
+
+也可以显式单独调用：
+
+```text
+sync_target_assets
+```
+
+如果缺少 token，MCP 会要求用户直接输入 Figma token，并通过 `configure_figma_token` 自动写入全局 Codex 配置；只有自动配置不可用时，才使用备用命令：
+
+```bash
+ui-design-to-code-mcp setup-figma-token
+```
 
 ### `slice_image_assets`
 

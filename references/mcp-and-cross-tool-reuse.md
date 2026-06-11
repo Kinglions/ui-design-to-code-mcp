@@ -13,7 +13,7 @@ should only route intent, choose a mode, and call the same MCP tools.
 The source adapter layer supports three source shapes:
 
 - `image`: a screenshot, UI preview image, or exported bitmap.
-- `figma`: Figma MCP node JSON without a screenshot.
+- `figma`: a Figma URL/node reference or Figma MCP node JSON without a screenshot.
 - `hybrid`: Figma MCP node JSON plus a Figma screenshot/export.
 
 Hybrid is preferred when available. Figma nodes provide structure, naming,
@@ -85,7 +85,7 @@ MCP client from skipping the user-facing mode gate and silently defaulting to
 
 ## Figma MCP Integration
 
-When a task starts from Figma, run the Figma MCP source step first, then feed the
+When a task starts from a Figma URL, node-id, or other Figma reference, run the Figma MCP source step first, then feed the
 result into this shared pipeline:
 
 1. Fetch Figma node JSON through Figma MCP.

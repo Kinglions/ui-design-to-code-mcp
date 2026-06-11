@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 const path = require("path");
+const fs = require("fs");
+const os = require("os");
 const { spawnSync, spawn } = require("child_process");
 
 const root = path.resolve(__dirname, "..");
@@ -8,6 +10,7 @@ const serverPath = path.join(root, "scripts", "ui_design_to_code_mcp_server.js")
 const installerPath = path.join(root, "scripts", "install_mcp_client.js");
 const registryTokenPath = path.join(root, "scripts", "configure_mcp_registry_token.js");
 const npmTrustedPublishingPath = path.join(root, "scripts", "configure_npm_trusted_publishing.js");
+const figmaTokenPath = path.join(root, "scripts", "configure_figma_token.js");
 
 function usage() {
   console.log(`ui-design-to-code-mcp
@@ -18,11 +21,32 @@ Usage:
   ui-design-to-code-mcp update [--clients cursor,claude-code,codex] [--channel latest|beta|next|stable]
   ui-design-to-code-mcp uninstall [--clients cursor,claude-code,codex] [--scope project|user] [--project-dir <dir>] [--dry-run]
   ui-design-to-code-mcp config [--client cursor|claude-code|codex] [--package-spec <pkg>]
+  ui-design-to-code-mcp setup-figma-token
+  ui-design-to-code-mcp figma-token
+  ui-design-to-code-mcp configure-figma-token [--client cursor|claude-code|codex] [--scope project|user] [--project-dir <dir>] [--env-var FIGMA_API_TOKEN] [--token <token>|--stdin] [--dry-run]
   ui-design-to-code-mcp configure-npm-trusted-publishing [--repo owner/name] [--workflow release.yml] [--environment npm-publish] [--dry-run] [--yes]
   ui-design-to-code-mcp configure-registry-token [--token <token>|--stdin] [--repo owner/name]  # fallback only; GitHub Actions uses OIDC
   ui-design-to-code-mcp doctor
   ui-design-to-code-mcp version
 `);
+}
+
+function readCodexFigmaTokenStatus() {
+  const configPath = path.join(os.homedir(), ".codex", "config.toml");
+  const envNames = ["FIGMA_API_TOKEN", "FIGMA_ACCESS_TOKEN", "FIGMA_OAUTH_TOKEN"];
+  const processEnvName = envNames.find((name) => process.env[name]);
+  if (processEnvName) return { configured: true, source: `process env ${processEnvName}` };
+  if (!fs.existsSync(configPath)) return { configured: false, source: configPath };
+  const text = fs.readFileSync(configPath, "utf8");
+  const section = text.match(/\[mcp_servers\.ui_design_to_code\.env\]\n([\s\S]*?)(?=\n\[|$)/);
+  if (!section) return { configured: false, source: configPath };
+  const configuredName = envNames.find((name) => {
+    const line = new RegExp(`^\\s*${name}\\s*=\\s*(".*"|'.*'|[^\\n#]+)`, "m");
+    return line.test(section[1]);
+  });
+  return configuredName
+    ? { configured: true, source: `${configPath} [mcp_servers.ui_design_to_code.env].${configuredName}` }
+    : { configured: false, source: configPath };
 }
 
 function doctor() {
@@ -58,8 +82,13 @@ function doctor() {
         done = true;
         clearTimeout(timeout);
         const tools = response.result.tools || [];
+        const tokenStatus = readCodexFigmaTokenStatus();
         console.log(`doctor passed: ${tools.length} tools`);
         console.log(tools.map((tool) => tool.name).join(","));
+        console.log(`figma token: ${tokenStatus.configured ? "configured" : "missing"} (${tokenStatus.source})`);
+        if (!tokenStatus.configured) {
+          console.log("configure with: ui-design-to-code-mcp setup-figma-token");
+        }
         server.kill();
       }
     }
@@ -82,6 +111,14 @@ function main() {
   }
   if (command === "configure-registry-token") {
     const result = spawnSync(process.execPath, [registryTokenPath, ...rest], { stdio: "inherit" });
+    process.exit(result.status || 0);
+  }
+  if (command === "configure-figma-token") {
+    const result = spawnSync(process.execPath, [figmaTokenPath, ...rest], { stdio: "inherit" });
+    process.exit(result.status || 0);
+  }
+  if (command === "setup-figma-token" || command === "figma-token") {
+    const result = spawnSync(process.execPath, [figmaTokenPath, "--client", "codex", ...rest], { stdio: "inherit" });
     process.exit(result.status || 0);
   }
   if (command === "configure-npm-trusted-publishing") {

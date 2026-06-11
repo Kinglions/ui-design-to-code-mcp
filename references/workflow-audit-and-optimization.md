@@ -97,10 +97,14 @@ server alone can fully parse a screenshot into final code.
 
 ### Figma MCP Source Dependency
 
-`ingest_figma_source` expects Figma MCP output as JSON or a saved JSON path. It
-does not call Figma itself. A client that wants Figma design input must first
-run the Figma MCP node/screenshot retrieval step, then pass those outputs into
-this MCP as `nodeJson`, `nodeJsonPath`, and optional `screenshotPath`.
+`ingest_figma_source` now supports two source-adapter modes:
+
+1. External Figma JSON / screenshot already fetched by another client.
+2. Direct Figma REST ingestion by this package itself from Figma URL /
+   `fileKey` / `nodeId` + token.
+
+The downstream semantic IR / cross-platform / target IR / codegen flow remains
+the same. Only the source-adapter step changed.
 
 ### Runtime Review Preconditions
 
