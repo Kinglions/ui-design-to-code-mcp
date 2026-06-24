@@ -22,6 +22,8 @@ Links:
 - npm: <https://www.npmjs.com/package/ui-design-to-code-mcp>
 - MCP Registry: `io.github.Kinglions/ui-design-to-code-mcp`
 - GitHub: <https://github.com/Kinglions/ui-design-to-code-mcp>
+- Quick feedback: <https://github.com/Kinglions/ui-design-to-code-mcp/issues/new?title=%5BFeedback%5D%20>
+- GitHub Issues: <https://github.com/Kinglions/ui-design-to-code-mcp/issues/new/choose>
 
 ## 中文
 
@@ -29,7 +31,22 @@ Links:
 
 它**不替代真正写代码的 agent/model**。它的职责是标准化运行目录、输入清单、Figma 数据集、中间 IR 合约、目标平台布局产物、代码生成记录、精确切图产物、视觉验收门禁、产物校验和清理流程。
 
-## 核心亮点
+## 功能介绍
+
+### 适用场景
+
+- 需要把 UI 截图、参考图、GPT Image mockup、Figma URL、Figma MCP 节点 JSON 或 Figma 导出图转成可追踪的设计实现流程。
+- 需要先解析设计结构、节点树、布局语义、组件层级、状态和资产，再进入代码实现。
+- 需要 Web、iOS、Android 等多目标平台的 Target Layout IR 或实现计划。
+- 需要对生成实现做截图验收、视觉差异复核、文本溢出检查、底部导航检查、资产覆盖检查和产物清理。
+
+### 不适用场景
+
+- 只想让模型基于一张图直接写最终代码，且不需要中间产物、追踪关系或验收证据。
+- 纯 MCP 安装、版本、doctor、配置排查请求；这类请求不应该创建 design run。
+- 没有设计源，也没有 design-to-code / design-decoding 意图的普通前端开发任务。
+
+### 核心能力
 
 - 支持 **Codex**、**Cursor**、**Claude Code**。
 - 创建隔离的标准运行目录：`generated/ui-design-to-code/<run-id>` 或 `/private/tmp/ui-design-to-code/<run-id>`。
@@ -39,7 +56,17 @@ Links:
 - 支持基于 `source_bbox` 的源图精确 bitmap/icon 切图。
 - Codex 安装后使用本地稳定 serve 命令，避免每次 MCP 启动都执行 `npx @latest`。
 
-## 快速开始
+### 产出物
+
+- `artifact-run-manifest.json`：一次运行的产物清单、保留策略和清理边界。
+- `design-source-manifest.json` / `source image manifest`：设计源、像素尺寸、坐标系和输入假设。
+- `figma-source-dataset.json`：Figma 节点、样式、组件、注释、截图和资产下载信息。
+- Reference Image Analysis、Vision IR、Node Compression IR、Semantic UI IR、Cross-platform Node Data。
+- Target Layout IR、codegen 记录、visual review plan/result、QA audit 和 cleanup dry-run 结果。
+
+## 使用手册
+
+### 快速开始
 
 ### 安装到 Codex
 
@@ -91,6 +118,22 @@ npx -y ui-design-to-code-mcp@latest doctor
 npx -y ui-design-to-code-mcp@latest serve
 ```
 
+### 反馈与改进入口
+
+如果你在使用中遇到模式选择不清晰、Figma token 检测不符合预期、视觉还原不稳定、资产同步路径错误、运行时验收失败或文档示例缺失，可以直接提交反馈：
+
+- 快捷反馈：<https://github.com/Kinglions/ui-design-to-code-mcp/issues/new?title=%5BFeedback%5D%20>
+- Bug / 功能请求 / 使用问题：<https://github.com/Kinglions/ui-design-to-code-mcp/issues/new/choose>
+- 已有问题列表：<https://github.com/Kinglions/ui-design-to-code-mcp/issues>
+
+提交时建议附带：
+
+- 客户端：Codex / Cursor / Claude Code。
+- 输入类型：截图、Figma URL、Figma node JSON、混合输入。
+- 选择的模式：`decode-only`、`plan-only`、`target-ir`、`codegen`、`codegen-with-auto-review` 或 `runtime-review`。
+- 目标平台：`web-react`、`web-next`、`ios-uikit`、`ios-swiftui`、`android-compose`、`android-view`。
+- 关键产物或日志：`artifact-run-manifest.json`、`validate_pipeline` 输出、`visual-review-result.json`、doctor 输出。
+
 ## 推荐执行流程
 
 当请求同时包含设计源和 design-to-code / design-decoding 意图时，客户端应先自动发现并调用 `ui_design_to_code` MCP，而不是先走纯本地实现流程。典型设计源包括 UI 截图、预览图、GPT Image mockup、Figma URL / `node-id`、Figma MCP 节点 JSON、Figma 截图或导出图。
@@ -114,6 +157,17 @@ npx -y ui-design-to-code-mcp@latest serve
 9. 使用 `run_codegen` 或 `run_codegen_with_auto_review` 记录结果。
 9. 调用 `validate_pipeline` 校验完整产物链路。
 10. 需要时使用 `cleanup_design_run` 清理生成产物。
+
+## 当前流程优化建议
+
+当前流程已经具备 token gate、mode gate、独立 runRoot、manifest 追踪、结构校验、视觉验收和 cleanup dry-run。后续更值得优化的是下面几类：
+
+- **IR 自动生成边界**：MCP 当前负责登记、校验和追踪产物；Vision IR、Compression IR、Semantic IR 和真实代码仍由调用 agent/model 生成。README 和客户端提示应持续避免暗示 MCP 单独完成全自动截图转代码。
+- **运行时验收前置条件**：`codegen-with-auto-review` 和 `runtime-review` 需要宿主项目具备可运行命令、截图入口和目标页面定位。缺少这些条件时，应明确返回 blocked，而不是把未截图的实现标记为可交付。
+- **Schema 校验深度**：`validate_pipeline` 目前偏结构性、依赖少。未来可以在不显著增加安装成本的前提下，引入更完整的 JSON Schema 校验。
+- **产物体积和孤儿文件审计**：现有 size accounting 主要覆盖 manifest 已登记文件。后续可以增加 runRoot orphan artifact audit，只报告不删除。
+- **revision 管理**：多轮 patch / review 后，应在 manifest 中记录 supersedes 关系，让旧失败版本自动进入 cleanup eligible。
+- **资产去重**：source crop 和 Figma asset 下载可以进一步用 hash 去重，减少多轮 review 产生的重复图片。
 
 ## 执行模式
 
@@ -646,7 +700,22 @@ https://github.com/Kinglions/ui-design-to-code-mcp.git
 
 It does **not** replace the coding agent or model. Instead, it gives agents a reliable workflow for run directories, source manifests, Figma datasets, intermediate IR contracts, target layout artifacts, codegen records, asset slicing outputs, visual review gates, validation, and cleanup.
 
-## Highlights
+## Feature Overview
+
+### When to use it
+
+- You have a UI screenshot, reference image, GPT Image mockup, Figma URL, Figma MCP node JSON, or Figma export and need a traceable design-to-code workflow.
+- You want to decode structure, node hierarchy, layout semantics, states, and assets before implementation.
+- You need target layout artifacts or implementation plans for Web, iOS, Android, or multiple platforms.
+- You need runtime screenshots, visual diff evidence, text-overflow checks, navigation checks, asset coverage checks, or artifact cleanup.
+
+### When not to use it
+
+- You only want a one-shot prompt that writes final code from an image, with no intermediate artifacts or review evidence.
+- You are only checking MCP installation, version, doctor output, or configuration. Those requests should not create a design run.
+- The task has no design source and no design-decoding or design-to-code intent.
+
+### Core capabilities
 
 - Works with **Codex**, **Cursor**, and **Claude Code**.
 - Creates isolated artifact runs under `generated/ui-design-to-code/<run-id>` or `/private/tmp/ui-design-to-code/<run-id>`.
@@ -656,7 +725,17 @@ It does **not** replace the coding agent or model. Instead, it gives agents a re
 - Supports precise source-image asset slicing using explicit `source_bbox` layer manifests.
 - Optimizes Codex startup by installing a stable local MCP serve command instead of running `npx @latest` on every startup.
 
-## Quick Start
+### Outputs
+
+- `artifact-run-manifest.json`: run-level artifact list, retention policy, and cleanup boundary.
+- `design-source-manifest.json` / source image manifest: source metadata, pixel size, coordinate system, and assumptions.
+- `figma-source-dataset.json`: Figma nodes, styles, components, comments, screenshots, and asset download metadata.
+- Reference Image Analysis, Vision IR, Node Compression IR, Semantic UI IR, and Cross-platform Node Data.
+- Target Layout IR, codegen records, visual review plan/result, QA audit outputs, and cleanup dry-run reports.
+
+## User Handbook
+
+### Quick Start
 
 ### Install for Codex
 
@@ -689,6 +768,22 @@ npx -y ui-design-to-code-mcp@latest doctor
 npx -y ui-design-to-code-mcp@latest serve
 ```
 
+### Feedback and Issues
+
+Use these links when mode selection is unclear, Figma token detection does not behave as expected, visual restoration is unstable, asset sync paths are wrong, runtime review is blocked, or documentation examples are missing:
+
+- Quick feedback: <https://github.com/Kinglions/ui-design-to-code-mcp/issues/new?title=%5BFeedback%5D%20>
+- Bug reports / feature requests / usage questions: <https://github.com/Kinglions/ui-design-to-code-mcp/issues/new/choose>
+- Existing issues: <https://github.com/Kinglions/ui-design-to-code-mcp/issues>
+
+Useful details to include:
+
+- Client: Codex / Cursor / Claude Code.
+- Source type: screenshot, Figma URL, Figma node JSON, or hybrid input.
+- Mode: `decode-only`, `plan-only`, `target-ir`, `codegen`, `codegen-with-auto-review`, or `runtime-review`.
+- Target: `web-react`, `web-next`, `ios-uikit`, `ios-swiftui`, `android-compose`, or `android-view`.
+- Evidence: `artifact-run-manifest.json`, `validate_pipeline` output, `visual-review-result.json`, or doctor output.
+
 ## Recommended Workflow
 
 1. Choose a mode with `get_run_modes` when the user has not specified one.
@@ -701,6 +796,17 @@ npx -y ui-design-to-code-mcp@latest serve
 8. Record results with `run_codegen` or `run_codegen_with_auto_review`.
 9. Validate the full artifact chain with `validate_pipeline`.
 10. Optionally clean generated artifacts with `cleanup_design_run`.
+
+## Current Workflow Optimization Notes
+
+The current workflow already has token gating, mode gating, isolated run roots, manifest traceability, structural validation, visual review, and cleanup dry-runs. The next high-value improvements are:
+
+- **IR generation boundary**: the MCP registers, validates, and tracks artifacts; the calling agent/model still generates Vision IR, Compression IR, Semantic IR, and implementation code.
+- **Runtime review prerequisites**: `codegen-with-auto-review` and `runtime-review` need runnable host-app commands, screenshot capture configuration, and page routing. Missing prerequisites should return blocked, not deliverable.
+- **Schema validation depth**: `validate_pipeline` is intentionally lightweight and structural. A future version can add deeper JSON Schema validation if dependency impact is acceptable.
+- **Artifact size and orphan audit**: current size accounting covers manifest-listed files. A future audit can report unregistered files inside runRoot without deleting them.
+- **Revision management**: patch/review loops should record supersedes relationships so failed old revisions can become cleanup-eligible.
+- **Asset dedupe**: source crops and Figma downloads can use hashes to avoid duplicate image assets across review loops.
 
 ## Execution Modes
 
