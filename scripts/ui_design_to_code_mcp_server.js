@@ -1582,16 +1582,19 @@ function buildCrossPlatformNodes(args) {
 
 function buildTargetIr(args) {
   const target = String(args.target || "target");
+  const schemaPath = target.includes("android")
+    ? "references/target-layout-android-compose.schema.json"
+    : target === "ios-uikit"
+      ? "references/uikit-layout-ir.schema.json"
+      : target.includes("ios")
+        ? "references/target-layout-ios-swiftui.schema.json"
+        : "references/target-layout-web-react.schema.json";
   return registerArtifact(args, {
     id: `${target}-target-layout`,
     artifactType: args.artifactType || "target_layout_ir",
     category: "final",
     cleanupStatus: "keep",
-    schemaPath: target.includes("android")
-      ? "references/target-layout-android-compose.schema.json"
-      : target.includes("ios")
-        ? "references/target-layout-ios-swiftui.schema.json"
-        : "references/target-layout-web-react.schema.json",
+    schemaPath,
     referencePath: "references/cross-platform-conversion-workflow.md",
     missingMessage: "Generate or provide target layout IR, then call build_target_ir with target and artifactPath to register it."
   });

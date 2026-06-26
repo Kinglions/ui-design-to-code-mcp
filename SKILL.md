@@ -25,6 +25,8 @@ Detail preservation rule: screenshot similarity failures usually come from missi
 
 Height preservation rule: never flatten a multi-slot card into a single container height. Any `content_card`, `hero_header`, `prompt_input`, repeated-list cell, rail cell, or fixed CTA must carry both outer height and a `slotMetrics` / `slotLayout` contract that explains how media, title, subtitle, badges, metadata, progress, footer, and actions consume vertical space. If the screenshot does not support exact values, preserve measured ratios or min/max constraints with an uncertainty note instead of replacing them with defaults.
 
+Adaptive layout rule: treat a source screenshot or Figma frame as one viewport sample, not as the only production device. Generated code for nontrivial screens must include target-native adaptive metrics for compact width, regular width, short height, landscape, Dynamic Type/accessibility text, keyboard/focused input, and safe-area changes. Preserve fixed controls such as back, close, floating actions, tab bars, and bottom CTAs outside scroll content unless the design explicitly makes them scroll away. Prefer the target app's existing page margins and design tokens over screenshot-only margins when implementing inside an existing product.
+
 Visual fidelity rule: generated code must not be accepted only because the IR validates or the build passes when the selected mode is `codegen-with-auto-review`. In that mode, create a visual review plan, capture runtime screenshot(s), compare non-material UI regions against the source or cropped source image, and run a bounded patch loop when visual thresholds fail. Non-material view similarity must be at least `0.9` before delivery. If capture is blocked or similarity is below `0.9`, do not mark the implementation as deliverable.
 
 ## Default Pipeline
@@ -212,6 +214,9 @@ Large temporary crops, screenshots, and debug images should default to `/private
 11. Build target Layout IR.
    - Keep fixed regions outside scroll content unless the target adapter explicitly uses scaffold slots or sticky containers.
    - Add scroll inset, padding, safe-area, or viewport compensation for fixed controls.
+   - Do not copy a single source frame's page margins directly into production code until project-local margins have been checked. If an existing app screen uses a page inset token, reuse that token or document why the design intentionally differs.
+   - For substantial screens, include an explicit adaptive metrics policy in target IR or generated code. At minimum cover compact width, regular width, short height, landscape, Dynamic Type accessibility text sizes, and keyboard-present/focused-input states.
+   - For forms and auth pages, keep navigation controls fixed, keep inputs vertically scrollable, maintain 44 pt minimum touch targets, and add keyboard avoidance through native scroll insets or platform keyboard APIs.
    - Use target-native repeated-content containers for dynamic lists and grids.
    - Use simple stack/flex/linear containers only for stable small static groups.
    - Use design tokens instead of raw magic numbers.
@@ -226,6 +231,7 @@ Large temporary crops, screenshots, and debug images should default to `/private
    - Generate screen/root view, reusable components, cells/items, state model, view-model/store stub, view state, and mock data.
    - Include loading, empty, error, and content states.
    - Include input validation, error presentation, boundary values, and keyboard handling.
+   - When translating pixel-perfect mockups, separate visual parity from responsive behavior: use measured source values to derive ratios, min/max values, and state-specific metrics instead of hardcoding every coordinate.
    - Generate named layout constants for outer component heights and for internal slots. Avoid anonymous page-level numbers such as `card.height = 404` unless the same component also defines slot heights/ratios that sum to the card layout.
 
 13. Review normal project behavior for `codegen`.
@@ -235,6 +241,7 @@ Large temporary crops, screenshots, and debug images should default to `/private
 
 14. Run visual implementation review for `codegen-with-auto-review`.
    - Build `Visual Review Plan` with source image/crop, target runtime, viewports, states, thresholds, and output paths.
+   - Include at least one compact viewport, the source/reference viewport, and one larger viewport when the target platform supports multiple device sizes. For forms, include focused-input or keyboard state when automation can expose it.
    - Mark material regions such as photos, generated media, video thumbnails, illustrations, external assets, and device frames as `materialExclusions`.
    - Capture runtime screenshot for each required viewport/state when automation is available.
    - Compare screenshots with `compare_screenshots.js --min-similarity 0.9` or an adapter-specific equivalent.

@@ -27,6 +27,14 @@ user explicitly selects `codegen-with-auto-review`.
 
 - Do not replace a whole screen with one full-screen bitmap unless the user
   explicitly requests that.
+- Treat the source screenshot as one visual baseline viewport. Do not treat its
+  exact width, height, margins, or top offsets as production constants unless
+  the target product is fixed-size.
+- For native app screens, fixed navigation controls, close/back buttons,
+  floating actions, tab bars, and bottom CTAs must remain in fixed/safe-area
+  containers unless the source explicitly shows them scrolling with content.
+- Prefer project-local page margins and design tokens over screenshot-only
+  margins when implementing inside an existing product.
 - Complex media, photos, generated illustrations, and device mockup frames may
   be assets.
 - Material regions such as photos, generated media, video thumbnails,
@@ -40,6 +48,32 @@ user explicitly selects `codegen-with-auto-review`.
   them.
 - Non-material UI similarity must be at least 90% before delivery in
   `codegen-with-auto-review`.
+
+## Adaptive Layout Review
+
+Visual parity at the source viewport is necessary but not sufficient for
+production delivery. For `codegen-with-auto-review`, include adaptive layout
+evidence whenever the target platform can run multiple device sizes.
+
+Minimum viewport set:
+
+- Compact mobile: a small/short phone viewport such as 375x667.
+- Reference mobile: the source or nearest target viewport.
+- Large mobile: a larger phone viewport such as 430x932.
+- Landscape or compact-height viewport when the target platform supports it.
+
+Required checks:
+
+- Page-level horizontal padding matches the target app's existing page rhythm or
+  a documented design token, not only the screenshot crop.
+- Fixed controls stay fixed during scroll and are constrained to safe areas.
+- Scroll content remains reachable without overlapping fixed controls.
+- Forms keep 44 pt minimum touch targets and avoid the focused field or CTA when
+  the keyboard appears.
+- Text does not overlap, truncate unexpectedly, or become visually oversized
+  when Dynamic Type/accessibility text sizes are enabled.
+- Large viewports do not scale every font and control proportionally; they may
+  add breathing room or width caps instead.
 
 ## Web Review
 
@@ -103,6 +137,11 @@ Typical flow:
 4. Launch bundle ID.
 5. Capture screenshot.
 6. Run `compare_screenshots.js`.
+
+For iOS auth, form, onboarding, checkout, subscription, and creation flows,
+capture at least the content state on a compact iPhone and a larger iPhone when
+the simulator workflow can boot those devices. Also capture focused input or
+keyboard state when possible.
 
 If no simulator is booted, boot one before running the script or provide a
 project-specific simulator workflow.
@@ -169,12 +208,14 @@ Icon and text alignment review:
 Use this order when visual review fails:
 
 1. Fix viewport, crop, safe area, and root scale mismatch.
-2. Fix layout geometry: x/y, width/height, gaps, padding, fixed regions.
-3. Fix typography: font size, weight, line height, wrapping, truncation.
-4. Fix visual styling: colors, radius, border, shadow, opacity, blur.
-5. Fix media crop and asset strategy.
-6. Fix state-specific rendering.
-7. Only then consider bitmap fallback for a component.
+2. Fix adaptive behavior: project page margins, fixed regions, safe-area
+   anchoring, keyboard avoidance, and compact/large viewport metrics.
+3. Fix layout geometry: x/y, width/height, gaps, padding, fixed regions.
+4. Fix typography: font size, weight, line height, wrapping, truncation.
+5. Fix visual styling: colors, radius, border, shadow, opacity, blur.
+6. Fix media crop and asset strategy.
+7. Fix state-specific rendering.
+8. Only then consider bitmap fallback for a component.
 
 Stop after three failed patch iterations and report remaining mismatch with
 diff evidence.

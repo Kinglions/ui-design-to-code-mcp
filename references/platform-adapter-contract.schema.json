@@ -89,11 +89,24 @@
               "properties": {
                 "maxPixelDiffRatio": { "type": "number", "minimum": 0, "maximum": 1 },
                 "maxMeanChannelDelta": { "type": "number", "minimum": 0, "maximum": 255 },
-                "pixelDeltaThreshold": { "type": "number", "minimum": 0, "maximum": 255 }
+                "pixelDeltaThreshold": { "type": "number", "minimum": 0, "maximum": 255 },
+                "minSimilarity": { "type": "number", "minimum": 0, "maximum": 1 }
               },
               "additionalProperties": true
             },
             "requiredStateCaptures": { "type": "array", "items": { "type": "string" } },
+            "conditionalStateCaptures": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["state", "requiredWhen"],
+                "properties": {
+                  "state": { "type": "string", "minLength": 1 },
+                  "requiredWhen": { "type": "string", "minLength": 1 }
+                },
+                "additionalProperties": true
+              }
+            },
             "textOverflowCheck": { "type": "string" },
             "blockedWhen": { "type": "array", "items": { "type": "string" } }
           },

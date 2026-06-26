@@ -545,7 +545,8 @@ cross_platform_node_data
 schema 提示按 target 名称选择：
 
 - Android target 使用 Android layout schema。
-- iOS target 使用 iOS SwiftUI layout schema。
+- `ios-uikit` 使用 UIKit layout schema。
+- `ios-swiftui` 使用 iOS SwiftUI layout schema。
 - 其他 target 使用 Web React layout schema。
 
 ### `run_codegen`
@@ -1145,7 +1146,8 @@ Registers target-platform layout IR for a selected target.
 Schema hint selection:
 
 - Android targets use Android layout schemas.
-- iOS targets use iOS SwiftUI layout schemas.
+- `ios-uikit` uses the UIKit layout schema.
+- `ios-swiftui` uses the iOS SwiftUI layout schema.
 - Other targets use Web React layout schemas.
 
 ### `run_codegen`
