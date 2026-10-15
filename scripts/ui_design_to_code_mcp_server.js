@@ -75,13 +75,16 @@ const triggerExamples = [
   "根据这个 Figma 链接实现 iOS 页面",
   "根据这个 Figma 链接实现 Android 页面",
   "根据这个 Figma 链接实现 Web 页面",
+  "根据这个 Figma 链接实现 Cocos Creator 页面",
   "根据设计稿实现 UIKit 页面",
   "根据设计稿实现 Compose 页面",
   "根据设计稿实现 React 页面",
+  "根据设计稿实现 Cocos Creator 页面",
   "根据 Figma 还原 SwiftUI 页面",
   "implement this Figma in UIKit",
   "implement this Figma in Compose",
   "implement this Figma in React",
+  "implement this Figma in Cocos Creator",
   "Figma to code",
   "解析这个 Figma 节点",
   "根据 Figma MCP 输出继续生成跨平台节点数据",
@@ -419,6 +422,7 @@ function inferTargetProfiles(targets) {
     if (target === "web-react" || target === "web-next") return { target, vectorFormat: "svg", rasterFormat: "png", iconScale: 1 };
     if (target === "android-compose" || target === "android-view") return { target, vectorFormat: "png", rasterFormat: "png", iconScale: 1 };
     if (target === "ios-uikit" || target === "ios-swiftui") return { target, vectorFormat: "png", rasterFormat: "png", iconScale: 3 };
+    if (target === "cocos-creator") return { target, vectorFormat: "png", rasterFormat: "png", iconScale: 1 };
     return { target, vectorFormat: "svg", rasterFormat: "png", iconScale: 1 };
   });
 }
@@ -895,7 +899,7 @@ function getRunModes(args = {}) {
       figmaToken: tokenStatus,
       userSelectionRequired: false,
       modes: runModes,
-      targetPlatforms: ["ios-uikit", "ios-swiftui", "web-react", "web-next", "android-compose", "android-view"],
+      targetPlatforms: ["ios-uikit", "ios-swiftui", "web-react", "web-next", "android-compose", "android-view", "cocos-creator"],
       prompt: [
         "检测到 Figma 设计稿输入，但 ui_design_to_code MCP 当前没有可用的 Figma token。",
         tokenStatus.userPrompt,
@@ -913,7 +917,7 @@ function getRunModes(args = {}) {
     figmaToken: tokenStatus,
     userSelectionRequired: !explicitMode,
     modes: runModes,
-    targetPlatforms: ["ios-uikit", "ios-swiftui", "web-react", "web-next", "android-compose", "android-view"],
+    targetPlatforms: ["ios-uikit", "ios-swiftui", "web-react", "web-next", "android-compose", "android-view", "cocos-creator"],
     triggerExamples,
     prompt,
     autoTriggerRule: "When a UI screenshot, preview image, Figma MCP node dataset, Figma screenshot, or hybrid source is present and the user asks for decoding, implementation, restoration, parity review, or target-platform UI generation, discover this MCP and call get_run_modes before local-only implementation work.",
@@ -1588,6 +1592,8 @@ function buildTargetIr(args) {
       ? "references/uikit-layout-ir.schema.json"
       : target.includes("ios")
         ? "references/target-layout-ios-swiftui.schema.json"
+        : target === "cocos-creator"
+          ? "references/target-layout-cocos-creator.schema.json"
         : "references/target-layout-web-react.schema.json";
   return registerArtifact(args, {
     id: `${target}-target-layout`,

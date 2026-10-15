@@ -1,15 +1,17 @@
 ---
 name: ui-design-to-code
-description: Use for UI screenshot, preview image, GPT Image mockup, Figma URL/node-id, Figma MCP node JSON, or Figma screenshot to code workflows. Prefer this skill whenever a design source is present and the user wants to decode, analyze, restore, review, or implement the UI as code for iOS, Android, Web, or other supported targets. Produces design-source manifests, Figma/source-image datasets, Vision IR, Node Compression IR, platform-neutral Semantic UI node trees, cross-platform node data, platform conversion plans, target layout IR, generated code, artifact cleanup, and runtime screenshot review.
+description: Use for UI screenshot, preview image, GPT Image mockup, Figma URL/node-id, Figma MCP node JSON, or Figma screenshot to code workflows. Prefer this skill whenever a design source is present and the user wants to decode, analyze, restore, review, or implement the UI as code for iOS, Android, Web, Cocos Creator, or other supported targets. Produces design-source manifests, Figma/source-image datasets, Vision IR, Node Compression IR, platform-neutral Semantic UI node trees, cross-platform node data, platform conversion plans, target layout IR, generated code, artifact cleanup, and runtime screenshot review.
 metadata:
   short-description: Decode UI designs into node trees and platform code
 ---
 
 # UI Design to Code
 
-Use this skill to turn a UI preview image, screenshot, Figma MCP node dataset, Figma screenshot, or hybrid Figma+image source into traceable design-decoding artifacts, a platform-neutral UI node tree, cross-platform node data, and optionally maintainable implementation workflows for iOS, Web, Android, or other platform adapters. In `codegen-with-auto-review` mode, the goal is to recreate the visual effect of the source image or Figma screenshot with target-platform code, then verify it with runtime screenshots and visual comparison.
+Use this skill to turn a UI preview image, screenshot, Figma MCP node dataset, Figma screenshot, or hybrid Figma+image source into traceable design-decoding artifacts, a platform-neutral UI node tree, cross-platform node data, and optionally maintainable implementation workflows for iOS, Web, Android, Cocos Creator, or other platform adapters. In `codegen-with-auto-review` mode, the goal is to recreate the visual effect of the source image or Figma screenshot with target-platform code, then verify it with runtime screenshots and visual comparison.
 
 Core rule: do not generate platform code directly from a bitmap or raw Figma JSON. First build a Design Source Manifest, normalize source-specific data, then build a platform-neutral semantic node tree, then cross-platform node data, then map through an explicit platform adapter contract.
+
+Cocos Creator rule: when the target is `cocos-creator`, read `references/cocos-creator-development-rules.md` and `references/platform-adapters/cocos-creator.adapter-contract.json` before generating target IR or code. Treat Cocos Creator 3.x as a Node + Component + Canvas UI runtime with design-resolution adaptation, not as a DOM or generic TypeScript target.
 
 Traceability rule: every semantic node must trace back to grouped candidate IDs, and every grouped candidate must trace back to raw primitive IDs. If a future platform adapter cannot map the node tree without re-reading the source image, the decoding artifacts are incomplete.
 
@@ -64,7 +66,7 @@ Prefer this skill when both of the following are true:
 
 Platform should be inferred from both the user request and repo context.
 
-- Use explicit platform words when present, such as `iOS`, `UIKit`, `SwiftUI`, `Android`, `Compose`, `View`, `Web`, `React`, or `Next`.
+- Use explicit platform words when present, such as `iOS`, `UIKit`, `SwiftUI`, `Android`, `Compose`, `View`, `Web`, `React`, `Next`, `Cocos`, or `Cocos Creator`.
 - If the user did not name a platform, inspect the repo and prefer the dominant runnable target.
 - If the user asks for multiple targets or cross-platform planning, still use this skill first because the pipeline is platform-neutral before adapter mapping.
 - Do not require exact phrases. Matching should be semantic, not keyword-only.
@@ -199,7 +201,7 @@ Large temporary crops, screenshots, and debug images should default to `/private
    - Add `platformHints` only as optional hints. They must not replace platform-neutral node data.
 
 10. Build `Platform Conversion Plan`.
-   - Choose target adapters such as `ios-uikit`, `ios-swiftui`, `web-react`, `web-next`, `android-compose`, or `android-view`.
+   - Choose target adapters such as `ios-uikit`, `ios-swiftui`, `web-react`, `web-next`, `android-compose`, `android-view`, or `cocos-creator`.
    - For each target, map cross-platform nodes through a versioned adapter contract.
    - Record unsupported patterns, required assets, required project components, state-management assumptions, and review commands.
 
@@ -210,6 +212,7 @@ Large temporary crops, screenshots, and debug images should default to `/private
    - Then page-private views.
    - Use bitmap fallback only for decorative media or explicit assets.
    - Record `mappingReason` for each mapped component.
+   - For `cocos-creator`, keep the Canvas policy, Node parent/child hierarchy, UITransform, Widget/Layout, ScrollView content/view split, serialized component references, and the one-renderable-component-per-Node restriction explicit in the target plan.
 
 11. Build target Layout IR.
    - Keep fixed regions outside scroll content unless the target adapter explicitly uses scaffold slots or sticky containers.
@@ -227,7 +230,7 @@ Large temporary crops, screenshots, and debug images should default to `/private
    - Cards, cells, and repeated items must keep internal slot allocation; only emitting one outer height is invalid unless the component has a single slot.
 
 12. Generate target code only after the IR validates.
-   - Default target adapters: iOS UIKit + SnapKit, iOS SwiftUI, Web React/Next.js, Android Jetpack Compose.
+   - Default target adapters: iOS UIKit + SnapKit, iOS SwiftUI, Web React/Next.js, Android Jetpack Compose, and Cocos Creator 3.x TypeScript.
    - Generate screen/root view, reusable components, cells/items, state model, view-model/store stub, view state, and mock data.
    - Include loading, empty, error, and content states.
    - Include input validation, error presentation, boundary values, and keyboard handling.

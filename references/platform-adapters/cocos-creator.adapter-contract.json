@@ -1,0 +1,145 @@
+{
+  "adapter": {
+    "id": "cocos-creator",
+    "name": "Cocos Creator 3.x TypeScript Adapter",
+    "platform": "cocos",
+    "language": "TypeScript",
+    "uiRuntime": "Cocos Creator 3.x UI system",
+    "version": "3.x",
+    "defaultLayout": "Canvas design resolution plus Node/UITransform/Widget/Layout"
+  },
+  "mappingPriority": [
+    "project_component",
+    "cocos_native_component",
+    "generated_reusable_component",
+    "page_private_component",
+    "bitmap_asset"
+  ],
+  "semanticMappings": [
+    {
+      "semanticType": "primary_cta",
+      "preferred": "Node + Button + Label",
+      "fallbacks": ["Button", "custom Component with touch handler"],
+      "requiredNodeFields": ["core", "layout", "visual", "interaction", "accessibility"],
+      "notes": ["Keep a minimum touch target and bind the click event through the project scene/component contract."]
+    },
+    {
+      "semanticType": "input_field",
+      "preferred": "Node + EditBox",
+      "fallbacks": ["EditBox with a project-owned validation component"],
+      "requiredNodeFields": ["core", "layout", "visual", "interaction", "data.validation"],
+      "notes": ["Do not substitute a DOM input or browser-only keyboard API."]
+    },
+    {
+      "semanticType": "content_card",
+      "preferred": "Node container + UITransform + Sprite/Label children",
+      "fallbacks": ["project card prefab", "generated reusable card Component"],
+      "requiredNodeFields": ["core", "layout.slotLayout", "visual"],
+      "notes": ["Only one renderable component is allowed per Node; split shell, media, and text into child Nodes."]
+    },
+    {
+      "semanticType": "vertical_list",
+      "preferred": "ScrollView + content Node + Layout",
+      "fallbacks": ["Node container + Layout", "project list prefab"],
+      "requiredNodeFields": ["core", "layout", "data.template"],
+      "notes": ["Keep the content Node separate from the viewport and account for layout updates on the next frame."]
+    },
+    {
+      "semanticType": "bottom_navigation",
+      "preferred": "Canvas child + Widget + Layout + Button children",
+      "fallbacks": ["project navigation prefab"],
+      "requiredNodeFields": ["core", "layout", "interaction", "accessibility"],
+      "notes": ["Keep navigation outside the scrolling content and apply safe-area compensation when needed."]
+    }
+  ],
+  "layoutCapabilities": {
+    "scroll": "ScrollView with an explicit view and content Node",
+    "fixed": "Canvas child with Widget alignment; keep outside ScrollView content",
+    "overlay": "Node sibling order and zIndex/local position",
+    "grid": "Layout component with GRID type and explicit constraint",
+    "safeArea": "SafeArea component or Widget plus project safe-area policy",
+    "keyboard": "EditBox focus plus project keyboard/viewport policy; no DOM assumptions",
+    "responsive": "Canvas design resolution with one proportional adaptation mode per orientation; validate portrait, landscape, and safe content bounds",
+    "adaptationModes": ["fit_width", "fit_height", "show_all", "no_border"],
+    "defaultAdaptationPolicy": "Use fit_width for portrait HUDs and fit_height for landscape HUDs unless the project explicitly requires show_all or no_border.",
+    "distortion": "Never scale X and Y independently; ExactFit-style distortion is rejected",
+    "breakpoints": "Use a small number of aspect-ratio/orientation variants only; do not emit CSS-like per-device-pixel breakpoints"
+  },
+  "stateMappings": {
+    "loading": "project loading Node or state Component",
+    "empty": "empty-state Node/prefab",
+    "error": "error-state Node/prefab with retry event",
+    "content": "content Node/prefab",
+    "disabled": "Button.interactable or project component state",
+    "focused": "EditBox focus state",
+    "selected": "Toggle/ToggleContainer or project navigation state"
+  },
+  "eventMappings": {
+    "tap": "Button click event or Node.EventType.TOUCH_END",
+    "textChanged": "EditBox text-change event",
+    "selectionChanged": "Toggle/ToggleContainer event",
+    "itemSelected": "Button click event with stable item data"
+  },
+  "accessibilityMappings": {
+    "role": "Preserve semantic role in component metadata; Cocos UI is not a DOM/ARIA tree",
+    "label": "Visible Label plus platform/project accessibility bridge when available",
+    "value": "Component state and visible value Label",
+    "hint": "Visible helper/error Label and project accessibility metadata"
+  },
+  "assetHandling": {
+    "projectRoot": "assets/",
+    "figmaAssets": "assets/ui-design-to-code/figma/{icons,illustrations,images}",
+    "runtimeReference": "SpriteFrame or project asset reference; do not emit base64/data URLs",
+    "bitmap": "Prefer imported SpriteFrame and preserve source crop/anchor metadata",
+    "vector": "Rasterize to PNG for the default portable path unless the project has a verified vector pipeline",
+    "naming": "Use stable names and avoid replacing existing project assets"
+  },
+  "reviewPlan": {
+    "commands": [
+      "Run the project through its configured Cocos Creator 3.x editor/build command",
+      "Run the project's TypeScript/lint checks when configured"
+    ],
+    "runtimeChecks": [
+      "Canvas design resolution",
+      "selected proportional adaptation mode and no unintended distortion",
+      "portrait and landscape resolution policies",
+      "16:9 landscape, 19.5:9 portrait, 4:3 tablet, and an extreme-aspect-ratio device",
+      "safe area and fixed bottom navigation",
+      "ScrollView content and clipping",
+      "loading empty error content states",
+      "EditBox focus, validation, keyboard and boundary values",
+      "touch/mouse event behavior"
+    ],
+    "visualReview": {
+      "capture": "Use the project's Cocos Creator preview or native build screenshot path",
+      "compare": "scripts/compare_screenshots.js when the project exposes a captured PNG",
+      "defaultViewports": [
+        { "width": 390, "height": 844, "deviceScaleFactor": 1, "isMobile": true },
+        { "width": 844, "height": 390, "deviceScaleFactor": 1, "isMobile": true }
+      ],
+      "thresholds": {
+        "maxPixelDiffRatio": 0.08,
+        "maxMeanChannelDelta": 12,
+        "pixelDeltaThreshold": 16,
+        "minSimilarity": 0.9
+      },
+      "requiredStateCaptures": ["content"],
+      "textOverflowCheck": "Check Label overflow mode, line height, component bounds, and runtime text measurement in the target project"
+    }
+  },
+  "rejectWhen": [
+    "target is treated as DOM, React, UIKit, SwiftUI, or Android View code",
+    "UI node is emitted without Canvas/design-resolution assumptions",
+    "fit width and fit height are enabled together without an explicit show_all policy",
+    "X and Y are scaled independently or ExactFit-style distortion is used",
+    "a device-pixel-specific breakpoint is added without an orientation/aspect-ratio rationale",
+    "content controls are positioned against the physical screen instead of the safe content area",
+    "a single Node contains multiple renderable components that should be separate Nodes",
+    "layout depends on CSS flex/grid or an unverified third-party layout runtime",
+    "ScrollView content and viewport are not represented separately",
+    "fixed navigation or CTA is placed inside scrolling content without an explicit product requirement",
+    "runtime code assumes Layout results are available immediately after mutation",
+    "asset is referenced by a base64/data URL or a path outside the Cocos assets pipeline",
+    "interaction has no Button/Node event mapping and no validation/error state"
+  ]
+}

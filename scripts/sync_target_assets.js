@@ -184,6 +184,19 @@ function syncToWeb(projectRoot, item) {
   };
 }
 
+function syncToCocos(projectRoot, item) {
+  const baseDir = path.join(projectRoot, "assets", "ui-design-to-code", "figma");
+  const folder = item.kind === "icon" ? "icons" : item.kind === "illustration" ? "illustrations" : "images";
+  const destinationPath = path.join(baseDir, folder, path.basename(item.outputPath));
+  copyFile(item.outputPath, destinationPath);
+  return {
+    target: item.target,
+    strategy: "cocos_assets",
+    destinationPath,
+    projectRelativePath: relativeToProject(projectRoot, destinationPath)
+  };
+}
+
 function syncItem(projectRoot, item, fallbackTargets) {
   const targets = item.target === "shared" ? fallbackTargets : [item.target];
   const results = [];
@@ -192,6 +205,7 @@ function syncItem(projectRoot, item, fallbackTargets) {
     if (target.startsWith("ios-")) results.push(syncToIos(projectRoot, typedItem));
     else if (target.startsWith("android-")) results.push(syncToAndroid(projectRoot, typedItem));
     else if (target.startsWith("web-")) results.push(syncToWeb(projectRoot, typedItem));
+    else if (target === "cocos-creator") results.push(syncToCocos(projectRoot, typedItem));
   }
   return results;
 }

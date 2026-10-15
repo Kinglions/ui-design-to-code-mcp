@@ -183,8 +183,10 @@ npx -y ui-design-to-code-mcp@latest serve
 目标平台示例：
 
 ```text
-ios-uikit / ios-swiftui / web-react / web-next / android-compose / android-view
+ios-uikit / ios-swiftui / web-react / web-next / android-compose / android-view / cocos-creator
 ```
+
+For `cocos-creator`, the target contract is Cocos Creator 3.x TypeScript. It uses a Canvas design-resolution policy, preserves aspect ratio, selects one proportional mode per orientation (`fit_width`, `fit_height`, `show_all`, or explicitly justified `no_border`), uses SafeArea/Widget for controls, a Node + Component hierarchy, `UITransform`/`Widget`/`Layout`, explicit `ScrollView` view/content nodes, and assets under `assets/`. It does not generate DOM/CSS, ExactFit-style distortion, or per-device-pixel breakpoints. See [`references/cocos-creator-development-rules.md`](references/cocos-creator-development-rules.md) and [`references/platform-adapters/cocos-creator.adapter-contract.json`](references/platform-adapters/cocos-creator.adapter-contract.json).
 
 ## 输入源选择
 

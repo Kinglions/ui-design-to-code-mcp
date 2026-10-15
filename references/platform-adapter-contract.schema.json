@@ -11,7 +11,7 @@
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "name": { "type": "string", "minLength": 1 },
-        "platform": { "type": "string", "enum": ["ios", "web", "android", "unknown"] },
+        "platform": { "type": "string", "enum": ["ios", "web", "android", "cocos", "unknown"] },
         "language": { "type": "string", "minLength": 1 },
         "uiRuntime": { "type": "string", "minLength": 1 },
         "version": { "type": "string", "minLength": 1 }
